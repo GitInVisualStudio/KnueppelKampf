@@ -4,6 +4,9 @@ using System.Text;
 
 namespace KnueppelKampfBase.Networking.Packets
 {
+    /// <summary>
+    /// Simple debug packet used to send string information
+    /// </summary>
     public class StringPacket : Packet
     {
         private string content;

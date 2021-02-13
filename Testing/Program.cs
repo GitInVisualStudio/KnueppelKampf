@@ -4,11 +4,13 @@ using System;
 
 namespace Testing
 {
+    /// <summary>
+    /// Simple testing program; alter as you wish but please keep most functions!
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
         {
-            Packet.InitPacketTypes();
             Console.WriteLine("Server or client? [s/c]");
             string choice = Console.ReadLine();
             if (choice.ToLower() == "s")
@@ -17,6 +19,9 @@ namespace Testing
                 Client();
         }
 
+        /// <summary>
+        /// Runs a server instance
+        /// </summary>
         private static void Server()
         {
             Console.WriteLine("Started server.");
@@ -26,6 +31,9 @@ namespace Testing
             s.StopListen();
         }
 
+        /// <summary>
+        /// Runs a client instance and sends string packets from user inputs
+        /// </summary>
         private static void Client()
         {
             Console.WriteLine("Started client");

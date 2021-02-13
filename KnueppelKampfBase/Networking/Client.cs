@@ -18,6 +18,11 @@ namespace KnueppelKampfBase.Networking
             client.Connect(serverIp, Server.PORT);
         }
 
+        /// <summary>
+        /// Used to obtain server IP
+        /// </summary>
+        /// <param name="host">Hostname or IPAddress in dotted-decimal notation</param>
+        /// <param name="af">The prefered AddressFamily that should be returned, defaults to Ipv4</param>
         private IPAddress GetIpFromHostname(string host, AddressFamily af = AddressFamily.InterNetwork)
         {
             IPHostEntry entry = Dns.GetHostEntry(host);
