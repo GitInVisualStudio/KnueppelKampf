@@ -16,19 +16,9 @@ namespace KnueppelKampfBase.Networking
         /// <summary>
         /// Used to gracefully abort listening thread, has to be initialized!
         /// </summary>
-        private CancellationTokenSource cts;
+        private CancellationTokenSource cts = new CancellationTokenSource();
         private bool isDisposed;
         private bool isListening;
-
-        private CancellationTokenSource Cts
-        {
-            get
-            {
-                if (cts == null)
-                    cts = new CancellationTokenSource();
-                return cts;
-            }
-        }
 
         public event EventHandler<Packet> PacketRecieved;
 
@@ -54,7 +44,7 @@ namespace KnueppelKampfBase.Networking
                 while (true)
                 {
                     IPEndPoint sender = new IPEndPoint(IPAddress.Any, Server.PORT);
-                    byte[] recieved = Receive(ref sender);
+                    byte[] recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
                     Console.WriteLine("Recieved data from " + sender.ToString());
                     Packet p;
                     try
@@ -69,7 +59,7 @@ namespace KnueppelKampfBase.Networking
                     p.Sender = sender;
                     PacketRecieved?.Invoke(this, p);
                 }
-            }, Cts.Token);
+            }, cts.Token);
         }
 
         /// <summary>
@@ -77,7 +67,7 @@ namespace KnueppelKampfBase.Networking
         /// </summary>
         public void StopListen()
         {
-            Cts.Cancel();
+            cts.Cancel();
             isListening = false;
         }
 
@@ -88,7 +78,7 @@ namespace KnueppelKampfBase.Networking
                 if (disposing)
                 {
                     StopListen();
-                    Cts.Dispose();
+                    cts.Dispose();
                 }
                 base.Dispose(disposing);
                 isDisposed = true;

@@ -26,15 +26,10 @@ namespace KnueppelKampfBase.Networking.Packets
 
         public override byte[] ToBytes()
         {
-            byte packetType = GetByteFromType(GetType());
-            byte[] packageId = BitConverter.GetBytes(Id);
-            byte[] value = Encoding.UTF8.GetBytes(content);
-
-            List<byte> result = new List<byte>();
-            result.Add(packetType);
-            result.AddRange(packageId);
-            result.AddRange(value);
-            return result.ToArray();
+            byte[] result = base.ToBytes();
+            Array.Resize<byte>(ref result, HEADER_SIZE + content.Length);
+            Encoding.UTF8.GetBytes(content, 0, content.Length, result, HEADER_SIZE);
+            return result;
         }
     }
 }

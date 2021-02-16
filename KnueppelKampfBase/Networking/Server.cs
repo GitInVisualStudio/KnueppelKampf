@@ -1,5 +1,6 @@
 ﻿using KnueppelKampfBase.Networking.Packets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +14,11 @@ namespace KnueppelKampfBase.Networking
     {
         private bool isDisposed;
         private CustomUdpClient listener;
+        private Connection[] pending;
+        private Connection[] connected;
+
+        private const int PENDING_SLOTS = 64;
+        private const int CONNECTED_SLOTS = 512;
 
         public const int PORT = 1337;
 
@@ -30,6 +36,9 @@ namespace KnueppelKampfBase.Networking
             //IPEndPoint iep = new IPEndPoint(ip, PORT);
             listener = new CustomUdpClient(PORT);
             listener.PacketRecieved += PacketReceived;
+
+            pending = new Connection[PENDING_SLOTS];
+            connected = new Connection[CONNECTED_SLOTS];
         }
 
         /// <summary>
@@ -62,6 +71,14 @@ namespace KnueppelKampfBase.Networking
         public void StopListen()
         {
             listener.StopListen();
+        }
+
+        private int GetFirstFreeIndex(object[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (array[i] == null)
+                    return i;
+            return -1;
         }
 
         public void Dispose()
