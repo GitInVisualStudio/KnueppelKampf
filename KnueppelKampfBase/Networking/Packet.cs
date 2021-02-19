@@ -51,9 +51,13 @@ namespace KnueppelKampfBase.Networking
             throw new Exception("Type not found");
         }
 
-        public virtual byte[] ToBytes()
+        public abstract byte[] ToBytes();
+
+        protected virtual byte[] GetHeader(int size = HEADER_SIZE)
         {
-            byte[] result = new byte[HEADER_SIZE];
+            if (size < HEADER_SIZE)
+                throw new Exception("Invalid size");
+            byte[] result = new byte[size];
             BitConverter.GetBytes(PROTOCOL_ID).CopyTo(result, 0);
             result[4] = GetByteFromType(GetType());
             BitConverter.GetBytes(id).CopyTo(result, 5);

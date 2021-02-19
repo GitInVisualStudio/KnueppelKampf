@@ -1,8 +1,11 @@
-﻿using System;
+﻿using KnueppelKampfBase.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking
 {
@@ -10,12 +13,47 @@ namespace KnueppelKampfBase.Networking
     {
         private bool isDisposed;
         private CustomUdpClient client;
+        private byte clientSalt;
+        private byte serverSalt;
+        private Dictionary<Type, Action<Packet>> packetCallbacks;
+        private ConnectionStatus connectionStatus;
+
+        private static CancellationTokenSource cts = new CancellationTokenSource();
 
         public Client(string host)
         {
             IPAddress serverIp = GetIpFromHostname(host);
             client = new CustomUdpClient();
             client.Connect(serverIp, Server.PORT);
+            connectionStatus = ConnectionStatus.Disconnected;
+            packetCallbacks = new Dictionary<Type, Action<Packet>>()
+            {
+                {
+                    typeof(ChallengePacket), (Packet p) =>
+                    {
+                        ChallengePacket cp = (ChallengePacket)p;
+                        serverSalt = cp.ServerSalt;
+                        connectionStatus = ConnectionStatus.SendingResponse;
+                        ChallengeResponsePacket crp = new ChallengeResponsePacket(clientSalt, serverSalt);
+                        SendPacket(crp);
+                    }
+                },
+                {
+                    typeof(FullWorldPacket), (Packet p) =>
+                    {
+                        connectionStatus = ConnectionStatus.Connected;
+                        Console.WriteLine("Connected!");
+                    }
+                }
+            };
+            client.StartListen();
+            client.PacketRecieved += PacketRecieved;
+        }
+
+        private void PacketRecieved(object sender, Packet e)
+        {
+            if (packetCallbacks.ContainsKey(e.GetType()))
+                packetCallbacks[e.GetType()](e);
         }
 
         /// <summary>
@@ -32,10 +70,36 @@ namespace KnueppelKampfBase.Networking
             throw new Exception("No IP found");
         }
 
+        public void StartConnecting()
+        {
+            if (connectionStatus != ConnectionStatus.Disconnected)
+                return;
+            connectionStatus = ConnectionStatus.SendingConnect;
+            Task.Run(() =>
+            {
+                while (connectionStatus != ConnectionStatus.Connected)
+                {
+                    if (connectionStatus == ConnectionStatus.SendingConnect)
+                    {
+                        ConnectPacket p = new ConnectPacket();
+                        clientSalt = p.ClientSalt;
+                        SendPacket(p);
+                        Thread.Sleep(100);
+                    }
+                    else if (connectionStatus == ConnectionStatus.SendingResponse)
+                    {
+                        SendPacket(new ChallengeResponsePacket(clientSalt, serverSalt));
+                        Thread.Sleep(100);
+                    }
+                    else if (connectionStatus == ConnectionStatus.Disconnected)
+                        break;
+                }
+            }, cts.Token);
+        }
+
         public void SendPacket(Packet p)
         {
-            byte[] bytes = p.ToBytes();
-            client.Send(bytes, bytes.Length);
+            client.Send(p);
         }
 
         public void Dispose()
@@ -61,5 +125,13 @@ namespace KnueppelKampfBase.Networking
         {
             Dispose(false);
         }
+    }
+
+    enum ConnectionStatus
+    {
+        Disconnected = 0,
+        SendingConnect = 1,
+        SendingResponse = 2,
+        Connected = 3
     }
 }

@@ -11,6 +11,8 @@ namespace KnueppelKampfBase.Networking.Packets
     {
         private byte xored;
 
+        public byte Xored { get => xored; set => xored = value; }
+
         public ChallengeResponsePacket(byte clientSalt, byte serverSalt)
         {
             xored = (byte)(clientSalt ^ serverSalt);
@@ -23,10 +25,8 @@ namespace KnueppelKampfBase.Networking.Packets
 
         public override byte[] ToBytes()
         {
-            byte[] result = new byte[HEADER_SIZE + 1];
-            byte[] header = base.ToBytes();
-            header.CopyTo(result, 0);
-            header[HEADER_SIZE] = xored;
+            byte[] result = GetHeader(HEADER_SIZE + 1);
+            result[HEADER_SIZE] = xored;
             return result;
         }
     }

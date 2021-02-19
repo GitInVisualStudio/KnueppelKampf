@@ -12,6 +12,9 @@ namespace KnueppelKampfBase.Networking.Packets
         private byte clientSalt;
         private byte serverSalt;
 
+        public byte ClientSalt { get => clientSalt; set => clientSalt = value; }
+        public byte ServerSalt { get => serverSalt; set => serverSalt = value; }
+
         public ChallengePacket(byte clientSalt)
         {
             this.clientSalt = clientSalt;
@@ -26,12 +29,10 @@ namespace KnueppelKampfBase.Networking.Packets
 
         public override byte[] ToBytes()
         {
-            byte[] result = new byte[HEADER_SIZE + 2];
-            byte[] header = base.ToBytes();
-            header.CopyTo(result, 0);
-            result[HEADER_SIZE] = clientSalt;
-            result[HEADER_SIZE + 1] = serverSalt;
-            return result;
+            byte[] bytes = GetHeader(HEADER_SIZE + 2);
+            bytes[HEADER_SIZE] = clientSalt;
+            bytes[HEADER_SIZE + 1] = serverSalt;
+            return bytes;
         }
     }
 }

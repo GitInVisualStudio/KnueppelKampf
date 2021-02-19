@@ -10,26 +10,26 @@ namespace KnueppelKampfBase.Networking.Packets
     public class ConnectPacket : Packet
     {
         /// <summary>
-        /// Salt to be XOR-ed with server salt, recieved in ChallengePacket
+        /// Salt to be XOR-ed with server salt, which is recieved in ChallengePacket
         /// </summary>
         private byte clientSalt;
-        
+
+        public byte ClientSalt { get => clientSalt; set => clientSalt = value; }
+
         public ConnectPacket()
         {
-            clientSalt = (byte)rnd.Next(byte.MaxValue);
+            ClientSalt = (byte)rnd.Next(byte.MaxValue);
         }
 
         public ConnectPacket(byte[] bytes) : base(bytes)
         {
-            clientSalt = bytes[HEADER_SIZE];
+            ClientSalt = bytes[HEADER_SIZE];
         }
 
         public override byte[] ToBytes()
         {
-            byte[] result = new byte[MAX_SIZE];
-            byte[] header = base.ToBytes();
-            header.CopyTo(result, 0);
-            result[HEADER_SIZE] = clientSalt;
+            byte[] result = GetHeader(MAX_SIZE);
+            result[HEADER_SIZE] = ClientSalt;
             return result;
         }
     }

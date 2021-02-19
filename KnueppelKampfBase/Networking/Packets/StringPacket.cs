@@ -21,14 +21,13 @@ namespace KnueppelKampfBase.Networking.Packets
 
         public StringPacket(byte[] bytes) : base(bytes)
         {
-            content = encoding.GetString(bytes, 5, bytes.Length - 5);
+            content = encoding.GetString(bytes, HEADER_SIZE, bytes.Length - HEADER_SIZE);
         }
 
         public override byte[] ToBytes()
         {
-            byte[] result = base.ToBytes();
-            Array.Resize<byte>(ref result, HEADER_SIZE + content.Length);
-            Encoding.UTF8.GetBytes(content, 0, content.Length, result, HEADER_SIZE);
+            byte[] result = GetHeader(HEADER_SIZE + content.Length);
+            encoding.GetBytes(content, 0, content.Length, result, HEADER_SIZE);
             return result;
         }
     }

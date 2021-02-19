@@ -38,6 +38,9 @@ namespace Testing
         {
             Console.WriteLine("Started client");
             Client c = new Client("localhost");
+            c.StartConnecting();
+
+            /*
             while (true)
             {
                 string line = Console.ReadLine();
@@ -47,7 +50,7 @@ namespace Testing
                 StringPacket p = new StringPacket(line);
                 c.SendPacket(p);
             }
-
+            */
             Console.WriteLine("Client over");
             Console.ReadLine();
         }

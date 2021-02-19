@@ -24,10 +24,12 @@ namespace KnueppelKampfBase.Networking
 
         public CustomUdpClient() : base()
         {
+            DontFragment = true;
         }
 
         public CustomUdpClient(int port) : base(port)
         {
+            DontFragment = true;
         }
 
         /// <summary>
@@ -69,6 +71,25 @@ namespace KnueppelKampfBase.Networking
         {
             cts.Cancel();
             isListening = false;
+        }
+
+        /// <summary>
+        /// Sends a packet to the specified ip
+        /// </summary>
+        public void Send(Packet p, IPEndPoint iep)
+        {
+            byte[] bytes = p.ToBytes();
+            Send(bytes, bytes.Length, iep);
+        }
+
+        /// <summary>
+        /// Sends a packet to the connected ip
+        /// </summary>
+
+        public void Send(Packet p)
+        {
+            byte[] bytes = p.ToBytes();
+            Send(bytes, bytes.Length);
         }
 
         protected override void Dispose(bool disposing)

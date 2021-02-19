@@ -17,6 +17,8 @@ namespace KnueppelKampfBase.Networking
         private Connection[] pending;
         private Connection[] connected;
 
+        private Dictionary<Type, Action<Packet>> packetCallbacks;
+
         private const int PENDING_SLOTS = 64;
         private const int CONNECTED_SLOTS = 512;
 
@@ -39,6 +41,68 @@ namespace KnueppelKampfBase.Networking
 
             pending = new Connection[PENDING_SLOTS];
             connected = new Connection[CONNECTED_SLOTS];
+
+            packetCallbacks = new Dictionary<Type, Action<Packet>>()
+            {
+                {
+                    typeof(StringPacket), (Packet p) =>
+                    {
+                        StringPacket sp = (StringPacket)p;
+                        Console.WriteLine(sp.Content);
+                    }
+                },
+                { typeof(ConnectPacket), (Packet p) =>
+                    {
+                        int i = GetFirstFreeIndex(pending);
+                        if (i == -1)
+                        {
+                            listener.Send(new DeclineConnectPacket(), p.Sender);
+                            return;
+                        }
+                        ConnectPacket cp = (ConnectPacket)p;
+                        ChallengePacket challenge = new ChallengePacket(cp.ClientSalt);
+                        pending[i] = new Connection(cp.Sender, cp.ClientSalt, challenge.ServerSalt);
+                        pending[i].RefreshPacketTimestamp();
+                    }
+                },
+                {
+                    typeof(ChallengeResponsePacket), (Packet p) =>
+                    {
+                        int connectionIndex = GetConnectionIndexFromIEP(pending, p.Sender);
+                        if (connectionIndex == -1)
+                            return;
+                        Connection c = pending[connectionIndex];
+                        ChallengeResponsePacket crp = (ChallengeResponsePacket)p;
+                        if (crp.Xored == c.Xored) // response packet was correct
+                        {
+                            pending[connectionIndex] = null;
+                            connectionIndex = GetFirstFreeIndex(connected);
+                            if (connectionIndex == -1)
+                            {
+                                listener.Send(new DeclineConnectPacket(), p.Sender);
+                                return;
+                            }
+                            connected[connectionIndex] = c;
+                            c.RefreshPacketTimestamp();
+                            FullWorldPacket fwp = new FullWorldPacket();
+                            listener.Send(fwp, p.Sender);
+                            return;
+                        }
+                        listener.Send(new DeclineConnectPacket(), p.Sender);
+                    }
+                },
+                { 
+                    typeof(KeepAlivePacket), (Packet p) =>
+                    {
+                        int connectionIndex = GetConnectionIndexFromIEP(connected, p.Sender);
+                        if (connectionIndex == -1)
+                            return;
+
+                        Connection c = connected[connectionIndex];
+                        c.RefreshPacketTimestamp();
+                    }
+                }
+            };
         }
 
         /// <summary>
@@ -57,10 +121,9 @@ namespace KnueppelKampfBase.Networking
 
         private void PacketReceived(object sender, Packet packet)
         {
-            if (packet is StringPacket)
-            {
-                Console.WriteLine(((StringPacket)packet).Content);
-            }
+            Type packetType = packet.GetType();
+            if (packetCallbacks.ContainsKey(packetType))
+                packetCallbacks[packetType](packet);
         }
 
         public void StartListen()
@@ -79,6 +142,27 @@ namespace KnueppelKampfBase.Networking
                 if (array[i] == null)
                     return i;
             return -1;
+        }
+
+        private int GetConnectionIndexFromIEP(Connection[] array, IPEndPoint iep)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (array[i].Client == iep)
+                    return i;
+            return -1;
+        }
+
+        public void TimeoutConnections()
+        {
+            TimeoutConnections(pending);
+            TimeoutConnections(connected);
+        }
+
+        private void TimeoutConnections(Connection[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (array[i].IsTimedOut())
+                    array[i] = null;
         }
 
         public void Dispose()
