@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets
+namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 {
-    class KeepAlivePacket : SaltedPacket
+    class DeclineConnectPacket : Packet
     {
-        public KeepAlivePacket(byte salt) : base(salt)
+        public DeclineConnectPacket()
         {
 
         }
 
-        public KeepAlivePacket(byte[] bytes) : base(bytes)
+        public DeclineConnectPacket(byte[] bytes) : base(bytes)
         {
 
         }

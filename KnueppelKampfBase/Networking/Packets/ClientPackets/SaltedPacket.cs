@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets
+namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
     /// <summary>
     /// Any packet sent by client after connection was established has to derive from this type, neaning

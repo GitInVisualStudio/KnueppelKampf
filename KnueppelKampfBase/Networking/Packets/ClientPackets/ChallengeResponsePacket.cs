@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets
+namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
     /// <summary>
     /// Packet sent by client in response to ChallengePacket to authenticate

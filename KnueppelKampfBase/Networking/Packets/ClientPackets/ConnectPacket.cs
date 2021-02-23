@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets
+namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
     /// <summary>
     /// Packet a client sends to the server to request a connection

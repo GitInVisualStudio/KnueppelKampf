@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets
+namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 {
     /// <summary>
     /// Sent by server in response to ConnectPacket

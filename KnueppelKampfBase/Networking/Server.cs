@@ -1,4 +1,6 @@
 ﻿using KnueppelKampfBase.Networking.Packets;
+using KnueppelKampfBase.Networking.Packets.ClientPackets;
+using KnueppelKampfBase.Networking.Packets.ServerPackets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
