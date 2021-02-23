@@ -17,10 +17,10 @@ Global
 		{A9C4610E-31FE-46CF-B200-F259A3DC683F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9C4610E-31FE-46CF-B200-F259A3DC683F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C4610E-31FE-46CF-B200-F259A3DC683F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3242E5C0-0B9E-4DC0-9144-E01F7F88C929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3242E5C0-0B9E-4DC0-9144-E01F7F88C929}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3242E5C0-0B9E-4DC0-9144-E01F7F88C929}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3242E5C0-0B9E-4DC0-9144-E01F7F88C929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18874E5F-0D17-45EE-9C38-C8B7527FDAD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18874E5F-0D17-45EE-9C38-C8B7527FDAD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18874E5F-0D17-45EE-9C38-C8B7527FDAD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18874E5F-0D17-45EE-9C38-C8B7527FDAD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
