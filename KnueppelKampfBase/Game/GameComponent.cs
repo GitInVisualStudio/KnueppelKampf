@@ -9,8 +9,13 @@ namespace KnueppelKampfBase.Game
         private GameObject gameObject;
         public GameObject GameObject { get => gameObject; set => gameObject = value; }
 
-        public abstract void Render();
+        public virtual void Init()
+        {
 
-        public abstract void Update();
+        }
+
+        public abstract void OnRender();
+
+        public abstract void OnUpdate();
     }
 }

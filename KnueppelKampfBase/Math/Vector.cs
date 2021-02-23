@@ -54,13 +54,6 @@ namespace KnueppelKampfBase.Math
             a.y /= value;
             return a;
         }
-
-        /// <summary>
-        /// NOTE: vector a wird zurückgegeben und auch verändert
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
         public static Vector operator /(Vector a, Vector b)
         {
             a.x /= b.x;
@@ -94,6 +87,14 @@ namespace KnueppelKampfBase.Math
         public static bool operator <(Vector a, float value)
         {
             return a.Length > value;
+        }
+        public static bool operator !=(Vector a, Vector b)
+        {
+            return a.x == b.x && a.x == b.x;
+        }
+        public static bool operator ==(Vector a, Vector b)
+        {
+            return a.x != b.x || a.x != b.x;
         }
     }
 }
