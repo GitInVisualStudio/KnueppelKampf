@@ -18,6 +18,7 @@ namespace KnueppelKampfBase.Networking
         private Connection[] connected;
 
         private Dictionary<Type, Action<Packet>> packetCallbacks;
+        private Dictionary<Type, Action<SaltedPacket, Connection>> connectedPacketCallbacks;
 
         private const int PENDING_SLOTS = 64;
         private const int CONNECTED_SLOTS = 512;
@@ -53,16 +54,28 @@ namespace KnueppelKampfBase.Networking
                 },
                 { typeof(ConnectPacket), (Packet p) =>
                     {
-                        int i = GetFirstFreeIndex(pending);
-                        if (i == -1)
+                        int connectionIndex = GetConnectionIndexFromIEP(pending, p.Sender);
+                        ChallengePacket challenge;
+                        if (connectionIndex == -1)
                         {
-                            listener.Send(new DeclineConnectPacket(), p.Sender);
-                            return;
+                            int i = GetFirstFreeIndex(pending);
+                            if (i == -1)
+                            {
+                                listener.Send(new DeclineConnectPacket(), p.Sender);
+                                return;
+                            }
+                            ConnectPacket cp = (ConnectPacket)p;
+                            challenge = new ChallengePacket(cp.ClientSalt);
+                            pending[i] = new Connection(cp.Sender, cp.ClientSalt, challenge.ServerSalt);
+                            pending[i].RefreshPacketTimestamp();
                         }
-                        ConnectPacket cp = (ConnectPacket)p;
-                        ChallengePacket challenge = new ChallengePacket(cp.ClientSalt);
-                        pending[i] = new Connection(cp.Sender, cp.ClientSalt, challenge.ServerSalt);
-                        pending[i].RefreshPacketTimestamp();
+                        else
+                        {
+                            Connection c = pending[connectionIndex];
+                            challenge = new ChallengePacket(c.ClientSalt, c.ServerSalt);
+                            c.RefreshPacketTimestamp();
+                        }
+                        listener.Send(challenge, p.Sender);
                     }
                 },
                 {
@@ -90,15 +103,14 @@ namespace KnueppelKampfBase.Networking
                         }
                         listener.Send(new DeclineConnectPacket(), p.Sender);
                     }
-                },
-                { 
-                    typeof(KeepAlivePacket), (Packet p) =>
-                    {
-                        int connectionIndex = GetConnectionIndexFromIEP(connected, p.Sender);
-                        if (connectionIndex == -1)
-                            return;
+                }
+            };
 
-                        Connection c = connected[connectionIndex];
+            connectedPacketCallbacks = new Dictionary<Type, Action<SaltedPacket, Connection>>()
+            {
+                {
+                    typeof(KeepAlivePacket), (SaltedPacket p, Connection c) =>
+                    {
                         c.RefreshPacketTimestamp();
                     }
                 }
@@ -122,8 +134,25 @@ namespace KnueppelKampfBase.Networking
         private void PacketReceived(object sender, Packet packet)
         {
             Type packetType = packet.GetType();
-            if (packetCallbacks.ContainsKey(packetType))
-                packetCallbacks[packetType](packet);
+            if (!(packet is SaltedPacket))
+            {
+                if (packetCallbacks.ContainsKey(packetType))
+                    packetCallbacks[packetType](packet);
+            }
+            else
+            {
+                int connectionIndex = GetConnectionIndexFromIEP(connected, packet.Sender);
+                if (connectionIndex == -1)
+                    return;
+
+                Connection c = connected[connectionIndex];
+                SaltedPacket sp = (KeepAlivePacket)packet;
+                if (c.Xored != sp.Salt) // Packet had invalid salt
+                    return;
+
+                if (connectedPacketCallbacks.ContainsKey(packetType))
+                    connectedPacketCallbacks[packetType].Invoke(sp, c);
+            }
         }
 
         public void StartListen()
@@ -147,7 +176,7 @@ namespace KnueppelKampfBase.Networking
         private int GetConnectionIndexFromIEP(Connection[] array, IPEndPoint iep)
         {
             for (int i = 0; i < array.Length; i++)
-                if (array[i].Client == iep)
+                if (array[i] != null && array[i].Client.Equals(iep))
                     return i;
             return -1;
         }

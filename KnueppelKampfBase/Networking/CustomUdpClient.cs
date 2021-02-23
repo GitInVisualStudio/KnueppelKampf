@@ -47,7 +47,6 @@ namespace KnueppelKampfBase.Networking
                 {
                     IPEndPoint sender = new IPEndPoint(IPAddress.Any, Server.PORT);
                     byte[] recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
-                    Console.WriteLine("Recieved data from " + sender.ToString());
                     Packet p;
                     try
                     {
@@ -59,6 +58,7 @@ namespace KnueppelKampfBase.Networking
                         continue;
                     }
                     p.Sender = sender;
+                    Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
                     PacketRecieved?.Invoke(this, p);
                 }
             }, cts.Token);

@@ -15,10 +15,12 @@ namespace KnueppelKampfBase.Networking
         private CustomUdpClient client;
         private byte clientSalt;
         private byte serverSalt;
+        private byte xorSalt;
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private ConnectionStatus connectionStatus;
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
+        private static Random rnd = new Random(1312);
 
         public Client(string host)
         {
@@ -44,16 +46,23 @@ namespace KnueppelKampfBase.Networking
                         connectionStatus = ConnectionStatus.Connected;
                         Console.WriteLine("Connected!");
                     }
+                },
+                {
+                    typeof(DeclineConnectPacket), (Packet p) =>
+                    {
+                        connectionStatus = ConnectionStatus.Disconnected;
+                    }
                 }
             };
-            client.StartListen();
             client.PacketRecieved += PacketRecieved;
+            client.StartListen();
         }
 
         private void PacketRecieved(object sender, Packet e)
         {
-            if (packetCallbacks.ContainsKey(e.GetType()))
-                packetCallbacks[e.GetType()](e);
+            Type t = e.GetType();
+            if (packetCallbacks.ContainsKey(t))
+                packetCallbacks[t](e);
         }
 
         /// <summary>
@@ -81,7 +90,8 @@ namespace KnueppelKampfBase.Networking
                 {
                     if (connectionStatus == ConnectionStatus.SendingConnect)
                     {
-                        ConnectPacket p = new ConnectPacket();
+                        byte salt = (byte)rnd.Next(byte.MaxValue);
+                        ConnectPacket p = new ConnectPacket(salt);
                         clientSalt = p.ClientSalt;
                         SendPacket(p);
                         Thread.Sleep(100);

@@ -21,6 +21,12 @@ namespace KnueppelKampfBase.Networking.Packets
             this.serverSalt = (byte)rnd.Next(byte.MaxValue);
         }
 
+        public ChallengePacket(byte clientSalt, byte serverSalt)
+        {
+            this.clientSalt = clientSalt;
+            this.serverSalt = serverSalt;
+        }
+
         public ChallengePacket(byte[] bytes) : base(bytes)
         {
             clientSalt = bytes[HEADER_SIZE];
