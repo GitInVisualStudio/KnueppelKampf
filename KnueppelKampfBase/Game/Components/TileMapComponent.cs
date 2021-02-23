@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnueppelKampfBase.Render;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
@@ -23,12 +24,13 @@ namespace KnueppelKampfBase.Game.Components
 
         public Bitmap Current => this.tiles[Index];
 
-        public override void Render()
+        public override void OnRender()
         {
             //TODO: Statemanager
+            StateManager.DrawImage(Current, GameObject.Size / -2);
         }
 
-        public override void Update()
+        public override void OnUpdate()
         {
             time++;
             time %= delay;

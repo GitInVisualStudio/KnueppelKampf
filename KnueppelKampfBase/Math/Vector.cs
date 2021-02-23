@@ -7,21 +7,21 @@ namespace KnueppelKampfBase.Math
 {
     public struct Vector
     {
-        private double x, y;
+        private float x, y;
 
-        public Vector(double x, double y)
+        public Vector(float x, float y)
         {
             this.x = x;
             this.y = y;
         }
-        public double X { get => x; set => x = value; }
-        public double Y { get => y; set => y = value; }
+        public float X { get => x; set => x = value; }
+        public float Y { get => y; set => y = value; }
         
-        public double Length
+        public float Length
         {
             get
             {
-                return m.Sqrt(x * x + y * y);
+                return (float)m.Sqrt(x * x + y * y);
             }
             set
             {
@@ -30,37 +30,30 @@ namespace KnueppelKampfBase.Math
             }
         }
 
-        public static Vector operator +(Vector a, double value)
+        public static Vector operator +(Vector a, float value)
         {
             a.x += value;
             a.y += value;
             return a;
         }
-        public static Vector operator -(Vector a, double value)
+        public static Vector operator -(Vector a, float value)
         {
             a.x -= value;
             a.y -= value;
             return a;
         }
-        public static Vector operator *(Vector a, double value)
+        public static Vector operator *(Vector a, float value)
         {
             a.x *= value;
             a.y *= value;
             return a;
         }
-        public static Vector operator /(Vector a, double value)
+        public static Vector operator /(Vector a, float value)
         {
             a.x /= value;
             a.y /= value;
             return a;
         }
-
-        /// <summary>
-        /// NOTE: vector a wird zurückgegeben und auch verändert
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
         public static Vector operator /(Vector a, Vector b)
         {
             a.x /= b.x;
@@ -86,14 +79,22 @@ namespace KnueppelKampfBase.Math
             return a;
         }
 
-        public static bool operator >(Vector a, double value)
+        public static bool operator >(Vector a, float value)
         {
             return a.Length > value;
         }
 
-        public static bool operator <(Vector a, double value)
+        public static bool operator <(Vector a, float value)
         {
             return a.Length > value;
+        }
+        public static bool operator !=(Vector a, Vector b)
+        {
+            return a.x == b.x && a.x == b.x;
+        }
+        public static bool operator ==(Vector a, Vector b)
+        {
+            return a.x != b.x || a.x != b.x;
         }
     }
 }

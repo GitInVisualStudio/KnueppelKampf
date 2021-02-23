@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnueppelKampfBase", "KnueppelKampfBase\KnueppelKampfBase.csproj", "{A9C4610E-31FE-46CF-B200-F259A3DC683F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{18874E5F-0D17-45EE-9C38-C8B7527FDAD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnueppelKampf", "KnueppelKampf\KnueppelKampf.csproj", "{3242E5C0-0B9E-4DC0-9144-E01F7F88C929}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
