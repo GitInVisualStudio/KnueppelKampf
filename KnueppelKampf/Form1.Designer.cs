@@ -1,6 +1,6 @@
 ﻿namespace KnueppelKampf
 {
-    partial class Window
+    partial class Form1
     {
         /// <summary>
         /// Erforderliche Designervariable.
