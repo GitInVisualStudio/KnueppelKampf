@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -62,16 +63,10 @@
     <Compile Include="Networking\Connection.cs" />
     <Compile Include="Networking\CustomUdpClient.cs" />
     <Compile Include="Networking\Packet.cs" />
-    <Compile Include="Networking\Packets\ChallengePacket.cs" />
-    <Compile Include="Networking\Packets\ChallengeResponsePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ChallengeResponsePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ConnectPacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\KeepAlivePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\SaltedPacket.cs" />
-    <Compile Include="Networking\Packets\ConnectPacket.cs" />
-    <Compile Include="Networking\Packets\DeclineConnectPacket.cs" />
-    <Compile Include="Networking\Packets\FullWorldPacket.cs" />
-    <Compile Include="Networking\Packets\KeepAlivePacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\ChallengePacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\DeclineConnectPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\FullWorldPacket.cs" />
