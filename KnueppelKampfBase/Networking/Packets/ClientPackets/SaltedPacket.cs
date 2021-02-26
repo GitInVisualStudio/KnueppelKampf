@@ -8,7 +8,7 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
     /// Any packet sent by client after connection was established has to derive from this type, neaning
     /// any packet except ConnectPacket, ChallengeResponsePacket and, for debug purposes, StringPacket
     /// </summary>
-    abstract class SaltedPacket : Packet
+    public abstract class SaltedPacket : Packet
     {
         private byte salt;
 

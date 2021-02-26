@@ -24,6 +24,9 @@ namespace KnueppelKampfBase.Networking
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
 
+        public byte XorSalt { get => xorSalt; set => xorSalt = value; }
+        public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
+
         public Client(string host)
         {
             IPAddress serverIp = GetIpFromHostname(host);
@@ -38,8 +41,6 @@ namespace KnueppelKampfBase.Networking
                         ChallengePacket cp = (ChallengePacket)p;
                         serverSalt = cp.ServerSalt;
                         connectionStatus = ConnectionStatus.SendingResponse;
-                        ChallengeResponsePacket crp = new ChallengeResponsePacket(clientSalt, serverSalt);
-                        SendPacket(crp);
                     }
                 },
                 {
@@ -85,25 +86,25 @@ namespace KnueppelKampfBase.Networking
         {
             if (connectionStatus != ConnectionStatus.Disconnected)
                 return;
-            connectionStatus = ConnectionStatus.SendingConnect;
+            ConnectionStatus = ConnectionStatus.SendingConnect;
             Task.Run(() =>
             {
-                while (connectionStatus != ConnectionStatus.Connected)
+                clientSalt = (byte)rnd.Next(byte.MaxValue);
+                ConnectPacket p = new ConnectPacket(clientSalt);
+                while (ConnectionStatus != ConnectionStatus.Connected)
                 {
-                    if (connectionStatus == ConnectionStatus.SendingConnect)
+                    if (ConnectionStatus == ConnectionStatus.SendingConnect)
                     {
-                        byte salt = (byte)rnd.Next(byte.MaxValue);
-                        ConnectPacket p = new ConnectPacket(salt);
-                        clientSalt = p.ClientSalt;
                         SendPacket(p);
                         Thread.Sleep(100);
                     }
-                    else if (connectionStatus == ConnectionStatus.SendingResponse)
+                    else if (ConnectionStatus == ConnectionStatus.SendingResponse)
                     {
+                        Console.WriteLine("RESPONSE PACKET");
                         SendPacket(new ChallengeResponsePacket(clientSalt, serverSalt));
                         Thread.Sleep(100);
                     }
-                    else if (connectionStatus == ConnectionStatus.Disconnected)
+                    else if (ConnectionStatus == ConnectionStatus.Disconnected)
                         break;
                 }
             }, cts.Token);
@@ -139,7 +140,7 @@ namespace KnueppelKampfBase.Networking
         }
     }
 
-    enum ConnectionStatus
+    public enum ConnectionStatus
     {
         Disconnected = 0,
         SendingConnect = 1,

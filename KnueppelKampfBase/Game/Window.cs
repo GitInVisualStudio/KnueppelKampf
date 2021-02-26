@@ -17,6 +17,7 @@ namespace KnueppelKampfBase.Game
         {
             this.fps = fps;
             this.tps = tps;
+            Init();
         }
 
         public virtual void Init()
@@ -31,20 +32,21 @@ namespace KnueppelKampfBase.Game
             this.tpsTimer = new Timer();
             this.tpsTimer.Interval = (int)(1000.0f / (float)tps);
             this.tpsTimer.Tick += TpsTimer_Tick;
+            this.tpsTimer.Start();
         }
 
         private void TpsTimer_Tick(object sender, EventArgs e)
         {
-            this.Refresh();
+            this.OnUpdate();
         }
 
         private void FpsTimer_Tick(object sender, EventArgs e)
         {
             this.watch.Restart();
-            this.Update();
+            this.Refresh();
         }
 
-        protected override void OnPaint(PaintEventArgs e)
+        protected  override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
             float partialTicks = (float)((1000.0f / tps) - watch.Elapsed.TotalMilliseconds) / (1000.0f / tps);
@@ -52,13 +54,13 @@ namespace KnueppelKampfBase.Game
             StateManager.Update(e.Graphics);
         }
 
-        public virtual void OnRender()
+        protected virtual void OnRender()
         {
         }
 
-        public virtual void OnUpdate()
+        protected virtual void OnUpdate()
         {
 
-        }
+        }        
     }
 }

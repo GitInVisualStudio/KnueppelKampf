@@ -55,7 +55,7 @@ namespace KnueppelKampfBase.Networking
 
         protected virtual byte[] GetHeader(int size = HEADER_SIZE)
         {
-            if (size < HEADER_SIZE)
+            if (size < HEADER_SIZE || size > MAX_SIZE)
                 throw new Exception("Invalid size");
             byte[] result = new byte[size];
             BitConverter.GetBytes(PROTOCOL_ID).CopyTo(result, 0);
