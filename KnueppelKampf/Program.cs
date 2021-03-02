@@ -16,7 +16,8 @@ namespace KnueppelKampf
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GameWindow());
+            GameWindow gw = new GameWindow();
+            Application.Run(gw);
         }
     }
 }

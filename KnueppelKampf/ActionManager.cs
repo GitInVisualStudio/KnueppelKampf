@@ -18,9 +18,6 @@ namespace KnueppelKampf
             { Key.LeftCtrl, GameAction.Duck}
         };
 
-        [DllImport("user32.dll")]
-        private static extern int GetKeyboardState(byte[] keystate);
-
         public static void Bind(Key key, GameAction action)
         {
             KeyValuePair<Key, GameAction> assigned = bindings.FirstOrDefault(x => x.Value == action);
@@ -35,7 +32,7 @@ namespace KnueppelKampf
             foreach (Key k in bindings.Keys)
             {
                 KeyStates state = Keyboard.GetKeyStates(k);
-                if (state == KeyStates.Down)
+                if ((state & KeyStates.Down) > 0)
                     actions.Add(bindings[k]);
             }
             return actions.ToArray();

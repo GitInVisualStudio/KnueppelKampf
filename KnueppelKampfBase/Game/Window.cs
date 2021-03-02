@@ -53,6 +53,7 @@ namespace KnueppelKampfBase.Game
             float partialTicks = (float)((1000.0f / tps) - watch.Elapsed.TotalMilliseconds) / (1000.0f / tps);
             StateManager.partialTicks = partialTicks;
             StateManager.Update(e.Graphics);
+            this.OnRender();
         }
 
         protected virtual void OnRender()

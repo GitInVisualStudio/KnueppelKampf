@@ -46,7 +46,15 @@ namespace KnueppelKampfBase.Networking
                 while (true)
                 {
                     IPEndPoint sender = new IPEndPoint(IPAddress.Any, Server.PORT);
-                    byte[] recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
+                    byte[] recieved;
+                    try
+                    {
+                        recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
+                    }
+                    catch (SocketException e)
+                    {
+                        continue; // this shouldnt fucking happen but sometimes it does :)
+                    }
                     Packet p;
                     try
                     {

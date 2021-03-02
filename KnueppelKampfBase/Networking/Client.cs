@@ -91,6 +91,8 @@ namespace KnueppelKampfBase.Networking
             {
                 clientSalt = (byte)rnd.Next(byte.MaxValue);
                 ConnectPacket p = new ConnectPacket(clientSalt);
+
+                ConnectPacket DEBUG = new ConnectPacket(p.ToBytes());
                 while (ConnectionStatus != ConnectionStatus.Connected)
                 {
                     if (ConnectionStatus == ConnectionStatus.SendingConnect)
@@ -100,7 +102,6 @@ namespace KnueppelKampfBase.Networking
                     }
                     else if (ConnectionStatus == ConnectionStatus.SendingResponse)
                     {
-                        Console.WriteLine("RESPONSE PACKET");
                         SendPacket(new ChallengeResponsePacket(clientSalt, serverSalt));
                         Thread.Sleep(100);
                     }
