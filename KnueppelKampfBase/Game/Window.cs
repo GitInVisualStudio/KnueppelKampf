@@ -48,6 +48,7 @@ namespace KnueppelKampfBase.Game
 
         protected  override void OnPaint(PaintEventArgs e)
         {
+            Graphics g = null;
             base.OnPaint(e);
             float partialTicks = (float)((1000.0f / tps) - watch.Elapsed.TotalMilliseconds) / (1000.0f / tps);
             StateManager.partialTicks = partialTicks;
