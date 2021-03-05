@@ -24,6 +24,16 @@ namespace KnueppelKampfBase.Game.Components
 
         public Bitmap Current => this.tiles[Index];
 
+        public override void ApplyState(ComponentState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ComponentState GetState()
+        {
+            throw new NotImplementedException();
+        }
+
         public override void OnRender()
         {
             //TODO: Statemanager

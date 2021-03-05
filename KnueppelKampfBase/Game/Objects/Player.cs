@@ -17,32 +17,14 @@ namespace KnueppelKampfBase.Game.Objects
         public bool Jumping { get => jumping; set => jumping = value; }
         public Color Color { get => color; set => color = value; }
 
-        public Player()
+        public Player(Vector position = default)
         {
+            this.position = position;
+            this.size = new Vector(50, 100);
+            color = Color.Black;
             this.AddComponent(new MoveComponent(5, 0.1f));
             this.AddComponent(new BoxComponent());
-            this.AddComponent(new ControlComponent(keyDown: KeyDown));
-        }
-
-        private void KeyDown(int key)
-        {
-            switch (key)
-            {
-                case 'A':
-                    break;
-                case 'D':
-                    break;
-                case 'W':
-                    break;
-                case 'S':
-                    break;
-                case ' ':
-                    //TODO: jump
-                    break;
-                case 15:
-                    //TODO: shift
-                    break;
-            }
+            this.AddComponent(new PlayerAnimationComponent(this));
         }
 
         public void Jump()
@@ -57,13 +39,14 @@ namespace KnueppelKampfBase.Game.Objects
 
         public override void OnRender()
         {
+            StateManager.SetColor(Color.Red);
+            StateManager.DrawRect(this.position, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + Size / 2);
-            StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
-            for (int i = components.Count - 1; i >= 0; i--)
-                components[i].OnRender();
+            for (int i = Components.Count - 1; i >= 0; i--)
+                Components[i].OnRender();
 
             StateManager.Pop();
 

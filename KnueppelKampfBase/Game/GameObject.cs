@@ -8,10 +8,11 @@ namespace KnueppelKampfBase.Game
 {
     public class GameObject
     {
+        protected Vector prevPosition;
         protected Vector position;
         protected Vector size;
         protected float rotation;
-        protected List<GameComponent> components;
+        private List<GameComponent> components;
 
         public Vector Position { get => position; set => position = value; }
         public Vector Size { get => size; set => size = value; }
@@ -64,23 +65,26 @@ namespace KnueppelKampfBase.Game
             }
         }
 
+        public List<GameComponent> Components { get => components; set => components = value; }
+        protected Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
+
         public GameObject()
         {
-            this.components = new List<GameComponent>();
+            this.Components = new List<GameComponent>();
         }
 
         public T GetComponent<T>() where T : GameComponent
         {
-            return (T)this.components.Find(x => x is T);
+            return (T)this.Components.Find(x => x is T);
         }
 
         public bool AddComponent<T>(T c) where T : GameComponent
         {
-            if (this.components.Find(x => x is T) != null)
+            if (this.Components.Find(x => x is T) != null)
                 return false;
             c.GameObject = this;
             c.Init();
-            this.components.Add(c);
+            this.Components.Add(c);
             return true;
         }
 
@@ -88,19 +92,20 @@ namespace KnueppelKampfBase.Game
         {
             StateManager.Push();
             //von der mitte des objektes wird rotiert
-            StateManager.Translate(Position + Size / 2);
+            //interpolieren
+            StateManager.Translate(Position - (prevPosition - position) * StateManager.partialTicks + Size / 2);
             StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
-            for (int i = components.Count - 1; i >= 0; i--)
-                components[i].OnRender();
+            for (int i = Components.Count - 1; i >= 0; i--)
+                Components[i].OnRender();
             StateManager.Pop();
         }
 
         public virtual void OnUpdate()
         {
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
-            for (int i = components.Count - 1; i >= 0; i--)
-                components[i].OnUpdate();
+            for (int i = Components.Count - 1; i >= 0; i--)
+                Components[i].OnUpdate();
         }
     }
 }

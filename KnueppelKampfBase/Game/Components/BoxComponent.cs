@@ -99,5 +99,15 @@ namespace KnueppelKampfBase.Game.Components
                 return true;
             return false;
         }
+
+        public override ComponentState GetState()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ApplyState(ComponentState state)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -21,6 +21,16 @@ namespace KnueppelKampfBase.Game.Components
         public Action<int> KeyRelease { get => keyRelease; set => keyRelease = value; }
         public Action<int> KeyDown { get => keyDown; set => keyDown = value; }
 
+        public override void ApplyState(ComponentState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ComponentState GetState()
+        {
+            throw new NotImplementedException();
+        }
+
         public override void OnRender()
         {
             //throw new NotImplementedException();

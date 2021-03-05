@@ -14,6 +14,16 @@ namespace KnueppelKampfBase.Game.Components
             //this.holo = RenderUtils.BlurImage()
         }
 
+        public override void ApplyState(ComponentState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ComponentState GetState()
+        {
+            throw new NotImplementedException();
+        }
+
         public override void OnRender()
         {
             throw new NotImplementedException();

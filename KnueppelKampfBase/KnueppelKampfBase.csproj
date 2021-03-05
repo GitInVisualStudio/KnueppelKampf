@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game\ComponentState.cs" />
     <Compile Include="Game\Components\AnimationComponent.cs" />
     <Compile Include="Game\Components\BoxComponent.cs" />
     <Compile Include="Game\Components\ClickComponent.cs" />
@@ -55,10 +56,13 @@
     <Compile Include="Game\GameAction.cs" />
     <Compile Include="Game\GameComponent.cs" />
     <Compile Include="Game\GameObject.cs" />
+    <Compile Include="Game\ObjectState.cs" />
     <Compile Include="Game\Objects\Player.cs" />
     <Compile Include="Game\Window.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Game\WorldManager.cs" />
+    <Compile Include="Game\WorldState.cs" />
     <Compile Include="Math\Vector.cs" />
     <Compile Include="Networking\Client.cs" />
     <Compile Include="Networking\Connection.cs" />
