@@ -28,17 +28,32 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
         public InputPacket(byte[] bytes) : base(bytes)
         {
             worldStateAck = BitConverter.ToInt32(bytes, HEADER_SIZE);
-            actions = new GameAction[bytes.Length - sizeof(int) - HEADER_SIZE];
-            for (int i = 0; i < actions.Length; i++)
-                actions[i] = (GameAction)bytes[HEADER_SIZE + sizeof(int)];
+            byte actionByte = bytes[HEADER_SIZE + sizeof(int)];
+            actions = new GameAction[GetSetBits(actionByte)];
+            GameAction[] values = (GameAction[])Enum.GetValues(typeof(GameAction));
+            int lastSet = 0;
+            foreach (GameAction action in values)
+                if (((byte)action & actionByte) > 0)
+                    actions[lastSet++] = action;
+        }
+
+        private int GetSetBits(byte b)
+        {
+            int count = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                count += b & 1;
+                b = (byte)(b >> 1);
+            }
+            return count;
         }
 
         public override byte[] ToBytes()
         {
-            byte[] result = GetHeader(HEADER_SIZE + sizeof(int) + actions.Length);
+            byte[] result = GetHeader(HEADER_SIZE + sizeof(int) + 1);
             BitConverter.GetBytes(worldStateAck).CopyTo(result, HEADER_SIZE);
             for (int i = 0; i < actions.Length; i++)
-                result[i + HEADER_SIZE + sizeof(int)] = (byte)actions[i];
+                result[HEADER_SIZE + sizeof(int)] += (byte)actions[i];
             return result;
         }
     }
