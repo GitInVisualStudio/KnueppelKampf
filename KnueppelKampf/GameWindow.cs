@@ -1,4 +1,6 @@
 ﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Game.Objects;
+using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Networking;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using System;
@@ -31,6 +33,12 @@ namespace KnueppelKampf
                 AutoSize = true
             };
             Controls.Add(debugData);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            this.worldManager.Entities.Add(new Player(new Vector(50.0f, 50.0f)));
         }
 
         protected override void OnUpdate()
