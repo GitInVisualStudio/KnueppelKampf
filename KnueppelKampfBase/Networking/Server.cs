@@ -58,6 +58,7 @@ namespace KnueppelKampfBase.Networking
                     {
                         int connectionIndex = GetConnectionIndexFromIEP(pending, p.Sender);
                         ChallengePacket challenge;
+                        ConnectPacket cp = (ConnectPacket)p;
                         if (connectionIndex == -1)
                         {
                             int i = GetFirstFreeIndex(pending);
@@ -66,7 +67,7 @@ namespace KnueppelKampfBase.Networking
                                 listener.Send(new DeclineConnectPacket(), p.Sender);
                                 return;
                             }
-                            ConnectPacket cp = (ConnectPacket)p;
+                            
                             challenge = new ChallengePacket(cp.ClientSalt);
                             pending[i] = new Connection(cp.Sender, cp.ClientSalt, challenge.ServerSalt);
                             pending[i].RefreshPacketTimestamp();
@@ -74,6 +75,7 @@ namespace KnueppelKampfBase.Networking
                         else
                         {
                             Connection c = pending[connectionIndex];
+                            c.ClientSalt = cp.ClientSalt;
                             challenge = new ChallengePacket(c.ClientSalt, c.ServerSalt);
                             c.RefreshPacketTimestamp();
                         }
@@ -148,7 +150,7 @@ namespace KnueppelKampfBase.Networking
                     return;
 
                 Connection c = connected[connectionIndex];
-                SaltedPacket sp = (KeepAlivePacket)packet;
+                SaltedPacket sp = (SaltedPacket)packet;
                 if (c.Xored != sp.Salt) // Packet had invalid salt
                     return;
 

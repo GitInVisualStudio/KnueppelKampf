@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnueppelKampf", "KnueppelKa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnueppelKampfBase", "KnueppelKampfBase\KnueppelKampfBase.csproj", "{5B05AE5C-2675-41E6-A30F-9A6F4859FB43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnueppelKampfServer", "KnueppelKampfServer\KnueppelKampfServer.csproj", "{F5660648-A26E-4129-B800-F33EFEBCE8DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5B05AE5C-2675-41E6-A30F-9A6F4859FB43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B05AE5C-2675-41E6-A30F-9A6F4859FB43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B05AE5C-2675-41E6-A30F-9A6F4859FB43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5660648-A26E-4129-B800-F33EFEBCE8DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5660648-A26E-4129-B800-F33EFEBCE8DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5660648-A26E-4129-B800-F33EFEBCE8DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5660648-A26E-4129-B800-F33EFEBCE8DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

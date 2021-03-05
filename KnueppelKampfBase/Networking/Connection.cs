@@ -30,7 +30,7 @@ namespace KnueppelKampfBase.Networking
             this.client = client;
             this.clientSalt = clientSalt;
             this.serverSalt = serverSalt;
-            xored = (byte)(serverSalt ^ clientSalt);
+            xored = (byte)(clientSalt ^ serverSalt);
         }
 
         private float GetTimestamp()
