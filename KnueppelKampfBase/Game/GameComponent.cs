@@ -17,5 +17,9 @@ namespace KnueppelKampfBase.Game
         public abstract void OnRender();
 
         public abstract void OnUpdate();
+
+        public abstract ComponentState GetState();
+
+        public abstract void ApplyState(ComponentState state);
     }
 }

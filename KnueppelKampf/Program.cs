@@ -16,7 +16,7 @@ namespace KnueppelKampf
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Game(fps: 60, tps: 30));
         }
     }
 }

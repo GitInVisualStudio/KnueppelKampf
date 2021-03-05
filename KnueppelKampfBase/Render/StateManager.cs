@@ -364,7 +364,7 @@ namespace KnueppelKampfBase.Render
 
             PointF[] points = new PointF[res];
 
-            for (float i = 0, k = 0; i <= System.Math.PI; i += (float)System.Math.PI / (float)res, k++)
+            for (float i = 0, k = 0; i < System.Math.PI * 2; i += (float)System.Math.PI * 2 / (float)res, k++)
             {
                 float offsetX = r, offsetY = r;
                 if (i <= System.Math.PI)
