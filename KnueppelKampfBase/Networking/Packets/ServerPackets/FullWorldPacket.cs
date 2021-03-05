@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnueppelKampfBase.Game;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 
         public int MapId { get => mapId; set => mapId = value; }
 
-        public FullWorldPacket()
+        public FullWorldPacket(WorldManager manager)
         {
             mapId = 1312;
         }

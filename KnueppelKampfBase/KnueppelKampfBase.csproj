@@ -67,6 +67,7 @@
     <Compile Include="Networking\Client.cs" />
     <Compile Include="Networking\Connection.cs" />
     <Compile Include="Networking\CustomUdpClient.cs" />
+    <Compile Include="Networking\Game.cs" />
     <Compile Include="Networking\Packet.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ChallengeResponsePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ConnectPacket.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Networking\Packets\ServerPackets\ChallengePacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\DeclineConnectPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\FullWorldPacket.cs" />
+    <Compile Include="Networking\Packets\ServerPackets\KeepClientAlivePacket.cs" />
     <Compile Include="Networking\Packets\StringPacket.cs" />
     <Compile Include="Networking\Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="Render\RenderUtils.cs" />
     <Compile Include="Render\State.cs" />
     <Compile Include="Render\StateManager.cs" />
+    <Compile Include="Utils\TimeUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

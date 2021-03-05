@@ -1,6 +1,7 @@
 ﻿using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -20,6 +21,7 @@ namespace KnueppelKampfBase.Networking
         private byte xorSalt;
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private ConnectionStatus connectionStatus;
+        private long lastPacketTimestamp;
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
@@ -44,8 +46,9 @@ namespace KnueppelKampfBase.Networking
                     }
                 },
                 {
-                    typeof(FullWorldPacket), (Packet p) =>
+                    typeof(KeepClientAlivePacket), (Packet p) =>
                     {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp(); 
                         connectionStatus = ConnectionStatus.Connected;
                         Console.WriteLine("Connected!");
                     }
@@ -92,7 +95,6 @@ namespace KnueppelKampfBase.Networking
                 clientSalt = (byte)rnd.Next(byte.MaxValue);
                 ConnectPacket p = new ConnectPacket(clientSalt);
 
-                ConnectPacket DEBUG = new ConnectPacket(p.ToBytes());
                 while (ConnectionStatus != ConnectionStatus.Connected)
                 {
                     if (ConnectionStatus == ConnectionStatus.SendingConnect)
@@ -109,6 +111,18 @@ namespace KnueppelKampfBase.Networking
                         break;
                 }
             }, cts.Token);
+        }
+
+        public bool IsTimedOut()
+        {
+            if (connectionStatus != ConnectionStatus.Connected)
+                return false;
+            if (TimeUtils.GetTimestamp() - lastPacketTimestamp > Connection.TIME_OUT)
+            {
+                connectionStatus = ConnectionStatus.Disconnected;
+                return true;
+            }
+            return false;
         }
 
         public void SendPacket(Packet p)

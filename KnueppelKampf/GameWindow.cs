@@ -46,6 +46,8 @@ namespace KnueppelKampf
             base.OnUpdate();
 
             SendInputPacket();
+            if (client.IsTimedOut())
+                MessageBox.Show("Connection to server timed out.");
         }
 
         private void SendInputPacket()
@@ -59,10 +61,7 @@ namespace KnueppelKampf
                 }));
                 InputPacket p = new InputPacket(client.XorSalt, pressedActions);
                 client.SendPacket(p);
-                Console.WriteLine("Sent input packet");
-                return;
             }
-            Console.WriteLine("Client not connected, didn't send input packet");
         }
 
         private string ActionArrayToString(GameAction[] pressedActions)
