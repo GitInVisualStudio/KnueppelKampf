@@ -25,7 +25,9 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 
         public override byte[] ToBytes()
         {
-            return GetHeader(MAX_SIZE);
+            byte[] result = GetHeader(MAX_SIZE);
+            result[HEADER_SIZE] = clientSalt;
+            return result;
         }
     }
 }

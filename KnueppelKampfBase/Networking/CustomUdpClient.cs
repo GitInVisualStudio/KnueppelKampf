@@ -46,7 +46,15 @@ namespace KnueppelKampfBase.Networking
                 while (true)
                 {
                     IPEndPoint sender = new IPEndPoint(IPAddress.Any, Server.PORT);
-                    byte[] recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
+                    byte[] recieved;
+                    try
+                    {
+                        recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
+                    }
+                    catch (SocketException e)
+                    {
+                        continue; // this shouldnt fucking happen but sometimes it does :)
+                    }
                     Packet p;
                     try
                     {
@@ -59,6 +67,7 @@ namespace KnueppelKampfBase.Networking
                     }
                     p.Sender = sender;
                     Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
+                    Console.WriteLine("Data: " + PrintBytes(recieved));
                     PacketRecieved?.Invoke(this, p);
                 }
             }, cts.Token);
@@ -85,11 +94,18 @@ namespace KnueppelKampfBase.Networking
         /// <summary>
         /// Sends a packet to the connected ip
         /// </summary>
-
         public void Send(Packet p)
         {
             byte[] bytes = p.ToBytes();
             Send(bytes, bytes.Length);
+        }
+
+        private string PrintBytes(byte[] bytes)
+        {
+            string result = "";
+            foreach (byte b in bytes)
+                result += b.ToString() + ",";
+            return result;
         }
 
         protected override void Dispose(bool disposing)

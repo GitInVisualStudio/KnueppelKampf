@@ -53,6 +53,7 @@
     <Compile Include="Game\Components\MoveComponent.cs" />
     <Compile Include="Game\Components\PlayerAnimationComponent.cs" />
     <Compile Include="Game\Components\TileMapComponent.cs" />
+    <Compile Include="Game\GameAction.cs" />
     <Compile Include="Game\GameComponent.cs" />
     <Compile Include="Game\GameObject.cs" />
     <Compile Include="Game\ObjectState.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Networking\Packet.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ChallengeResponsePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\ConnectPacket.cs" />
+    <Compile Include="Networking\Packets\ClientPackets\InputPacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\KeepAlivePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\SaltedPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\ChallengePacket.cs" />
