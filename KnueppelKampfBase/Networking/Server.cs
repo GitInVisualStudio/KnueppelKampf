@@ -132,6 +132,28 @@ namespace KnueppelKampfBase.Networking
                         c.RefreshRecievedPacketTimestamp();
                     }
                 },
+                {
+                    typeof(QueuePacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(p.Sender);
+                        int gameId = -1;
+                        if (gameIndex != -1)
+                            gameId = gameIndex;
+                        else
+                        {
+                            foreach (Game g in games)
+                                if (g.AddConnection(c))
+                                {
+                                    gameId = g.Id;
+                                    break;
+                                }
+                        }
+
+                        QueueResponsePacket qrp = new QueueResponsePacket(gameId);
+                        listener.Send(qrp, p.Sender);
+                        c.RefreshSentPacketTimestamp();
+                    }
+                },
             };
         }
 
@@ -164,6 +186,9 @@ namespace KnueppelKampfBase.Networking
                     return;
 
                 Connection c = connected[connectionIndex];
+                if (c == null)
+                    return;
+                c.RefreshRecievedPacketTimestamp();
                 SaltedPacket sp = (SaltedPacket)packet;
                 if (c.Xored != sp.Salt) // Packet had invalid salt
                     return;
@@ -188,7 +213,7 @@ namespace KnueppelKampfBase.Networking
             listener.Send(p, c.Client);
         }
 
-        private int GetFirstFreeIndex(object[] array)
+        private int GetFirstFreeIndex(Connection[] array)
         {
             for (int i = 0; i < array.Length; i++)
                 if (array[i] == null)
@@ -200,6 +225,14 @@ namespace KnueppelKampfBase.Networking
         {
             for (int i = 0; i < array.Length; i++)
                 if (array[i] != null && array[i].Client.Equals(iep))
+                    return i;
+            return -1;
+        }
+
+        private int GetGameIndexFromIep(IPEndPoint iep)
+        {
+            for (int i = 0; i < games.Length; i++)
+                if (games[i] != null && Array.Find(games[i].Connections, x => x.Client == iep) != null)
                     return i;
             return -1;
         }

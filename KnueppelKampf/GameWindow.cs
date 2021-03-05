@@ -20,6 +20,7 @@ namespace KnueppelKampf
         private Client client;
 
         private Label debugData;
+        private Button connectBtn;
 
         public GameWindow() : base(60, 30)
         {
@@ -33,6 +34,14 @@ namespace KnueppelKampf
                 AutoSize = true
             };
             Controls.Add(debugData);
+
+            connectBtn = new Button()
+            {
+                Text = "Connect",
+                Location = new Point(100, 0)
+            };
+            Controls.Add(connectBtn);
+            connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
         }
 
         public override void Init()
@@ -48,6 +57,11 @@ namespace KnueppelKampf
             SendInputPacket();
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
+
+            debugData.Invoke(new MethodInvoker(() =>
+            {
+                debugData.Text = client.IngameStatus.ToString();
+            }));
         }
 
         private void SendInputPacket()
@@ -55,21 +69,10 @@ namespace KnueppelKampf
             if (client.ConnectionStatus == ConnectionStatus.Connected)
             {
                 GameAction[] pressedActions = ActionManager.GetActions();
-                Invoke(new MethodInvoker(() =>
-                {
-                    debugData.Text = ActionArrayToString(pressedActions);
-                }));
+                
                 InputPacket p = new InputPacket(client.XorSalt, pressedActions);
                 client.SendPacket(p);
             }
-        }
-
-        private string ActionArrayToString(GameAction[] pressedActions)
-        {
-            string res = "";
-            foreach (GameAction g in pressedActions)
-                res += g.ToString();
-            return res;
         }
     }
 }

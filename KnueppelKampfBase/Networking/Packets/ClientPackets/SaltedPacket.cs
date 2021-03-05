@@ -31,7 +31,7 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
             if (size < HEADER_SIZE)
                 throw new Exception("Invalid size");
             byte[] header = base.GetHeader(size);
-            header[HEADER_SIZE] = salt;
+            header[Packet.HEADER_SIZE] = salt;
             return header;
         }
     }

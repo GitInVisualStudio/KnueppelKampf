@@ -11,19 +11,22 @@ namespace KnueppelKampfBase.Networking
 {
     public class Game
     {
-        private List<Connection> connections;
+        private Connection[] connections;
         private Dictionary<Connection, Player> players;
         private WorldManager manager;
         private int id;
 
         private static int lastId = 1;
 
+        private const int MAX_PLAYERS = 4;
+
         public int Id { get => id; set => id = value; }
+        public Connection[] Connections { get => connections; }
 
         public Game()
         {
             id = lastId++;
-            connections = new List<Connection>();
+            connections = new Connection[MAX_PLAYERS];
             players = new Dictionary<Connection, Player>();
             manager = new WorldManager();
         }
@@ -31,7 +34,7 @@ namespace KnueppelKampfBase.Networking
         private void StartGame()
         {
             players = new Dictionary<Connection, Player>();
-            foreach (Connection c in connections)
+            foreach (Connection c in Connections)
             {
                 Player p = new Player();
                 players[c] = p;
@@ -39,14 +42,27 @@ namespace KnueppelKampfBase.Networking
             }
 
             FullWorldPacket fwp = new FullWorldPacket(manager);
-            for (int i = 0; i < connections.Count; i++)
-                Server.Instance.SendPacket(fwp, connections[i]);
+            for (int i = 0; i < Connections.Length; i++)
+                if (connections[i] != null)
+                    Server.Instance.SendPacket(fwp, Connections[i]);
         }
 
-        public void AddConnection(Connection c)
+        public bool AddConnection(Connection c)
         {
-            connections.Add(c);
+            int index = GetFirstFreeIndex();
+            if (index == -1)
+                return false;
+            connections[index] = c;
             c.InGame = true;
+            return true;
+        }
+
+        private int GetFirstFreeIndex()
+        {
+            for (int i = 0; i < connections.Length; i++)
+                if (connections[i] == null)
+                    return i;
+            return -1;
         }
     }
 }

@@ -73,11 +73,13 @@
     <Compile Include="Networking\Packets\ClientPackets\ConnectPacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\InputPacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\KeepAlivePacket.cs" />
+    <Compile Include="Networking\Packets\ClientPackets\QueuePacket.cs" />
     <Compile Include="Networking\Packets\ClientPackets\SaltedPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\ChallengePacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\DeclineConnectPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\FullWorldPacket.cs" />
     <Compile Include="Networking\Packets\ServerPackets\KeepClientAlivePacket.cs" />
+    <Compile Include="Networking\Packets\ServerPackets\QueueResponsePacket.cs" />
     <Compile Include="Networking\Packets\StringPacket.cs" />
     <Compile Include="Networking\Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
