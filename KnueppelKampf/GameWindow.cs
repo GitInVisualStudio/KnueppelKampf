@@ -60,7 +60,7 @@ namespace KnueppelKampf
 
             debugData.Invoke(new MethodInvoker(() =>
             {
-                debugData.Text = client.IngameStatus.ToString();
+                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameId;
             }));
         }
 

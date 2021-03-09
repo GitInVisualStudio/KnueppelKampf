@@ -18,7 +18,6 @@ namespace KnueppelKampfBase.Networking
         private CustomUdpClient client;
         private byte clientSalt;
         private byte serverSalt;
-        private byte xorSalt;
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private ConnectionStatus connectionStatus;
         private IngameStatus ingameStatus;
@@ -28,9 +27,10 @@ namespace KnueppelKampfBase.Networking
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
 
-        public byte XorSalt { get => xorSalt; set => xorSalt = value; }
+        public byte XorSalt { get => (byte)(clientSalt ^ serverSalt); }
         public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
         public IngameStatus IngameStatus { get => ingameStatus; set => ingameStatus = value; }
+        public int GameId { get => gameId; set => gameId = value; }
 
         public Client(string host)
         {
@@ -72,7 +72,7 @@ namespace KnueppelKampfBase.Networking
                         if (qrp.GameId == -1)
                             IngameStatus = IngameStatus.NotInGame;
 
-                        gameId = qrp.GameId;
+                        GameId = qrp.GameId;
                         IngameStatus = IngameStatus.InGame;
                     }
                 }
@@ -138,7 +138,8 @@ namespace KnueppelKampfBase.Networking
             IngameStatus = IngameStatus.Queueing;
             Task.Run(() =>
             {
-                QueuePacket qp = new QueuePacket(xorSalt);
+                QueuePacket qp = new QueuePacket(XorSalt);
+
                 while (ingameStatus == IngameStatus.Queueing)
                 {
                     client.Send(qp);

@@ -57,6 +57,14 @@ namespace KnueppelKampfBase.Networking
             return true;
         }
 
+        public void TimeoutConnection(Connection c)
+        {
+            int index = Array.FindIndex(connections, x => x != null && x == c);
+            connections[index] = null;
+            manager.Entities.Remove(players[c]);
+            players.Remove(c);
+        }
+
         private int GetFirstFreeIndex()
         {
             for (int i = 0; i < connections.Length; i++)

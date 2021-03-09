@@ -23,7 +23,7 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 
         public SaltedPacket(byte[] bytes) : base(bytes)
         {
-            salt = bytes[HEADER_SIZE];
+            salt = bytes[Packet.HEADER_SIZE];
         }
 
         protected override byte[] GetHeader(int size = HEADER_SIZE)
@@ -31,7 +31,7 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
             if (size < HEADER_SIZE)
                 throw new Exception("Invalid size");
             byte[] header = base.GetHeader(size);
-            header[Packet.HEADER_SIZE] = salt;
+            header[HEADER_SIZE - 1] = salt;
             return header;
         }
     }
