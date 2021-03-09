@@ -61,8 +61,11 @@ namespace KnueppelKampfBase.Networking
         {
             int index = Array.FindIndex(connections, x => x != null && x == c);
             connections[index] = null;
-            manager.Entities.Remove(players[c]);
-            players.Remove(c);
+            if (players.ContainsKey(c))
+            {
+                manager.Entities.Remove(players[c]);
+                players.Remove(c);
+            }
         }
 
         private int GetFirstFreeIndex()

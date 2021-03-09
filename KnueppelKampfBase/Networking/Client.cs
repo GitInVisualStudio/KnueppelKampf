@@ -21,7 +21,7 @@ namespace KnueppelKampfBase.Networking
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private ConnectionStatus connectionStatus;
         private IngameStatus ingameStatus;
-        private int gameId;
+        private GameInfoPacket gameInfo;
         private long lastPacketTimestamp;
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
@@ -30,7 +30,7 @@ namespace KnueppelKampfBase.Networking
         public byte XorSalt { get => (byte)(clientSalt ^ serverSalt); }
         public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
         public IngameStatus IngameStatus { get => ingameStatus; set => ingameStatus = value; }
-        public int GameId { get => gameId; set => gameId = value; }
+        public GameInfoPacket GameInfo { get => gameInfo; set => gameInfo = value; }
 
         public Client(string host)
         {
@@ -72,8 +72,14 @@ namespace KnueppelKampfBase.Networking
                         if (qrp.GameId == -1)
                             IngameStatus = IngameStatus.NotInGame;
 
-                        GameId = qrp.GameId;
                         IngameStatus = IngameStatus.InGame;
+                    }
+                },
+                {
+                    typeof(GameInfoPacket), (Packet p) =>
+                    {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
+                        gameInfo = (GameInfoPacket)p;
                     }
                 }
             };
@@ -145,6 +151,23 @@ namespace KnueppelKampfBase.Networking
                     client.Send(qp);
                     Thread.Sleep(100);
                 }
+                StartGettingGameInfo();
+            }, cts.Token);
+        }
+
+        public void StartGettingGameInfo()
+        {
+            if (connectionStatus != ConnectionStatus.Connected || ingameStatus != IngameStatus.InGame)
+                return; 
+            GameInfoPacket outdated = gameInfo;
+            Task.Run(() =>
+            {
+                GetGameInfoPacket ggip = new GetGameInfoPacket(XorSalt);
+                while (gameInfo == outdated)
+                {
+                    client.Send(ggip);
+                    Thread.Sleep(100);
+                }
             }, cts.Token);
         }
 
@@ -165,6 +188,7 @@ namespace KnueppelKampfBase.Networking
             client.Send(p);
         }
 
+        #region Disposal
         public void Dispose()
         {
             Dispose(true);
@@ -188,6 +212,7 @@ namespace KnueppelKampfBase.Networking
         {
             Dispose(false);
         }
+        #endregion
     }
 
     public enum ConnectionStatus

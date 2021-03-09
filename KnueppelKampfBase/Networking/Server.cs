@@ -166,6 +166,19 @@ namespace KnueppelKampfBase.Networking
                         c.RefreshSentPacketTimestamp();
                     }
                 },
+                {
+                    typeof(GetGameInfoPacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(c.Client);
+                        if (gameIndex == -1)
+                            return;
+
+                        Game g = games[gameIndex];
+                        GameInfoPacket ggip = new GameInfoPacket(g);
+                        listener.Send(ggip, p.Sender);
+                        c.RefreshSentPacketTimestamp();
+                    }
+                }
             };
         }
 
@@ -287,7 +300,8 @@ namespace KnueppelKampfBase.Networking
                 if (array[i] != null && array[i].IsTimedOut())
                 {
                     int gameIndex = GetGameIndexFromIep(array[i].Client);
-                    games[gameIndex].TimeoutConnection(array[i]);
+                    if (gameIndex != -1) 
+                        games[gameIndex].TimeoutConnection(array[i]);
                     array[i] = null;
                 }
         }

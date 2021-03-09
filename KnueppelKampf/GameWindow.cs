@@ -58,9 +58,10 @@ namespace KnueppelKampf
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
 
+            client.StartGettingGameInfo();
             debugData.Invoke(new MethodInvoker(() =>
             {
-                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameId;
+                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
             }));
         }
 

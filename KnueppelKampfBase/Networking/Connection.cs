@@ -28,7 +28,8 @@ namespace KnueppelKampfBase.Networking
         /// <summary>
         /// Time in seconds where no packets are recieved until connection times out
         /// </summary>
-        public const int TIME_OUT = 10;
+        public const int TIME_OUT = 3;
+        public const int BYTE_LENGTH = sizeof(long) + sizeof(int);
 
         public Connection(IPEndPoint client, byte clientSalt, byte serverSalt)
         {
@@ -51,8 +52,14 @@ namespace KnueppelKampfBase.Networking
 
         public bool IsTimedOut()
         {
-            float currentTimestamp = TimeUtils.GetTimestamp();
+            long currentTimestamp = TimeUtils.GetTimestamp();
             return currentTimestamp - lastRecievedPacketTimestamp > TIME_OUT;
+        }
+
+        public void ToBytes(byte[] buffer, int startingIndex)
+        {
+            BitConverter.GetBytes(client.Address.Address).CopyTo(buffer, startingIndex);
+            BitConverter.GetBytes(client.Port).CopyTo(buffer, startingIndex + sizeof(long));
         }
     }
 }
