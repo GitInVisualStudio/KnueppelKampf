@@ -18,6 +18,7 @@ namespace KnueppelKampf
     public partial class GameWindow : Window
     {
         private Client client;
+        private WorldManager manager;
 
         private Label debugData;
         private Button connectBtn;
@@ -26,7 +27,8 @@ namespace KnueppelKampf
         {
             InitializeComponent();
 
-            client = new Client("localhost");
+            manager = new WorldManager();
+            client = new Client("localhost", manager);
             client.StartConnecting();
 
             debugData = new Label()
@@ -54,7 +56,7 @@ namespace KnueppelKampf
         {
             base.OnUpdate();
 
-            SendInputPacket();
+            SendInputOrKeepAlive();
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
 
@@ -65,14 +67,22 @@ namespace KnueppelKampf
             }));
         }
 
-        private void SendInputPacket()
+        private void SendInputOrKeepAlive()
         {
             if (client.ConnectionStatus == ConnectionStatus.Connected)
             {
-                GameAction[] pressedActions = ActionManager.GetActions();
-                
-                InputPacket p = new InputPacket(client.XorSalt, pressedActions);
-                client.SendPacket(p);
+                if (client.IngameStatus == IngameStatus.InGame)
+                {
+                    GameAction[] pressedActions = ActionManager.GetActions();
+
+                    InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
+                    client.SendPacket(p);
+                }
+                else
+                {
+                    KeepAlivePacket kap = new KeepAlivePacket(client.XorSalt);
+                    client.SendPacket(kap);
+                }
             }
         }
     }

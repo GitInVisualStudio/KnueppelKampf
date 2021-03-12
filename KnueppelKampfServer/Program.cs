@@ -7,7 +7,7 @@ namespace KnueppelKampfServer
     {
         static void Main(string[] args)
         {
-            Server s = Server.Instance;
+            Server s = new Server(false);
             s.StartListen();
             s.StartTimeoutThread();
             Console.WriteLine("Server started.");

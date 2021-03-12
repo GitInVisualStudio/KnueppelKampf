@@ -25,7 +25,6 @@ namespace KnueppelKampfBase.Networking
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private Dictionary<Type, Action<SaltedPacket, Connection>> connectedPacketCallbacks;
 
-        private static Server instance = new Server(false);
         private static CancellationTokenSource cts = new CancellationTokenSource();
 
         private const int PENDING_SLOTS = 64;
@@ -34,14 +33,11 @@ namespace KnueppelKampfBase.Networking
 
         public const int PORT = 1337;
 
-        public static Server Instance { get => instance; }
-
-
         /// <summary>
         /// Initializes serverobject with IP
         /// </summary>
         /// <param name="useLocalhost">Whether the server should use 127.0.0.1 ip or use its actual outgoing one</param>
-        protected Server(bool useLocalhost = false)
+        public Server(bool useLocalhost = false)
         {
             isDisposed = false;
             isCheckingTimeouts = false;
@@ -157,6 +153,7 @@ namespace KnueppelKampfBase.Networking
                                     games[newGameIndex] = g;
                                     g.AddConnection(c);
                                     gameId = g.Id;
+                                    g.StartHandle(SendPacket);
                                 }
                             }
                         }
@@ -177,6 +174,18 @@ namespace KnueppelKampfBase.Networking
                         GameInfoPacket ggip = new GameInfoPacket(g);
                         listener.Send(ggip, p.Sender);
                         c.RefreshSentPacketTimestamp();
+                    }
+                },
+                {
+                    typeof(InputPacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(c.Client);
+                        if (gameIndex == -1)
+                            return;
+
+                        Game g = games[gameIndex];
+                        InputPacket inpt = (InputPacket)p;
+                        g.ClientAcknowledgesWorldState(c, inpt.WorldStateAck);
                     }
                 }
             };
@@ -233,11 +242,12 @@ namespace KnueppelKampfBase.Networking
             listener.StopListen();
         }
 
-        public void SendPacket(Packet p, Connection c)
+        private void SendPacket(Packet p, IPEndPoint iep)
         {
-            listener.Send(p, c.Client);
+            listener.Send(p, iep);
         }
 
+        #region ArrayHelpers
         private int GetFirstFreeIndex(object[] array)
         {
             for (int i = 0; i < array.Length; i++)
@@ -261,6 +271,7 @@ namespace KnueppelKampfBase.Networking
                     return i;
             return -1;
         }
+        #endregion
 
         public void StartTimeoutThread()
         {
@@ -299,10 +310,16 @@ namespace KnueppelKampfBase.Networking
             for (int i = 0; i < array.Length; i++)
                 if (array[i] != null && array[i].IsTimedOut())
                 {
-                    int gameIndex = GetGameIndexFromIep(array[i].Client);
-                    if (gameIndex != -1) 
-                        games[gameIndex].TimeoutConnection(array[i]);
-                    array[i] = null;
+                    lock (games)
+                        lock (array)
+                        {
+                            int gameIndex = GetGameIndexFromIep(array[i].Client);
+                            if (gameIndex != -1)
+                                games[gameIndex].TimeoutConnection(array[i]);
+                            array[i] = null;
+                            if (games[gameIndex].GetPlayersConnected() == 0)
+                                games[gameIndex] = null;
+                        }
                 }
         }
 

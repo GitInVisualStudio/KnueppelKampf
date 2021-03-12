@@ -1,4 +1,5 @@
-﻿using KnueppelKampfBase.Networking.Packets;
+﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
 using KnueppelKampfBase.Utils;
@@ -23,6 +24,8 @@ namespace KnueppelKampfBase.Networking
         private IngameStatus ingameStatus;
         private GameInfoPacket gameInfo;
         private long lastPacketTimestamp;
+        private WorldManager manager;
+        private int worldStateAck;
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
@@ -31,14 +34,17 @@ namespace KnueppelKampfBase.Networking
         public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
         public IngameStatus IngameStatus { get => ingameStatus; set => ingameStatus = value; }
         public GameInfoPacket GameInfo { get => gameInfo; set => gameInfo = value; }
+        public WorldManager Manager { get => manager; set => manager = value; }
+        public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
 
-        public Client(string host)
+        public Client(string host, WorldManager manager)
         {
             IPAddress serverIp = GetIpFromHostname(host);
             client = new CustomUdpClient();
             client.Connect(serverIp, Server.PORT);
             connectionStatus = ConnectionStatus.Disconnected;
-            IngameStatus = IngameStatus.NotInGame;
+            ingameStatus = IngameStatus.NotInGame;
+            this.manager = manager;
 
             packetCallbacks = new Dictionary<Type, Action<Packet>>()
             {
@@ -53,7 +59,7 @@ namespace KnueppelKampfBase.Networking
                 {
                     typeof(KeepClientAlivePacket), (Packet p) =>
                     {
-                        lastPacketTimestamp = TimeUtils.GetTimestamp(); 
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
                         connectionStatus = ConnectionStatus.Connected;
                         Console.WriteLine("Connected!");
                     }
@@ -80,6 +86,15 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         gameInfo = (GameInfoPacket)p;
+                    }
+                },
+                {
+                    typeof(UpdatePacket), (Packet p) => 
+                    {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
+                        UpdatePacket up = (UpdatePacket)p;
+                        manager.Apply(up.Delta);
+                        WorldStateAck = up.Delta.NewerId;
                     }
                 }
             };

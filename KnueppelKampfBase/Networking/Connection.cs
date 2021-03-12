@@ -1,4 +1,5 @@
-﻿using KnueppelKampfBase.Networking.Packets;
+﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace KnueppelKampfBase.Networking
         private long lastRecievedPacketTimestamp;
         private long lastSentPacketTimestamp;
         private bool inGame;
+        private WorldState lastAck;
 
         public IPEndPoint Client { get => client; set => client = value; }
         public byte ClientSalt { get => clientSalt; set => clientSalt = value; }
@@ -24,7 +26,8 @@ namespace KnueppelKampfBase.Networking
         public long LastSentPacketTimestamp { get => lastSentPacketTimestamp; }
         public byte Xored { get => xored; set => xored = value; }
         public bool InGame { get => inGame; set => inGame = value; }
-        
+        public WorldState LastAck { get => lastAck; set => lastAck = value; }
+
         /// <summary>
         /// Time in seconds where no packets are recieved until connection times out
         /// </summary>

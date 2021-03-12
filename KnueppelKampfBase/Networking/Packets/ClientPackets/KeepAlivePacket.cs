@@ -4,7 +4,7 @@ using System.Text;
 
 namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
-    class KeepAlivePacket : SaltedPacket
+    public class KeepAlivePacket : SaltedPacket
     {
         public KeepAlivePacket(byte salt) : base(salt)
         {
