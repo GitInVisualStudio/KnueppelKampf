@@ -37,7 +37,7 @@ namespace KnueppelKampfBase.Game.Components
         public override void OnRender()
         {
             //StateManager.Translate(player.Size.X / 2, 0);
-            state += 2f * StateManager.delta * 5;
+            state += move.Length * StateManager.delta * 10;
             StateManager.SetColor(player.Color);
             int headSize = 25;
             StateManager.FillCircle(0, -player.Size.Y / 2 - (float)(-Sin(state) * 2), headSize);
@@ -54,15 +54,6 @@ namespace KnueppelKampfBase.Game.Components
             StateManager.Rotate(leftLeg);
             StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
             StateManager.Rotate(-leftLeg);
-            //StateManager.Translate(0, -height / 2 + headSize);
-            //rot = 15; //new value of arm rotation
-            //StateManager.Rotate(rot);
-            //StateManager.FillRoundRect(-width / 2, 0, width, height / 2, 5, 10);
-            //StateManager.Rotate(-rot);
-            //rot = 0; //new value of arm rotation
-            //StateManager.Rotate(rot);
-            //StateManager.FillRoundRect(-width / 2, 0, width, height / 2, 5, 10);
-            //StateManager.Rotate(-rot);
         }
 
         public override void OnUpdate()

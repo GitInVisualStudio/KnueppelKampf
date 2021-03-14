@@ -11,6 +11,7 @@ namespace KnueppelKampfBase.Game
     public class Window : Form
     {
         private int fps, tps;
+        private float tpt;
         private Stopwatch watch;
         private Timer fpsTimer, tpsTimer;
         protected WorldManager worldManager;
@@ -18,6 +19,7 @@ namespace KnueppelKampfBase.Game
         {
             this.fps = fps;
             this.tps = tps;
+            this.tpt = 1000.0f / tps;
             Init();
         }
 
@@ -44,12 +46,12 @@ namespace KnueppelKampfBase.Game
 
         private void TpsTimer_Tick(object sender, EventArgs e)
         {
+            this.watch.Restart();
             this.OnUpdate();
         }
 
         private void FpsTimer_Tick(object sender, EventArgs e)
         {
-            this.watch.Restart();
             this.Refresh();
         }
 
@@ -57,7 +59,7 @@ namespace KnueppelKampfBase.Game
         {
             Graphics g = null;
             base.OnPaint(e);
-            float partialTicks = (float)((1000.0f / tps) - watch.Elapsed.TotalMilliseconds) / (1000.0f / tps);
+            float partialTicks = (float)(tpt - watch.Elapsed.TotalMilliseconds) / tpt;
             StateManager.partialTicks = partialTicks;
             StateManager.Update(e.Graphics);
             this.OnRender();

@@ -30,6 +30,14 @@ namespace KnueppelKampfBase.Math
             }
         }
 
+        public float Angle
+        {
+            get
+            {
+                return (float)(-m.Atan2(x, y) * 180.0f / m.PI);
+            }
+        }
+
         public static Vector operator +(Vector a, float value)
         {
             a.x += value;
@@ -86,7 +94,7 @@ namespace KnueppelKampfBase.Math
 
         public static bool operator <(Vector a, float value)
         {
-            return a.Length > value;
+            return a.Length < value;
         }
         public static bool operator !=(Vector a, Vector b)
         {
@@ -95,6 +103,11 @@ namespace KnueppelKampfBase.Math
         public static bool operator ==(Vector a, Vector b)
         {
             return a.x != b.x || a.x != b.x;
+        }
+
+        public override string ToString()
+        {
+            return $"{x}:{y}";
         }
     }
 }

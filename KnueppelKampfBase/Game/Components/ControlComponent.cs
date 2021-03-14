@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnueppelKampfBase.Game.Objects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,39 +7,60 @@ namespace KnueppelKampfBase.Game.Components
 {
     public class ControlComponent : GameComponent
     {
-        private Action<int> keyPressed;
-        private Action<int> keyRelease;
-        private Action<int> keyDown;
-
-        public ControlComponent(Action<int> keyPressed = null, Action<int> keyRelease= null, Action<int> keyDown = null)
+        private MoveComponent move;
+        public ControlComponent(Player playerObject)
         {
-            this.keyDown = keyDown;
-            this.keyPressed = keyPressed;
-            this.keyRelease = keyRelease;
+            this.move = playerObject.GetComponent<MoveComponent>();
+            if (move == null)
+                throw new Exception($"GameObject: {playerObject} hat kein component {typeof(MoveComponent)}");
         }
-
-        public Action<int> KeyPressed { get => keyPressed; set => keyPressed = value; }
-        public Action<int> KeyRelease { get => keyRelease; set => keyRelease = value; }
-        public Action<int> KeyDown { get => keyDown; set => keyDown = value; }
 
         public override void ApplyState(ComponentState state)
         {
-            throw new NotImplementedException();
         }
 
         public override ComponentState GetState()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override void OnRender()
         {
-            //throw new NotImplementedException();
         }
 
         public override void OnUpdate()
         {
-            //throw new NotImplementedException();
+        }
+
+        public void HandleInpute(GameAction action)
+        {
+            
+            switch (action)
+            {
+                //TODO: find a neat way to implement jumping => onGround problem
+                case GameAction.Duck:
+                    break;
+                case GameAction.Jump:
+                    move.Y = -1;
+                    break;
+                case GameAction.MoveLeft:
+                    move.X = -1;
+                    break;
+                case GameAction.MoveRight:
+                    move.X = 1;
+                    break;
+                case GameAction.PrimaryUse:
+                    break;
+                case GameAction.SecondaryUse:
+                    //weiß nicht ob wir das überhaupt mal brauchen werden
+                    break;
+            }
+        }
+
+        public void HandleInputs(GameAction[] gameActions)
+        {
+            foreach (GameAction a in gameActions)
+                this.HandleInpute(a);
         }
     }
 }

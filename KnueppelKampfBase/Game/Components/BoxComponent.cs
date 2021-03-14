@@ -10,6 +10,20 @@ namespace KnueppelKampfBase.Game.Components
     {
         private Vector[] corners;
         private Vector[] original;
+        private Action<BoxComponent> onCollision;
+
+        public Action<BoxComponent> OnCollision { get => onCollision; set => onCollision = value; }
+
+        public BoxComponent(Action<BoxComponent> onCollision)
+        {
+            this.OnCollision = onCollision;
+        }
+
+        public BoxComponent()
+        {
+            this.OnCollision = null;
+        }
+
         public override void Init()
         {
             base.Init();
@@ -41,8 +55,8 @@ namespace KnueppelKampfBase.Game.Components
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector current = original[i];
-                double x = GameObject.X + current.X * ma.Cos(angle) - current.Y * ma.Sin(angle);
-                double y = GameObject.Y + current.X * ma.Sin(angle) + current.Y * ma.Cos(angle);
+                double x = GameObject.X + current.X;
+                double y = GameObject.Y + current.Y;
                 corners[i] = new Vector((float)x, (float)y);
             }
         }
@@ -57,8 +71,10 @@ namespace KnueppelKampfBase.Game.Components
             float[] angles; // Array der Winkel der Achsen, die überprüft werden müssen
             UpdateCorners();
             box.UpdateCorners();
-            if (GameObject.Rotation == box.GameObject.Rotation) // falls beide Boxen gleich ausgerichtet sind, sind ihre Achsen die selben
+            if (GameObject.Rotation == box.GameObject.Rotation)
+            { // falls beide Boxen gleich ausgerichtet sind, sind ihre Achsen die selben
                 angles = new float[] { GameObject.Rotation, GameObject.Rotation + (float)ma.PI / 2.0f };
+            }
             else
                 angles = new float[] { GameObject.Rotation, GameObject.Rotation + (float)ma.PI / 2.0f, box.GameObject.Rotation, box.GameObject.Rotation + (float)ma.PI / 2.0f };
 
@@ -67,6 +83,15 @@ namespace KnueppelKampfBase.Game.Components
                     return false;
 
             return true;
+        }
+
+        public void CheckCollision(IEnumerable<BoxComponent> boxes)
+        {
+            foreach (BoxComponent b in boxes)
+                if (b != this && Collides(b))
+                {
+                    OnCollision?.Invoke(b);
+                }
         }
 
         /// <summary>
@@ -102,12 +127,12 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override void ApplyState(ComponentState state)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

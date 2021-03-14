@@ -49,6 +49,7 @@
     <Compile Include="Game\Components\BoxComponent.cs" />
     <Compile Include="Game\Components\ClickComponent.cs" />
     <Compile Include="Game\Components\ControlComponent.cs" />
+    <Compile Include="Game\Components\HealthComponent.cs" />
     <Compile Include="Game\Components\HoloComponent.cs" />
     <Compile Include="Game\Components\MoveComponent.cs" />
     <Compile Include="Game\Components\PlayerAnimationComponent.cs" />
@@ -57,7 +58,9 @@
     <Compile Include="Game\GameComponent.cs" />
     <Compile Include="Game\GameObject.cs" />
     <Compile Include="Game\ObjectState.cs" />
+    <Compile Include="Game\Objects\Floor.cs" />
     <Compile Include="Game\Objects\Player.cs" />
+    <Compile Include="Game\Objects\Projectile.cs" />
     <Compile Include="Game\Window.cs">
       <SubType>Form</SubType>
     </Compile>

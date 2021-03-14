@@ -103,6 +103,7 @@ namespace KnueppelKampfBase.Game
 
         public virtual void OnUpdate()
         {
+            this.prevPosition = position;
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)
                 Components[i].OnUpdate();
