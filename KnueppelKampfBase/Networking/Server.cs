@@ -137,23 +137,27 @@ namespace KnueppelKampfBase.Networking
                             gameId = games[gameIndex].Id;
                         else
                         {
-                            foreach (Game g in games)
-                                if (g != null && g.AddConnection(c))
-                                {
-                                    gameId = g.Id;
-                                    break;
-                                }
-
-                            if (gameId == -1)
+                            lock(games)
                             {
-                                int newGameIndex = GetFirstFreeIndex(games);
-                                if (newGameIndex != -1)
+                                foreach (Game g in games)
+                                    if (g != null && g.AddConnection(c))
+                                    {
+                                        gameId = g.Id;
+                                        break;
+                                    }
+
+
+                                if (gameId == -1)
                                 {
-                                    Game g = new Game();
-                                    games[newGameIndex] = g;
-                                    g.AddConnection(c);
-                                    gameId = g.Id;
-                                    g.StartHandle(SendPacket);
+                                    int newGameIndex = GetFirstFreeIndex(games);
+                                    if (newGameIndex != -1)
+                                    {
+                                        Game g = new Game();
+                                        games[newGameIndex] = g;
+                                        g.AddConnection(c);
+                                        gameId = g.Id;
+                                        g.StartHandle(SendPacket);
+                                    }
                                 }
                             }
                         }
@@ -250,25 +254,34 @@ namespace KnueppelKampfBase.Networking
         #region ArrayHelpers
         private int GetFirstFreeIndex(object[] array)
         {
-            for (int i = 0; i < array.Length; i++)
-                if (array[i] == null)
-                    return i;
+            lock (array)
+            {
+                for (int i = 0; i < array.Length; i++)
+                    if (array[i] == null)
+                        return i;
+            }
             return -1;
         }
 
         private int GetConnectionIndexFromIEP(Connection[] array, IPEndPoint iep)
         {
-            for (int i = 0; i < array.Length; i++)
-                if (array[i] != null && array[i].Client.Equals(iep))
-                    return i;
+            lock (array)
+            {
+                for (int i = 0; i < array.Length; i++)
+                    if (array[i] != null && array[i].Client.Equals(iep))
+                        return i;
+            }
             return -1;
         }
 
         private int GetGameIndexFromIep(IPEndPoint iep)
         {
-            for (int i = 0; i < games.Length; i++)
-                if (games[i] != null && Array.Find(games[i].Connections, x => x != null && x.Client == iep) != null)
-                    return i;
+            lock (games)
+            {
+                for (int i = 0; i < games.Length; i++)
+                    if (games[i] != null && Array.Find(games[i].Connections, x => x != null && x.Client.Equals(iep)) != null)
+                        return i;
+            }
             return -1;
         }
         #endregion
@@ -290,13 +303,6 @@ namespace KnueppelKampfBase.Networking
                         for (int i = 0; i < connected.Length; i++)
                             if (connected[i] != null && TimeUtils.GetTimestamp() - connected[i].LastSentPacketTimestamp > 1)
                                 listener.Send(kcap, connected[i].Client);
-                    }
-
-                    lock (games)
-                    {
-                        for (int i = 0; i < games.Length; i++)
-                            if (games[i] != null && games[i].GetPlayersConnected() == 0)
-                                games[i] = null;
                     }
                     Thread.Sleep(100);
                 }
@@ -325,10 +331,12 @@ namespace KnueppelKampfBase.Networking
                         {
                             int gameIndex = GetGameIndexFromIep(array[i].Client);
                             if (gameIndex != -1)
+                            {
                                 games[gameIndex].TimeoutConnection(array[i]);
+                                if (games[gameIndex].GetPlayersConnected() == 0)
+                                    games[gameIndex] = null;
+                            }
                             array[i] = null;
-                            if (games[gameIndex].GetPlayersConnected() == 0)
-                                games[gameIndex] = null;
                         }
                 }
         }

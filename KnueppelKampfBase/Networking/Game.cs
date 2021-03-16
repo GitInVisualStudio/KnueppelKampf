@@ -57,17 +57,20 @@ namespace KnueppelKampfBase.Networking
             {
                 Player p = new Player();
                 players[c] = p;
-                Manager.Entities.Add(p);
+                manager.Entities.Add(p);
             }
         }
 
         public int GetPlayersConnected()
         {
             int count = 0;
-            foreach (Connection c in connections)
-                if (c != null)
-                    count++;
-            return count;
+            lock (connections)
+            {
+                foreach (Connection c in connections)
+                    if (c != null)
+                        count++;
+                return count;
+            }
         }
 
         public bool AddConnection(Connection c)
@@ -88,8 +91,15 @@ namespace KnueppelKampfBase.Networking
             connections[index] = null;
             if (players.ContainsKey(c))
             {
-                Manager.Entities.Remove(players[c]);
-                players.Remove(c);
+                lock (manager)
+                {
+                    manager.Entities.Remove(players[c]);
+                }
+
+                lock (players)
+                {
+                    players.Remove(c);
+                }
             }
         }
 
@@ -109,10 +119,9 @@ namespace KnueppelKampfBase.Networking
             isHandling = true;
             Task.Run(() =>
             {
-                idleSince = TimeUtils.GetTimestamp();
-
                 while (true)
                 {
+                    idleSince = TimeUtils.GetTimestamp();
                     while (true) // waits until enough players in game, game idle for long enough with 2 players
                     {
                         int playersInGame = GetPlayersConnected();
@@ -121,7 +130,6 @@ namespace KnueppelKampfBase.Networking
                         long timestamp = TimeUtils.GetTimestamp();
                         if (playersInGame == MAX_PLAYERS || (timestamp - IdleSince > MAX_IDLE_TIME && playersInGame > 1))
                             break;
-                        Console.WriteLine("Didnt start, there were " + playersInGame + "players connected");
                         Thread.Sleep(100);
                     }
 

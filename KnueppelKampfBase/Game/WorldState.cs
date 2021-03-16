@@ -19,7 +19,13 @@ namespace KnueppelKampfBase.Game
         public WorldState(WorldManager manager)
         {
             this.manager = manager;
-            this.states = manager.Entities.Select(o => new ObjectState(o)).ToList();
+            this.states = new List<ObjectState>();
+            lock (manager)
+            {
+                foreach (GameObject o in manager.Entities)
+                    states.Add(new ObjectState(o));
+            }
+            //this.states = manager.Entities.Select(o => new ObjectState(o)).ToList();
             acknowledgedBy = new List<Connection>();
             id = lastId++;
         }
