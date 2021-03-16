@@ -16,7 +16,7 @@ namespace KnueppelKampfBase.Networking
     public class Server : IDisposable
     {
         private bool isDisposed;
-        private bool isCheckingTimeouts;
+        private bool isDoingCleanup;
         private CustomUdpClient listener;
         private Connection[] pending;
         private Connection[] connected;
@@ -40,7 +40,7 @@ namespace KnueppelKampfBase.Networking
         public Server(bool useLocalhost = false)
         {
             isDisposed = false;
-            isCheckingTimeouts = false;
+            isDoingCleanup = false;
 
             IPAddress ip;
             if (useLocalhost)
@@ -273,21 +273,31 @@ namespace KnueppelKampfBase.Networking
         }
         #endregion
 
-        public void StartTimeoutThread()
+        public void StartCleanupThread()
         {
-            if (isCheckingTimeouts)
+            if (isDoingCleanup)
                 return;
 
-            isCheckingTimeouts = true;
+            isDoingCleanup = true;
             Task.Run(() =>
             {
                 while (true)
                 {
                     TimeoutConnections();
                     KeepClientAlivePacket kcap = new KeepClientAlivePacket();
-                    for (int i = 0; i < connected.Length; i++)
-                        if (connected[i] != null && TimeUtils.GetTimestamp() - connected[i].LastSentPacketTimestamp > 1)
-                            listener.Send(kcap, connected[i].Client);
+                    lock (connected)
+                    {
+                        for (int i = 0; i < connected.Length; i++)
+                            if (connected[i] != null && TimeUtils.GetTimestamp() - connected[i].LastSentPacketTimestamp > 1)
+                                listener.Send(kcap, connected[i].Client);
+                    }
+
+                    lock (games)
+                    {
+                        for (int i = 0; i < games.Length; i++)
+                            if (games[i] != null && games[i].GetPlayersConnected() == 0)
+                                games[i] = null;
+                    }
                     Thread.Sleep(100);
                 }
             }, cts.Token);
@@ -296,7 +306,7 @@ namespace KnueppelKampfBase.Networking
         public void StopTimeoutThread()
         {
             cts.Cancel();
-            isCheckingTimeouts = false;
+            isDoingCleanup = false;
         }
 
         private void TimeoutConnections()
