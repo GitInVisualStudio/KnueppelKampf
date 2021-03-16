@@ -106,7 +106,14 @@ namespace KnueppelKampfBase.Networking
         {
             Type t = e.GetType();
             if (packetCallbacks.ContainsKey(t))
-                packetCallbacks[t](e);
+                try
+                {
+                    packetCallbacks[t](e);
+                }
+                catch
+                {
+                    Console.WriteLine("Something went wrong handling package of type " + t.Name);
+                }
         }
 
         /// <summary>

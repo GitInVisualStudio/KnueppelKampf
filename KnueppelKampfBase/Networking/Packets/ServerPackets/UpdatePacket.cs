@@ -20,7 +20,7 @@ namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 
         public UpdatePacket(byte[] bytes) : base(bytes)
         {
-
+            
         }
 
         public override byte[] ToBytes()
