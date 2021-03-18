@@ -7,12 +7,11 @@ namespace KnueppelKampfServer
     {
         static void Main(string[] args)
         {
-            using (Server s = new Server(true))
-            {
-                s.StartListen();
-                Console.WriteLine("Server started.");
-                Console.ReadLine();
-            }
+            Server s = new Server(false);
+            s.StartListen();
+            s.StartCleanupThread();
+            Console.WriteLine("Server started.");
+            Console.ReadLine();
         }
     }
 }

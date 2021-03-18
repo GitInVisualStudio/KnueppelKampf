@@ -23,22 +23,22 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void ApplyState(ComponentState state)
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public override ComponentState GetState()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override void OnRender()
         {
-            //throw new NotImplementedException();
+            //return null;
         }
 
         public override void OnUpdate()
         {
-            //throw new NotImplementedException();
+            //return null;
         }
     }
 }

@@ -66,8 +66,8 @@ namespace KnueppelKampfBase.Networking
                         continue;
                     }
                     p.Sender = sender;
-                    Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
-                    Console.WriteLine("Data: " + PrintBytes(recieved));
+                    //Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
+                    //Console.WriteLine("Data: " + PrintBytes(recieved));
                     PacketRecieved?.Invoke(this, p);
                 }
             }, cts.Token);

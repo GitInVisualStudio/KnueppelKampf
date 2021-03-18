@@ -18,14 +18,17 @@ namespace KnueppelKampf
     public partial class GameWindow : Window
     {
         private Client client;
+        private WorldManager manager;
 
         private Label debugData;
+        private Button connectBtn;
 
         public GameWindow() : base(60, 30)
         {
             InitializeComponent();
 
-            client = new Client("localhost");
+            manager = new WorldManager();
+            client = new Client("localhost", manager);
             client.StartConnecting();
 
             debugData = new Label()
@@ -33,6 +36,14 @@ namespace KnueppelKampf
                 AutoSize = true
             };
             Controls.Add(debugData);
+
+            connectBtn = new Button()
+            {
+                Text = "Connect",
+                Location = new Point(100, 0)
+            };
+            Controls.Add(connectBtn);
+            connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
         }
 
         public override void Init()
@@ -45,32 +56,34 @@ namespace KnueppelKampf
         {
             base.OnUpdate();
 
-            SendInputPacket();
+            SendInputOrKeepAlive();
+            if (client.IsTimedOut())
+                MessageBox.Show("Connection to server timed out.");
+
+            client.StartGettingGameInfo();
+            debugData.Invoke(new MethodInvoker(() =>
+            {
+                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
+            }));
         }
 
-        private void SendInputPacket()
+        private void SendInputOrKeepAlive()
         {
             if (client.ConnectionStatus == ConnectionStatus.Connected)
             {
-                GameAction[] pressedActions = ActionManager.GetActions();
-                Invoke(new MethodInvoker(() =>
+                if (client.IngameStatus == IngameStatus.InGame)
                 {
-                    debugData.Text = ActionArrayToString(pressedActions);
-                }));
-                InputPacket p = new InputPacket(client.XorSalt, pressedActions);
-                client.SendPacket(p);
-                Console.WriteLine("Sent input packet");
-                return;
-            }
-            Console.WriteLine("Client not connected, didn't send input packet");
-        }
+                    GameAction[] pressedActions = ActionManager.GetActions();
 
-        private string ActionArrayToString(GameAction[] pressedActions)
-        {
-            string res = "";
-            foreach (GameAction g in pressedActions)
-                res += g.ToString();
-            return res;
+                    InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
+                    client.SendPacket(p);
+                }
+                else
+                {
+                    KeepAlivePacket kap = new KeepAlivePacket(client.XorSalt);
+                    client.SendPacket(kap);
+                }
+            }
         }
     }
 }

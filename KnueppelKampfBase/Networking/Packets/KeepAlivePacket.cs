@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets.ClientPackets
+namespace KnueppelKampfBase.Networking.Packets
 {
-    public class KeepAlivePacket : SaltedPacket
+    class KeepAlivePacket : Packet
     {
-        public KeepAlivePacket(byte salt) : base(salt)
+        public KeepAlivePacket()
         {
 
         }

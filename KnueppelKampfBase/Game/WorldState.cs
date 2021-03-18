@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnueppelKampfBase.Networking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,14 +11,28 @@ namespace KnueppelKampfBase.Game
     {
         private List<ObjectState> states;
         private WorldManager manager;
+        private List<Connection> acknowledgedBy;
+        private int id;
+
+        private static int lastId;
 
         public WorldState(WorldManager manager)
         {
             this.manager = manager;
-            this.states = manager.Entities.Select(o => new ObjectState(o)).ToList();
+            this.states = new List<ObjectState>();
+            lock (manager)
+            {
+                foreach (GameObject o in manager.Entities)
+                    states.Add(new ObjectState(o));
+            }
+            //this.states = manager.Entities.Select(o => new ObjectState(o)).ToList();
+            acknowledgedBy = new List<Connection>();
+            id = lastId++;
         }
 
         public List<ObjectState> States { get => states; set => states = value; }
+        public List<Connection> AcknowledgedBy { get => acknowledgedBy; set => acknowledgedBy = value; }
+        public int Id { get => id; set => id = value; }
 
         public void Apply()
         {

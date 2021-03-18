@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
-    public class KeepAlivePacket : SaltedPacket
+    public class QueuePacket : SaltedPacket
     {
-        public KeepAlivePacket(byte salt) : base(salt)
+        public QueuePacket(byte salt) : base(salt)
         {
 
         }
 
-        public KeepAlivePacket(byte[] bytes) : base(bytes)
+        public QueuePacket(byte[] bytes) : base(bytes)
         {
 
         }
