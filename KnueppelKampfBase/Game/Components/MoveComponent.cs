@@ -59,7 +59,7 @@ namespace KnueppelKampfBase.Game.Components
             Velocity *= friction;
             if (Velocity < MIN_VALUE)
                 velocity = default;
-            //velocity.Y += 0.4f;
+            velocity.Y += 0.4f;
             this.GameObject.Position += velocity * 10;
         }
 

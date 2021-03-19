@@ -23,7 +23,7 @@ namespace KnueppelKampf
         private ControlComponent control;
         private Label debugData;
 
-        public GameWindow() : base(60, 30)
+        public GameWindow() : base(120, 30)
         {
             InitializeComponent();
 
@@ -42,7 +42,7 @@ namespace KnueppelKampf
             base.OnMouseMove(e);
             Vector mouse = new Vector(e.X, e.Y);
             mouse = mouse - thePlayer.Position;
-            thePlayer.Rotation = mouse.Angle;
+            //thePlayer.Rotation = mouse.Angle;
             //TODO: send rotation to the server
         }
 
@@ -56,9 +56,9 @@ namespace KnueppelKampf
         {
             base.Init();
             this.worldManager.Entities.Add(thePlayer = new Player(new Vector(50.0f, 50.0f)));
-            this.worldManager.Entities.Add(new Player(new Vector(250.0f, 150.0f)));
+            //this.worldManager.Entities.Add(new Player(new Vector(250.0f, 150.0f)));
             //this.worldManager.Entities.Add(new Floor(new Vector(100, 50), new Vector(50, 50)));
-            this.worldManager.Entities.Add(new Floor(new Vector(100, 200), new Vector(50, 50)));
+            this.worldManager.Entities.Add(new Floor(new Vector(100, 250), new Vector(500, 50)));
             control = thePlayer.GetComponent<ControlComponent>();
         }
 
