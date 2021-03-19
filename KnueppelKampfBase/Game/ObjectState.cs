@@ -14,7 +14,8 @@ namespace KnueppelKampfBase.Game
         public ObjectState(GameObject obj)
         {
             this.Obj = obj;
-            componentStates = obj.Components.Select(component => component.GetState()).ToList();
+            lock (obj)
+                componentStates = obj.Components.Select(component => component.GetState()).ToList();
         }
 
         public List<ComponentState> ComponentStates { get => componentStates; set => componentStates = value; }

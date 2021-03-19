@@ -17,34 +17,10 @@ namespace KnueppelKampfBase.Game.Components
 
         public float Length => velocity.Length;
 
-        public float X
-        {
-            get
-            {
-                return Velocity.X;
-            }
-            set
-            {
-                velocity.X = value;
-            }
-        }
-
-        public float Y
-        {
-            get
-            {
-                return Velocity.Y;
-            }
-            set
-            {
-                velocity.Y = value;
-            }
-        }
-
-        public MoveComponent(float limit = 5, float friction = 0.25f)
+        public MoveComponent(float limit = 5, float friction = 0.1f)
         {
             this.limit = limit;
-            this.friction = 1 - friction;
+            this.friction = friction;
         }
 
         public override void OnRender()
@@ -54,35 +30,22 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
-            if (Velocity > limit)
+            if(Velocity > limit)
                 velocity.Length = limit;
             Velocity *= friction;
             if (Velocity < MIN_VALUE)
-                velocity = default;
-            //velocity.Y += 0.4f;
-            this.GameObject.Position += velocity * 10;
+                velocity.Length = 0;
+            this.GameObject.Position += velocity;
         }
 
         public override ComponentState GetState()
         {
-            return new MoveState() { Velocity = velocity, Friction = friction };
+            return null;
         }
 
         public override void ApplyState(ComponentState state)
         {
-            if (!(state is MoveState))
-                throw new Exception($"Invalid state for {this.GetType().Name}");
-            MoveState ms = (MoveState)state;
-            velocity = ms.Velocity;
-            friction = ms.Friction;
+            return;
         }
-    }
-
-    public class MoveState : ComponentState
-    {
-        private Vector velocity;
-        private float friction;
-        public Vector Velocity { get => velocity; set => velocity = value; }
-        public float Friction { get => friction; set => friction = value; }
     }
 }

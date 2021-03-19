@@ -18,11 +18,11 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
         public GameAction[] Actions { get => actions; set => actions = value; }
 
-        public InputPacket(byte salt, GameAction[] actions) : base(salt)
+        public InputPacket(byte salt, GameAction[] actions, int worldStateAck) : base(salt)
         {
             this.actions = actions;
 
-            worldStateAck = 1337; // TODO
+            this.worldStateAck = worldStateAck;
         }
 
         public InputPacket(byte[] bytes) : base(bytes)

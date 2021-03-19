@@ -1,9 +1,8 @@
-﻿using KnueppelKampfBase.Game;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace KnueppelKampfBase.Networking.Packets.ServerPackets
+namespace KnueppelKampfBase.Networking.Packets
 {
     /// <summary>
     /// Packet containing the entire world state, sent by server
@@ -14,7 +13,7 @@ namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 
         public int MapId { get => mapId; set => mapId = value; }
 
-        public FullWorldPacket(WorldManager manager)
+        public FullWorldPacket()
         {
             mapId = 1312;
         }

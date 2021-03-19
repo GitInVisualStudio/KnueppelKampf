@@ -1,6 +1,8 @@
-﻿using KnueppelKampfBase.Networking.Packets;
+﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -17,22 +19,33 @@ namespace KnueppelKampfBase.Networking
         private CustomUdpClient client;
         private byte clientSalt;
         private byte serverSalt;
-        private byte xorSalt;
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private ConnectionStatus connectionStatus;
+        private IngameStatus ingameStatus;
+        private GameInfoPacket gameInfo;
+        private long lastPacketTimestamp;
+        private WorldManager manager;
+        private int worldStateAck;
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
 
-        public byte XorSalt { get => xorSalt; set => xorSalt = value; }
+        public byte XorSalt { get => (byte)(clientSalt ^ serverSalt); }
         public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
+        public IngameStatus IngameStatus { get => ingameStatus; set => ingameStatus = value; }
+        public GameInfoPacket GameInfo { get => gameInfo; set => gameInfo = value; }
+        public WorldManager Manager { get => manager; set => manager = value; }
+        public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
 
-        public Client(string host)
+        public Client(string host, WorldManager manager)
         {
             IPAddress serverIp = GetIpFromHostname(host);
             client = new CustomUdpClient();
             client.Connect(serverIp, Server.PORT);
             connectionStatus = ConnectionStatus.Disconnected;
+            ingameStatus = IngameStatus.NotInGame;
+            this.manager = manager;
+
             packetCallbacks = new Dictionary<Type, Action<Packet>>()
             {
                 {
@@ -44,8 +57,9 @@ namespace KnueppelKampfBase.Networking
                     }
                 },
                 {
-                    typeof(FullWorldPacket), (Packet p) =>
+                    typeof(KeepClientAlivePacket), (Packet p) =>
                     {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
                         connectionStatus = ConnectionStatus.Connected;
                         Console.WriteLine("Connected!");
                     }
@@ -54,6 +68,33 @@ namespace KnueppelKampfBase.Networking
                     typeof(DeclineConnectPacket), (Packet p) =>
                     {
                         connectionStatus = ConnectionStatus.Disconnected;
+                    }
+                },
+                {
+                    typeof(QueueResponsePacket), (Packet p) =>
+                    {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
+                        QueueResponsePacket qrp = (QueueResponsePacket)p;
+                        if (qrp.GameId == -1)
+                            IngameStatus = IngameStatus.NotInGame;
+
+                        IngameStatus = IngameStatus.InGame;
+                    }
+                },
+                {
+                    typeof(GameInfoPacket), (Packet p) =>
+                    {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
+                        gameInfo = (GameInfoPacket)p;
+                    }
+                },
+                {
+                    typeof(UpdatePacket), (Packet p) => 
+                    {
+                        lastPacketTimestamp = TimeUtils.GetTimestamp();
+                        UpdatePacket up = (UpdatePacket)p;
+                        manager.Apply(up.Delta);
+                        WorldStateAck = up.Delta.NewerId;
                     }
                 }
             };
@@ -65,7 +106,14 @@ namespace KnueppelKampfBase.Networking
         {
             Type t = e.GetType();
             if (packetCallbacks.ContainsKey(t))
-                packetCallbacks[t](e);
+                try
+                {
+                    packetCallbacks[t](e);
+                }
+                catch
+                {
+                    Console.WriteLine("Something went wrong handling package of type " + t.Name);
+                }
         }
 
         /// <summary>
@@ -92,7 +140,6 @@ namespace KnueppelKampfBase.Networking
                 clientSalt = (byte)rnd.Next(byte.MaxValue);
                 ConnectPacket p = new ConnectPacket(clientSalt);
 
-                ConnectPacket DEBUG = new ConnectPacket(p.ToBytes());
                 while (ConnectionStatus != ConnectionStatus.Connected)
                 {
                     if (ConnectionStatus == ConnectionStatus.SendingConnect)
@@ -111,11 +158,59 @@ namespace KnueppelKampfBase.Networking
             }, cts.Token);
         }
 
+        public void StartQueueing()
+        {
+            if (IngameStatus != IngameStatus.NotInGame)
+                return;
+
+            IngameStatus = IngameStatus.Queueing;
+            Task.Run(() =>
+            {
+                QueuePacket qp = new QueuePacket(XorSalt);
+
+                while (ingameStatus == IngameStatus.Queueing)
+                {
+                    client.Send(qp);
+                    Thread.Sleep(100);
+                }
+                StartGettingGameInfo();
+            }, cts.Token);
+        }
+
+        public void StartGettingGameInfo()
+        {
+            if (connectionStatus != ConnectionStatus.Connected || ingameStatus != IngameStatus.InGame)
+                return; 
+            GameInfoPacket outdated = gameInfo;
+            Task.Run(() =>
+            {
+                GetGameInfoPacket ggip = new GetGameInfoPacket(XorSalt);
+                while (gameInfo == outdated)
+                {
+                    client.Send(ggip);
+                    Thread.Sleep(100);
+                }
+            }, cts.Token);
+        }
+
+        public bool IsTimedOut()
+        {
+            if (connectionStatus != ConnectionStatus.Connected)
+                return false;
+            if (TimeUtils.GetTimestamp() - lastPacketTimestamp > Connection.TIME_OUT)
+            {
+                connectionStatus = ConnectionStatus.Disconnected;
+                return true;
+            }
+            return false;
+        }
+
         public void SendPacket(Packet p)
         {
             client.Send(p);
         }
 
+        #region Disposal
         public void Dispose()
         {
             Dispose(true);
@@ -139,6 +234,7 @@ namespace KnueppelKampfBase.Networking
         {
             Dispose(false);
         }
+        #endregion
     }
 
     public enum ConnectionStatus
@@ -147,5 +243,12 @@ namespace KnueppelKampfBase.Networking
         SendingConnect = 1,
         SendingResponse = 2,
         Connected = 3
+    }
+
+    public enum IngameStatus
+    {
+        NotInGame = 0,
+        Queueing,
+        InGame
     }
 }

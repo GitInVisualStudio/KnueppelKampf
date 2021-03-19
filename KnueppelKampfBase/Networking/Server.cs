@@ -1,6 +1,7 @@
 ﻿using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,15 +16,20 @@ namespace KnueppelKampfBase.Networking
     public class Server : IDisposable
     {
         private bool isDisposed;
+        private bool isDoingCleanup;
         private CustomUdpClient listener;
         private Connection[] pending;
         private Connection[] connected;
+        private Game[] games;
 
         private Dictionary<Type, Action<Packet>> packetCallbacks;
         private Dictionary<Type, Action<SaltedPacket, Connection>> connectedPacketCallbacks;
 
+        private static CancellationTokenSource cts = new CancellationTokenSource();
+
         private const int PENDING_SLOTS = 64;
         private const int CONNECTED_SLOTS = 512;
+        private const int GAME_SLOTS = 128;
 
         public const int PORT = 1337;
 
@@ -33,6 +39,9 @@ namespace KnueppelKampfBase.Networking
         /// <param name="useLocalhost">Whether the server should use 127.0.0.1 ip or use its actual outgoing one</param>
         public Server(bool useLocalhost = false)
         {
+            isDisposed = false;
+            isDoingCleanup = false;
+
             IPAddress ip;
             if (useLocalhost)
                 ip = IPAddress.Parse("127.0.0.1");
@@ -44,6 +53,7 @@ namespace KnueppelKampfBase.Networking
 
             pending = new Connection[PENDING_SLOTS];
             connected = new Connection[CONNECTED_SLOTS];
+            games = new Game[GAME_SLOTS];
 
             packetCallbacks = new Dictionary<Type, Action<Packet>>()
             {
@@ -70,14 +80,14 @@ namespace KnueppelKampfBase.Networking
                             
                             challenge = new ChallengePacket(cp.ClientSalt);
                             pending[i] = new Connection(cp.Sender, cp.ClientSalt, challenge.ServerSalt);
-                            pending[i].RefreshPacketTimestamp();
+                            pending[i].RefreshRecievedPacketTimestamp();
                         }
                         else
                         {
                             Connection c = pending[connectionIndex];
                             c.ClientSalt = cp.ClientSalt;
                             challenge = new ChallengePacket(c.ClientSalt, c.ServerSalt);
-                            c.RefreshPacketTimestamp();
+                            c.RefreshRecievedPacketTimestamp();
                         }
                         listener.Send(challenge, p.Sender);
                     }
@@ -100,9 +110,9 @@ namespace KnueppelKampfBase.Networking
                                 return;
                             }
                             connected[connectionIndex] = c;
-                            c.RefreshPacketTimestamp();
-                            FullWorldPacket fwp = new FullWorldPacket();
-                            listener.Send(fwp, p.Sender);
+                            c.RefreshRecievedPacketTimestamp();
+                            KeepClientAlivePacket kcap = new KeepClientAlivePacket();
+                            listener.Send(kcap, p.Sender);
                             return;
                         }
                         listener.Send(new DeclineConnectPacket(), p.Sender);
@@ -115,7 +125,71 @@ namespace KnueppelKampfBase.Networking
                 {
                     typeof(KeepAlivePacket), (SaltedPacket p, Connection c) =>
                     {
-                        c.RefreshPacketTimestamp();
+                        c.RefreshRecievedPacketTimestamp();
+                    }
+                },
+                {
+                    typeof(QueuePacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(p.Sender);
+                        int gameId = -1;
+                        if (gameIndex != -1)
+                            gameId = games[gameIndex].Id;
+                        else
+                        {
+                            lock(games)
+                            {
+                                foreach (Game g in games)
+                                    if (g != null && g.AddConnection(c))
+                                    {
+                                        gameId = g.Id;
+                                        break;
+                                    }
+
+
+                                if (gameId == -1)
+                                {
+                                    int newGameIndex = GetFirstFreeIndex(games);
+                                    if (newGameIndex != -1)
+                                    {
+                                        Game g = new Game();
+                                        games[newGameIndex] = g;
+                                        g.AddConnection(c);
+                                        gameId = g.Id;
+                                        g.StartHandle(SendPacket);
+                                    }
+                                }
+                            }
+                        }
+
+                        QueueResponsePacket qrp = new QueueResponsePacket(gameId);
+                        listener.Send(qrp, p.Sender);
+                        c.RefreshSentPacketTimestamp();
+                    }
+                },
+                {
+                    typeof(GetGameInfoPacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(c.Client);
+                        if (gameIndex == -1)
+                            return;
+
+                        Game g = games[gameIndex];
+                        GameInfoPacket ggip = new GameInfoPacket(g);
+                        listener.Send(ggip, p.Sender);
+                        c.RefreshSentPacketTimestamp();
+                    }
+                },
+                {
+                    typeof(InputPacket), (SaltedPacket p, Connection c) =>
+                    {
+                        int gameIndex = GetGameIndexFromIep(c.Client);
+                        if (gameIndex == -1)
+                            return;
+
+                        Game g = games[gameIndex];
+                        InputPacket inpt = (InputPacket)p;
+                        g.ClientAcknowledgesWorldState(c, inpt.WorldStateAck);
                     }
                 }
             };
@@ -150,6 +224,9 @@ namespace KnueppelKampfBase.Networking
                     return;
 
                 Connection c = connected[connectionIndex];
+                if (c == null)
+                    return;
+                c.RefreshRecievedPacketTimestamp();
                 SaltedPacket sp = (SaltedPacket)packet;
                 if (c.Xored != sp.Salt) // Packet had invalid salt
                     return;
@@ -169,23 +246,76 @@ namespace KnueppelKampfBase.Networking
             listener.StopListen();
         }
 
+        private void SendPacket(Packet p, IPEndPoint iep)
+        {
+            listener.Send(p, iep);
+        }
+
+        #region ArrayHelpers
         private int GetFirstFreeIndex(object[] array)
         {
-            for (int i = 0; i < array.Length; i++)
-                if (array[i] == null)
-                    return i;
+            lock (array)
+            {
+                for (int i = 0; i < array.Length; i++)
+                    if (array[i] == null)
+                        return i;
+            }
             return -1;
         }
 
         private int GetConnectionIndexFromIEP(Connection[] array, IPEndPoint iep)
         {
-            for (int i = 0; i < array.Length; i++)
-                if (array[i] != null && array[i].Client.Equals(iep))
-                    return i;
+            lock (array)
+            {
+                for (int i = 0; i < array.Length; i++)
+                    if (array[i] != null && array[i].Client.Equals(iep))
+                        return i;
+            }
             return -1;
         }
 
-        public void TimeoutConnections()
+        private int GetGameIndexFromIep(IPEndPoint iep)
+        {
+            lock (games)
+            {
+                for (int i = 0; i < games.Length; i++)
+                    if (games[i] != null && Array.Find(games[i].Connections, x => x != null && x.Client.Equals(iep)) != null)
+                        return i;
+            }
+            return -1;
+        }
+        #endregion
+
+        public void StartCleanupThread()
+        {
+            if (isDoingCleanup)
+                return;
+
+            isDoingCleanup = true;
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    TimeoutConnections();
+                    KeepClientAlivePacket kcap = new KeepClientAlivePacket();
+                    lock (connected)
+                    {
+                        for (int i = 0; i < connected.Length; i++)
+                            if (connected[i] != null && TimeUtils.GetTimestamp() - connected[i].LastSentPacketTimestamp > 1)
+                                listener.Send(kcap, connected[i].Client);
+                    }
+                    Thread.Sleep(100);
+                }
+            }, cts.Token);
+        }
+
+        public void StopTimeoutThread()
+        {
+            cts.Cancel();
+            isDoingCleanup = false;
+        }
+
+        private void TimeoutConnections()
         {
             TimeoutConnections(pending);
             TimeoutConnections(connected);
@@ -194,10 +324,24 @@ namespace KnueppelKampfBase.Networking
         private void TimeoutConnections(Connection[] array)
         {
             for (int i = 0; i < array.Length; i++)
-                if (array[i].IsTimedOut())
-                    array[i] = null;
+                if (array[i] != null && array[i].IsTimedOut())
+                {
+                    lock (games)
+                        lock (array)
+                        {
+                            int gameIndex = GetGameIndexFromIep(array[i].Client);
+                            if (gameIndex != -1)
+                            {
+                                games[gameIndex].TimeoutConnection(array[i]);
+                                if (games[gameIndex].GetPlayersConnected() == 0)
+                                    games[gameIndex] = null;
+                            }
+                            array[i] = null;
+                        }
+                }
         }
 
+        #region Disposal
         public void Dispose()
         {
             Dispose(true);
@@ -221,5 +365,6 @@ namespace KnueppelKampfBase.Networking
         {
             Dispose(false);
         }
+        #endregion
     }
 }

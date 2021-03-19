@@ -47,5 +47,10 @@ namespace KnueppelKampfBase.Game
         }
 
         public WorldState GetState() => new WorldState(this);
+
+        public void Apply(WorldDelta delta)
+        {
+
+        }
     }
 }
