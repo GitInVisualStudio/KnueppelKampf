@@ -34,8 +34,9 @@ namespace KnueppelKampfBase.Game.Components
                 velocity.Length = limit;
             Velocity *= friction;
             if (Velocity < MIN_VALUE)
-                velocity.Length = 0;
-            this.GameObject.Position += velocity;
+                velocity = default;
+            velocity.Y += 0.4f;
+            this.GameObject.Position += velocity * 10;
         }
 
         public override ComponentState GetState()

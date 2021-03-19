@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ma = System.Math;
+using static System.Math;
 
 namespace KnueppelKampfBase.Game.Components
 {
@@ -37,12 +37,12 @@ namespace KnueppelKampfBase.Game.Components
         /// <param name="angle">Der Winkel, in dem die Box gedreht ist</param>
         private void UpdateCorners()
         {
-            float angle = GameObject.Rotation;
+            double angle = GameObject.Rotation;
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector current = original[i];
-                double x = GameObject.X + current.X * ma.Cos(angle) - current.Y * ma.Sin(angle);
-                double y = GameObject.Y + current.X * ma.Sin(angle) + current.Y * ma.Cos(angle);
+                double x = GameObject.X + GameObject.Size.X / 2 + current.X * Cos(angle) - current.Y * Sin(angle);
+                double y = GameObject.Y + GameObject.Size.Y / 2 + current.X * Sin(angle) + current.Y * Cos(angle);
                 corners[i] = new Vector((float)x, (float)y);
             }
         }
@@ -54,46 +54,54 @@ namespace KnueppelKampfBase.Game.Components
         /// <returns></returns>
         public bool Collides(BoxComponent box)
         {
-            float[] angles; // Array der Winkel der Achsen, die überprüft werden müssen
+            double[] angles; // Array der Winkel der Achsen, die überprüft werden müssen
             UpdateCorners();
             box.UpdateCorners();
-            if (GameObject.Rotation == box.GameObject.Rotation) // falls beide Boxen gleich ausgerichtet sind, sind ihre Achsen die selben
-                angles = new float[] { GameObject.Rotation, GameObject.Rotation + (float)ma.PI / 2.0f };
+            if (GameObject.Rotation == box.GameObject.Rotation)
+                angles = new double[] { GameObject.Rotation, GameObject.Rotation + (double)PI / 2.0f };
             else
-                angles = new float[] { GameObject.Rotation, GameObject.Rotation + (float)ma.PI / 2.0f, box.GameObject.Rotation, box.GameObject.Rotation + (float)ma.PI / 2.0f };
+                angles = new double[] { GameObject.Rotation, GameObject.Rotation + (double)PI / 2.0f, box.GameObject.Rotation, box.GameObject.Rotation + (double)PI / 2.0f };
 
-            foreach (float angle in angles)
+            foreach (double angle in angles)
                 if (!ProjectionOverlaps(ProjectOnto(angle), box.ProjectOnto(angle)))
                     return false;
 
             return true;
         }
 
+        public void CheckCollision(IEnumerable<BoxComponent> boxes)
+        {
+            foreach (BoxComponent b in boxes)
+                if (b != this && Collides(b))
+                    OnCollision?.Invoke(b);
+        }
+
         /// <summary>
         /// Projiziert diese Box auf eine Achse
         /// </summary>
         /// <param name="angle">Der Winkel der Achse im Bogenmaß</param>
-        /// <returns>Array von zwei floats, die die relativ gesehen linkste und rechteste Stelle auf der Achse darstellen</returns>
-        private float[] ProjectOnto(float angle)
+        /// <returns>Array von zwei doubles, die die relativ gesehen linkste und rechteste Stelle auf der Achse darstellen</returns>
+        private double[] ProjectOnto(double angle)
         {
-            float min = Int32.MaxValue;
-            float max = Int32.MinValue;
+            double min = Int32.MaxValue;
+            double max = Int32.MinValue;
 
             foreach (Vector c in corners)
             {
-                float cuttingAngle = (float)ma.Atan(c.Y / c.X) - angle;
-                float projection = (float)(ma.Cos(cuttingAngle) * ma.Sqrt(ma.Pow(c.X, 2) + ma.Pow(c.Y, 2)));
+                double cuttingAngle = (double)Atan(c.Y / c.X) - angle;
+                double projection = (double)(Sin(cuttingAngle) * Sqrt(Pow(c.X, 2) + Pow(c.Y, 2)));
                 min = projection < min ? projection : min;
                 max = projection > max ? projection : max;
             }
 
-            return new float[] { min, max };
+            return new double[] { min, max };
         }
+
 
         /// <summary>
         /// Überprüft, ob sich zwei Projektionen überlappen
         /// </summary>
-        private bool ProjectionOverlaps(float[] a, float[] b)
+        private bool ProjectionOverlaps(double[] a, double[] b)
         {
             if ((a[0] < b[0] && a[1] > b[0]) || (b[0] < a[0] && b[1] > a[0]))
                 return true;

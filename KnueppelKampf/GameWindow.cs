@@ -46,10 +46,23 @@ namespace KnueppelKampf
             connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
         }
 
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            Vector mouse = new Vector(e.X, e.Y);
+            mouse = mouse - thePlayer.Position;
+            //thePlayer.Rotation = mouse.Angle;
+            //TODO: send rotation to the server
+        }
+
         public override void Init()
         {
             base.Init();
-            this.worldManager.Entities.Add(new Player(new Vector(50.0f, 50.0f)));
+            this.worldManager.Entities.Add(thePlayer = new Player(new Vector(50.0f, 50.0f)));
+            //this.worldManager.Entities.Add(new Player(new Vector(250.0f, 150.0f)));
+            //this.worldManager.Entities.Add(new Floor(new Vector(100, 50), new Vector(50, 50)));
+            this.worldManager.Entities.Add(new Floor(new Vector(100, 250), new Vector(500, 50)));
+            control = thePlayer.GetComponent<ControlComponent>();
         }
 
         protected override void OnUpdate()
@@ -77,6 +90,7 @@ namespace KnueppelKampf
 
                     InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
                     client.SendPacket(p);
+                    control.HandleInputs(pressedActions);
                 }
                 else
                 {
