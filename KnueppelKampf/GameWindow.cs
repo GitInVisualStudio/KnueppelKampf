@@ -59,9 +59,28 @@ namespace KnueppelKampf
         {
             base.Init();
             this.worldManager.Entities.Add(thePlayer = new Player(new Vector(50.0f, 50.0f)));
-            //this.worldManager.Entities.Add(new Player(new Vector(250.0f, 150.0f)));
-            //this.worldManager.Entities.Add(new Floor(new Vector(100, 50), new Vector(50, 50)));
-            this.worldManager.Entities.Add(new Floor(new Vector(100, 250), new Vector(500, 50)));
+            this.worldManager.Entities.Add(new Player(new Vector(550.0f, 50.0f)));
+            int width = 1920;
+            //unten
+            this.worldManager.Entities.Add(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
+            this.worldManager.Entities.Add(new Floor(new Vector(500 - 75, 850 - 100), new Vector(76, 600)));
+            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 1, 850 - 100), new Vector(76, 600)));
+            
+            //pillar
+            this.worldManager.Entities.Add(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+
+
+            //seiten
+            this.worldManager.Entities.Add(new Floor(new Vector(50, 650), new Vector(150, 600)));
+            this.worldManager.Entities.Add(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
+
+            //augen
+            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
+            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
+
+            this.worldManager.Camera = thePlayer;
+
             control = thePlayer.GetComponent<ControlComponent>();
         }
 
@@ -78,6 +97,12 @@ namespace KnueppelKampf
             {
                 debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
             }));
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            this.worldManager.Offset = new Vector(this.Width, this.Height) / 2;
         }
 
         private void SendInputOrKeepAlive()

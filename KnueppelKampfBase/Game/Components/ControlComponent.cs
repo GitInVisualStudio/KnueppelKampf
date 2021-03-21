@@ -1,4 +1,5 @@
-﻿using System;
+﻿    using KnueppelKampfBase.Game.Objects;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,15 +7,17 @@ namespace KnueppelKampfBase.Game.Components
 {
     public class ControlComponent : GameComponent
     {
-        private Action<int> keyPressed;
-        private Action<int> keyRelease;
-        private Action<int> keyDown;
-
-        public ControlComponent(Action<int> keyPressed = null, Action<int> keyRelease= null, Action<int> keyDown = null)
+        private MoveComponent move;
+        public ControlComponent()
         {
-            this.keyDown = keyDown;
-            this.keyPressed = keyPressed;
-            this.keyRelease = keyRelease;
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            this.move = GameObject.GetComponent<MoveComponent>();
+            if (move == null)
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
         }
 
         public Action<int> KeyPressed { get => keyPressed; set => keyPressed = value; }
@@ -38,7 +41,42 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
-            //return null;
+        }
+
+        public void HandleInpute(GameAction action)
+        {
+            
+            switch (action)
+            {
+                //TODO: find a neat way to implement jumping => onGround problem
+                case GameAction.Duck:
+                    break;
+                case GameAction.Jump:
+                    if(move.OnGround)
+                        move.Y = -12;
+                    break;
+                case GameAction.MoveLeft:
+                    move.X = -2f;
+                    break;
+                case GameAction.MoveRight:
+                    move.X = 2f;
+                    break;
+                case GameAction.PrimaryUse:
+                    ItemComponent item = GameObject.GetComponent<ItemComponent>();
+                    if (item == null)
+                        return;
+                    item.Attack();
+                    break;
+                case GameAction.SecondaryUse:
+                    //weiß nicht ob wir das überhaupt mal brauchen werden
+                    break;
+            }
+        }
+
+        public void HandleInputs(GameAction[] gameActions)
+        {
+            foreach (GameAction a in gameActions)
+                this.HandleInpute(a);
         }
     }
 }

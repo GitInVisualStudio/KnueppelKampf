@@ -18,10 +18,12 @@ namespace KnueppelKampfBase.Game.Objects
             this.position = position;
             this.size = new Vector(50, 100);
             color = Color.Black;
+            this.AddComponent(new HealthComponent(10.0f));
             this.AddComponent(new MoveComponent());
             this.AddComponent(new BoxComponent());
-            this.AddComponent(new PlayerAnimationComponent(this));
-            this.AddComponent(new ControlComponent(this));
+            this.AddComponent(new PlayerAnimationComponent());
+            this.AddComponent(new ControlComponent());
+            this.AddComponent(new ItemComponent());
         }
 
         public override void OnRender()
@@ -30,7 +32,7 @@ namespace KnueppelKampfBase.Game.Objects
             StateManager.DrawRect(this.position, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
-            StateManager.Translate(Position + (prevPosition - position) * StateManager.partialTicks + Size / 2);
+            StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);
             StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)

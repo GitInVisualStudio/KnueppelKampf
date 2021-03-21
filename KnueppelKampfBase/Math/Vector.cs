@@ -87,6 +87,11 @@ namespace KnueppelKampfBase.Math
             return a;
         }
 
+        public static Vector operator -(Vector a)
+        {
+            return a * -1;
+        }
+
         public static bool operator >(Vector a, float value)
         {
             return a.Length > value;
