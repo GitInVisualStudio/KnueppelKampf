@@ -47,7 +47,7 @@ namespace KnueppelKampfBase.Game.Components
         public MoveComponent(float limit = 5, float friction = 0.25f)
         {
             this.limit = limit;
-            this.friction = friction;
+            this.friction = 1 - friction;
         }
 
         public override void OnRender()
