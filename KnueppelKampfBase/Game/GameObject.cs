@@ -66,7 +66,7 @@ namespace KnueppelKampfBase.Game
         }
 
         public List<GameComponent> Components { get => components; set => components = value; }
-        protected Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
+        public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
 
         public GameObject()
         {
@@ -93,7 +93,7 @@ namespace KnueppelKampfBase.Game
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             //interpolieren
-            StateManager.Translate(Position - (prevPosition - position) * StateManager.partialTicks + Size / 2);
+            StateManager.Translate(Position + (prevPosition - position) * StateManager.partialTicks + Size / 2);
             StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)

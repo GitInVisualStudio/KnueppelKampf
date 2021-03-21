@@ -9,7 +9,7 @@ namespace KnueppelKampfBase.Game.Components
     public class HealthComponent : GameComponent
     {
 
-        private const int MAX_HURTTIME = 10;
+        public const int MAX_HURTTIME = 10;
 
         private float health;
         private int hurttime;
@@ -20,12 +20,19 @@ namespace KnueppelKampfBase.Game.Components
             set 
             {
                 if(value < health)
-                    hurttime = MAX_HURTTIME;
+                    Hurttime = MAX_HURTTIME;
                 health = value;
             }
         }
 
         public bool Dead => health <= 0;
+
+        public int Hurttime { get => hurttime; set => hurttime = value; }
+
+        public HealthComponent(float health)
+        {
+            this.health = health;
+        }
 
         public override void ApplyState(ComponentState state)
         {
@@ -33,12 +40,12 @@ namespace KnueppelKampfBase.Game.Components
                 throw new Exception($"Invalid state for {this.GetType().Name}");
             HealthState hs = (HealthState)state;
             Health = hs.Health;
-            hurttime = hs.Hurttime;
+            Hurttime = hs.Hurttime;
         }
 
         public override ComponentState GetState()
         {
-            return new HealthState { Health = Health, Hurttime = hurttime };
+            return new HealthState { Health = Health, Hurttime = Hurttime };
         }
 
         public override void OnRender()
@@ -48,8 +55,8 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
-            if (hurttime > 0)
-                hurttime--;
+            if (Hurttime > 0)
+                Hurttime--;
         }
     }
 

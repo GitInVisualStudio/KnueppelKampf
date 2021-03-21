@@ -10,28 +10,37 @@ namespace KnueppelKampfBase.Game.Components
 {
     public class PlayerAnimationComponent : GameComponent
     {
-        private Player player;
         private MoveComponent move;
+        private HealthComponent health;
+        private Player player;
         private float state;
         private float leftLeg, rightLeg;
-        public PlayerAnimationComponent(Player playerObject)
+        public PlayerAnimationComponent()
         {
-            this.player = playerObject;
-            this.move = playerObject.GetComponent<MoveComponent>();
-            if(move == null)
-            {
-                throw new Exception($"GameObject: {playerObject} hat kein component {typeof(MoveComponent)}");
-            }
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            this.player = (Player)GameObject;
+
+            this.move = GameObject.GetComponent<MoveComponent>();
+            this.health = GameObject.GetComponent<HealthComponent>();
+            if (move == null)
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
+            if (health == null)
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(HealthComponent)}");
+
         }
 
         public override void ApplyState(ComponentState state)
         {
-            throw new NotImplementedException();
+            
         }
 
         public override ComponentState GetState()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override void OnRender()
@@ -39,6 +48,12 @@ namespace KnueppelKampfBase.Game.Components
             //StateManager.Translate(player.Size.X / 2, 0);
             state += move.Length * StateManager.delta * 10;
             StateManager.SetColor(player.Color);
+            float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
+            float r = player.Color.R * delta + (1 - delta) * 255;
+            float g = player.Color.G * delta;
+            float b = player.Color.B * delta;
+            StateManager.SetColor((int)r, (int)g, (int)b);
+
             int headSize = 25;
             StateManager.FillCircle(0, -player.Size.Y / 2 - (float)(-Sin(state) * 2), headSize);
             float width = player.Size.X / 5;

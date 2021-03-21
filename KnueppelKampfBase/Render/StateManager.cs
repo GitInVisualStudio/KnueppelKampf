@@ -39,6 +39,7 @@ namespace KnueppelKampfBase.Render
         public static void Update(Graphics g)
         {
             delta = (float)watch.Elapsed.TotalSeconds;
+            g.InterpolationMode = InterpolationMode.HighQualityBilinear;
             watch.Reset();
             watch.Start();
             SetGraphics(g);

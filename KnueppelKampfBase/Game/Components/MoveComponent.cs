@@ -8,6 +8,7 @@ namespace KnueppelKampfBase.Game.Components
     public class MoveComponent : GameComponent
     {
         const float MIN_VALUE = 0.001f;
+        private bool onGround;
         private float limit;
         private float friction;
         private Vector velocity;
@@ -41,6 +42,8 @@ namespace KnueppelKampfBase.Game.Components
             }
         }
 
+        public bool OnGround { get => onGround; set => onGround = value; }
+
         public MoveComponent(float limit = 5, float friction = 0.25f)
         {
             this.limit = limit;
@@ -54,12 +57,13 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
-            if (Velocity > limit)
-                velocity.Length = limit;
+            OnGround = false;
+            //if (Velocity > limit)
+            //    velocity.Length = limit;
             Velocity *= friction;
             if (Velocity < MIN_VALUE)
                 velocity = default;
-            velocity.Y += 0.4f;
+            velocity.Y += 0.6f;
             this.GameObject.Position += velocity * 10;
         }
 

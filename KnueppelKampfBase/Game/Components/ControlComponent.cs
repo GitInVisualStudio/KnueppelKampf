@@ -1,4 +1,4 @@
-﻿using KnueppelKampfBase.Game.Objects;
+﻿    using KnueppelKampfBase.Game.Objects;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,11 +8,16 @@ namespace KnueppelKampfBase.Game.Components
     public class ControlComponent : GameComponent
     {
         private MoveComponent move;
-        public ControlComponent(Player playerObject)
+        public ControlComponent()
         {
-            this.move = playerObject.GetComponent<MoveComponent>();
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            this.move = GameObject.GetComponent<MoveComponent>();
             if (move == null)
-                throw new Exception($"GameObject: {playerObject} hat kein component {typeof(MoveComponent)}");
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
         }
 
         public override void ApplyState(ComponentState state)
@@ -41,15 +46,20 @@ namespace KnueppelKampfBase.Game.Components
                 case GameAction.Duck:
                     break;
                 case GameAction.Jump:
-                    move.Y = -1;
+                    if(move.OnGround)
+                        move.Y = -12;
                     break;
                 case GameAction.MoveLeft:
-                    move.X = -1;
+                    move.X = -2f;
                     break;
                 case GameAction.MoveRight:
-                    move.X = 1;
+                    move.X = 2f;
                     break;
                 case GameAction.PrimaryUse:
+                    ItemComponent item = GameObject.GetComponent<ItemComponent>();
+                    if (item == null)
+                        return;
+                    item.Attack();
                     break;
                 case GameAction.SecondaryUse:
                     //weiß nicht ob wir das überhaupt mal brauchen werden
