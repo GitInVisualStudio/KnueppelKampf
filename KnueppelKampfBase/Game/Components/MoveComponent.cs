@@ -69,12 +69,24 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return null;
+            return new MoveState() { Velocity = velocity, Friction = friction };
         }
 
         public override void ApplyState(ComponentState state)
         {
-            return;
+            if (!(state is MoveState))
+                throw new Exception($"Invalid state for {this.GetType().Name}");
+            MoveState ms = (MoveState)state;
+            velocity = ms.Velocity;
+            friction = ms.Friction;
         }
+    }
+
+    public class MoveState : ComponentState
+    {
+        private Vector velocity;
+        private float friction;
+        public Vector Velocity { get => velocity; set => velocity = value; }
+        public float Friction { get => friction; set => friction = value; }
     }
 }

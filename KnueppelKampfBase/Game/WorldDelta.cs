@@ -10,9 +10,12 @@ namespace KnueppelKampfBase.Game
     {
         private int oldId;
         private int newId;
-
+        private List<int> deleted;
+        private List<ObjectState> spawned;
         public int EarlierId { get => oldId; set => oldId = value; }
         public int NewerId { get => newId; set => newId = value; }
+        public List<int> Deleted { get => deleted; set => deleted = value; }
+        public List<ObjectState> Spawned { get => spawned; set => spawned = value; }
 
         public WorldDelta(WorldState oldState, WorldState newState)
         {
@@ -21,8 +24,20 @@ namespace KnueppelKampfBase.Game
             else
                 oldId = oldState.Id;
             newId = newState.Id;
-            
-            // TODO
+
+            Deleted = new List<int>();
+            if (oldState == null)
+            {
+                spawned = newState.States;
+                return;
+            }
+            foreach(ObjectState objs in oldState.States)
+                if(newState.States.Find(x => objs.Id == x.Id) == null)
+                    Deleted.Add(objs.Id);
+
+            foreach (ObjectState objs in newState.States)
+                if (oldState.States.Find(x => objs.Id == x.Id) == null)
+                    Spawned.Add(objs);
         }
     }
 }

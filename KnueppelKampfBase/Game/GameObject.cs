@@ -8,6 +8,8 @@ namespace KnueppelKampfBase.Game
 {
     public class GameObject
     {
+        private static int lastId;
+        private int id;
         protected Vector prevPosition;
         protected Vector position;
         protected Vector size;
@@ -67,10 +69,12 @@ namespace KnueppelKampfBase.Game
 
         public List<GameComponent> Components { get => components; set => components = value; }
         public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
+        public int Id { get => id; set => id = value; }
 
         public GameObject()
         {
             this.Components = new List<GameComponent>();
+            this.id = lastId++;
         }
 
         public T GetComponent<T>() where T : GameComponent
