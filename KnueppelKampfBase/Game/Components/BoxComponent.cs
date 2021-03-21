@@ -10,6 +10,20 @@ namespace KnueppelKampfBase.Game.Components
     {
         private Vector[] corners;
         private Vector[] original;
+        private Action<BoxComponent> onCollision;
+
+        public Action<BoxComponent> OnCollision { get => onCollision; set => onCollision = value; }
+
+        public BoxComponent(Action<BoxComponent> onCollision)
+        {
+            this.OnCollision = onCollision;
+        }
+
+        public BoxComponent()
+        {
+            this.OnCollision = null;
+        }
+
         public override void Init()
         {
             base.Init();
@@ -115,7 +129,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void ApplyState(ComponentState state)
         {
-            return;
+
         }
     }
 }

@@ -20,10 +20,6 @@ namespace KnueppelKampfBase.Game.Components
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
         }
 
-        public Action<int> KeyPressed { get => keyPressed; set => keyPressed = value; }
-        public Action<int> KeyRelease { get => keyRelease; set => keyRelease = value; }
-        public Action<int> KeyDown { get => keyDown; set => keyDown = value; }
-
         public override void ApplyState(ComponentState state)
         {
             return;

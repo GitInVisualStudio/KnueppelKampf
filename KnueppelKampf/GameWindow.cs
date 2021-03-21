@@ -1,4 +1,5 @@
 ﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Game.Components;
 using KnueppelKampfBase.Game.Objects;
 using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Networking;
@@ -19,7 +20,8 @@ namespace KnueppelKampf
     {
         private Client client;
         private WorldManager manager;
-
+        private Player thePlayer;
+        private ControlComponent control;
         private Label debugData;
         private Button connectBtn;
 
