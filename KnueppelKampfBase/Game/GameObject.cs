@@ -15,6 +15,7 @@ namespace KnueppelKampfBase.Game
         protected Vector size;
         protected float rotation;
         private List<GameComponent> components;
+        private bool despawn = false;
 
         public Vector Position { get => position; set => position = value; }
         public Vector Size { get => size; set => size = value; }
@@ -70,6 +71,7 @@ namespace KnueppelKampfBase.Game
         public List<GameComponent> Components { get => components; set => components = value; }
         public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
         public int Id { get => id; set => id = value; }
+        public bool Despawn { get => despawn; set => despawn = value; }
 
         public GameObject()
         {

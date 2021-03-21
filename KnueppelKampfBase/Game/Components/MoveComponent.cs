@@ -57,13 +57,14 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
+            if(OnGround)
+                Velocity *= friction;
             OnGround = false;
-            //if (Velocity > limit)
-            //    velocity.Length = limit;
-            Velocity *= friction;
+            if (Velocity > limit)
+                velocity.Length = limit;
             if (Velocity < MIN_VALUE)
                 velocity = default;
-            velocity.Y += 0.6f;
+            velocity.Y += 0.5f;
             this.GameObject.Position += velocity * 10;
         }
 

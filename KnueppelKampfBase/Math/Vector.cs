@@ -101,6 +101,17 @@ namespace KnueppelKampfBase.Math
         {
             return a.Length < value;
         }
+
+        public static bool operator >(Vector a, Vector b)
+        {
+            return a.x > b.x && a.y > b.y;
+        }
+
+        public static bool operator <(Vector a, Vector b)
+        {
+            return a.x < b.x && a.y < b.y;
+        }
+
         public static bool operator !=(Vector a, Vector b)
         {
             return a.x == b.x && a.x == b.x;

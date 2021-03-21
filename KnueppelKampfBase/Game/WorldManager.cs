@@ -54,11 +54,17 @@ namespace KnueppelKampfBase.Game
         public void OnUpdate()
         {
             for (int i = Entities.Count - 1; i >= 0; i--)
+            {
                 Entities[i].OnUpdate();
+                if (Entities[i].Despawn)
+                    this.entities.RemoveAt(i);
+            }
+                
 
             IEnumerable<BoxComponent> boxes = SelectComponents<BoxComponent>();
             foreach (BoxComponent box in boxes)
                 box.CheckCollision(boxes);
+
         }
 
         public WorldState GetState() => new WorldState(this);

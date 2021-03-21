@@ -31,7 +31,7 @@ namespace KnueppelKampf
 
             manager = new WorldManager();
             client = new Client("localhost", manager);
-            client.StartConnecting();
+            //client.StartConnecting();
 
             debugData = new Label()
             {
@@ -45,15 +45,15 @@ namespace KnueppelKampf
                 Location = new Point(100, 0)
             };
             Controls.Add(connectBtn);
-            connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
+            //connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
             Vector mouse = new Vector(e.X, e.Y);
-            mouse = mouse - thePlayer.Position;
-            //thePlayer.Rotation = mouse.Angle;
+            mouse = mouse - new Vector(Width / 2, Height / 2);
+            thePlayer.Rotation = mouse.Angle;
             //TODO: send rotation to the server
         }
 
@@ -62,6 +62,10 @@ namespace KnueppelKampf
             base.Init();
             this.worldManager.Entities.Add(thePlayer = new Player(new Vector(50.0f, 50.0f)));
             this.worldManager.Entities.Add(new Player(new Vector(550.0f, 50.0f)));
+            this.worldManager.Entities.Add(new Item(0)
+            {
+                Position = new Vector(550, 50)
+            }) ;
             int width = 1920;
             //unten
             this.worldManager.Entities.Add(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
@@ -89,16 +93,19 @@ namespace KnueppelKampf
         protected override void OnUpdate()
         {
             base.OnUpdate();
+            GameAction[] pressedActions = ActionManager.GetActions();
 
-            SendInputOrKeepAlive();
-            if (client.IsTimedOut())
-                MessageBox.Show("Connection to server timed out.");
+            control.HandleInputs(pressedActions);
 
-            client.StartGettingGameInfo();
-            debugData.Invoke(new MethodInvoker(() =>
-            {
-                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
-            }));
+            //SendInputOrKeepAlive();
+            //if (client.IsTimedOut())
+            //    MessageBox.Show("Connection to server timed out.");
+
+            //client.StartGettingGameInfo();
+            //debugData.Invoke(new MethodInvoker(() =>
+            //{
+            //    debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
+            //}));
         }
 
         protected override void OnResize(EventArgs e)
