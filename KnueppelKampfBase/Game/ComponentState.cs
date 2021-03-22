@@ -21,7 +21,7 @@ namespace KnueppelKampfBase.Game
 
         public abstract int ToBytes(byte[] array, int startIndex);
 
-        protected int GetTypeIndex(Type t)
+        protected static int GetTypeIndex(Type t)
         {
             return Array.FindIndex(componentTypes, x => x.Equals(t));
         }

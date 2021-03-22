@@ -39,8 +39,12 @@ namespace KnueppelKampfBase.Game
             changedComponents = new List<ComponentDelta>();
             entityId = BitConverter.ToInt32(bytes, index);
             index += sizeof(int);
+
+            // deserialize changed properties
             PropertyInfo[] properties = typeof(ObjectState).GetProperties();
-            while (index < endIndex)
+            int length = bytes[index++];
+            changedProperties = new Dictionary<byte, object>(length);
+            for (int i = 0; i < length; i++)
             {
                 int size = bytes[index++];
                 byte key = bytes[index++];
@@ -48,6 +52,16 @@ namespace KnueppelKampfBase.Game
                 Array.Copy(bytes, index, objBytes, 0, size);
                 Type t = properties[key].PropertyType;
                 changedProperties[key] = ByteUtils.FromBytes(objBytes, t);
+            }
+
+            // deserialize changed components
+            length = bytes[index++];
+            changedComponents = new List<ComponentDelta>(length);
+            for (int i = 0; i < length; i++)
+            {
+                int size = bytes[index++];
+                changedComponents.Add(new ComponentDelta(bytes, index));
+                index += size;
             }
         }
         
@@ -57,6 +71,7 @@ namespace KnueppelKampfBase.Game
             BitConverter.GetBytes(entityId).CopyTo(array, index);
             index += sizeof(int);
 
+            array[index++] = (byte)changedProperties.Count;
             // serialize changed properties
             foreach (int key in changedProperties.Keys)
             {
@@ -66,7 +81,14 @@ namespace KnueppelKampfBase.Game
                 index += size;
             }
 
-            // serialize changed copmonents // TODO
+            // serialize changed copmonents
+            array[index++] = (byte)changedComponents.Count;
+            foreach (ComponentDelta cd in changedComponents)
+            {
+                byte size = (byte)cd.ToBytes(array, index + 1);
+                array[index++] = size;
+                index += size;
+            }
             return index - startIndex;
         }
     }
