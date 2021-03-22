@@ -10,9 +10,14 @@ namespace KnueppelKampfBase.Game
 {
     public class ComponentDelta
     {
+        private int componentId;
         private Dictionary<byte, object> changedProperties;
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
+        /// <summary>
+        /// Component ID relative to owning game object
+        /// </summary>
+        public int ComponentId { get => componentId; set => componentId = value; }
 
         public ComponentDelta(ComponentState oldState, ComponentState newState)
         {

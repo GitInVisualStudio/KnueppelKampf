@@ -14,6 +14,7 @@ namespace KnueppelKampfBase.Game
         private int entityId;
         private Dictionary<byte, object> changedProperties;
         private List<ComponentDelta> changedComponents;
+        private Type objectType;
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
         public List<ComponentDelta> ChangedComponents { get => changedComponents; set => changedComponents = value; }
@@ -22,7 +23,17 @@ namespace KnueppelKampfBase.Game
         public ObjectDelta(ObjectState oldState, ObjectState newState)
         {
             entityId = oldState.Obj.Id;
-            changedProperties = WorldDelta.GetChangedProperties(oldState, newState);
+            objectType = oldState.Obj.GetType();
+            changedProperties = new Dictionary<byte, object>();
+            object[] oldProperties = oldState.PropertyValues;
+            object[] newProperties = newState.PropertyValues;
+            for (int i = 0; i < oldState.PropertyValues.Length; i++)
+            {
+                object oldValue = oldProperties[i];
+                object newValue = newProperties[i];
+                if (newValue.GetType().IsValueType && ((newValue == null && oldValue != null) || !newValue.Equals(oldValue)))
+                    changedProperties[(byte)i] = newValue;
+            }
             changedComponents = new List<ComponentDelta>();
             for (int i = 0; i < oldState.ComponentStates.Count; i++)
             {
@@ -32,26 +43,29 @@ namespace KnueppelKampfBase.Game
             }
         }   
 
-        public ObjectDelta(byte[] bytes, int startIndex, int endIndex)
+        public ObjectDelta(byte[] bytes, int startIndex)
         {
             int index = startIndex;
             changedProperties = new Dictionary<byte, object>();
             changedComponents = new List<ComponentDelta>();
             entityId = BitConverter.ToInt32(bytes, index);
             index += sizeof(int);
+            int typeIndex = bytes[index++];
+            objectType = GameObject.ObjectTypes[typeIndex];
 
             // deserialize changed properties
-            PropertyInfo[] properties = typeof(ObjectState).GetProperties();
+            PropertyInfo[] properties = objectType.GetProperties();
             int length = bytes[index++];
             changedProperties = new Dictionary<byte, object>(length);
             for (int i = 0; i < length; i++)
             {
-                int size = bytes[index++];
                 byte key = bytes[index++];
+                int size = bytes[index++];
                 byte[] objBytes = new byte[size];
                 Array.Copy(bytes, index, objBytes, 0, size);
                 Type t = properties[key].PropertyType;
                 changedProperties[key] = ByteUtils.FromBytes(objBytes, t);
+                index += size;
             }
 
             // deserialize changed components
@@ -70,16 +84,25 @@ namespace KnueppelKampfBase.Game
             int index = startIndex;
             BitConverter.GetBytes(entityId).CopyTo(array, index);
             index += sizeof(int);
+            array[index++] = (byte)GameObject.GetTypeIndex(objectType);
 
-            array[index++] = (byte)changedProperties.Count;
+            int propertyCountIndex = index++;
+            int propertyCount = 0; // number of serialized properties
             // serialize changed properties
+            PropertyInfo[] properties = objectType.GetProperties();
             foreach (int key in changedProperties.Keys)
             {
+                PropertyInfo property = properties[key];
+                Type t = property.PropertyType;
+                if (!t.IsValueType || property.GetCustomAttribute<DontSerializeAttribute>() != null)
+                    continue;
                 object value = changedProperties[(byte)key];
                 array[index++] = (byte)key;
                 int size = ByteUtils.GetBytesAddSize(value, array, index);
                 index += size;
+                propertyCount++;
             }
+            array[propertyCountIndex] = (byte)propertyCount;
 
             // serialize changed copmonents
             array[index++] = (byte)changedComponents.Count;

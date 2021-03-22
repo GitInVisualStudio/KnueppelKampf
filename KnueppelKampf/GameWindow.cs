@@ -24,7 +24,7 @@ namespace KnueppelKampf
         private Label debugData;
         private Button connectBtn;
 
-        public GameWindow() : base(60, 30)
+        public GameWindow() : base(60, WorldManager.TPS)
         {
             InitializeComponent();
 

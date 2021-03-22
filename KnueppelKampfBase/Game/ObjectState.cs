@@ -13,6 +13,7 @@ namespace KnueppelKampfBase.Game
     {
         private GameObject obj;
         private List<ComponentState> componentStates;
+        private object[] propertyValues;
 
         public ObjectState(GameObject obj = null)
         {
@@ -20,20 +21,32 @@ namespace KnueppelKampfBase.Game
             componentStates = new List<ComponentState>();
             if (obj != null)
                 lock (obj)
+                {
+                    PropertyInfo[] properties = obj.GetType().GetProperties();
+                    propertyValues = new object[properties.Length];
+                    for (int i = 0; i < properties.Length; i++)
+                        propertyValues[i] = properties[i].GetValue(obj);
+
                     foreach (GameComponent c in obj.Components)
                     {
                         ComponentState s = c.GetState();
                         if (s != null)
                             componentStates.Add(s);
                     }
+                }
         }
 
         public int Id => obj.Id;
         public List<ComponentState> ComponentStates { get => componentStates; set => componentStates = value; }
         public GameObject Obj { get => obj; set => obj = value; }
+        public object[] PropertyValues { get => propertyValues; set => propertyValues = value; }
 
         public void Apply()
         {
+            PropertyInfo[] properties = obj.GetType().GetProperties();
+            for (int i = 0; i < properties.Length; i++)
+                properties[i].SetValue(Obj, propertyValues[i]);
+
             for (int i = 0; i < Obj.Components.Count; i++)
                 Obj.Components[i].ApplyState(componentStates[i]);
         }
@@ -52,6 +65,8 @@ namespace KnueppelKampfBase.Game
             Type objectType = GameObject.ObjectTypes[typeIndex];
             obj = (GameObject)Activator.CreateInstance(objectType);
             PropertyInfo[] properties = objectType.GetProperties();
+
+            // deserialize properties
             for (int i = 0; i < properties.Length && index < endIndex; i++)
             {
                 PropertyInfo prop = properties[i];
@@ -66,6 +81,7 @@ namespace KnueppelKampfBase.Game
                 index += size;
             }
 
+            // deserialize components
             while (index < endIndex)
             {
                 ComponentState cs;
@@ -94,11 +110,12 @@ namespace KnueppelKampfBase.Game
         {
             int index = startIndex;
             PropertyInfo[] properties = obj.GetType().GetProperties();
-            foreach (PropertyInfo property in properties)
+            for (int i = 0; i < propertyValues.Length; i++)
             {
-                if (!property.PropertyType.IsValueType || property.GetCustomAttribute<DontSerializeAttribute>(true) != null)
+                PropertyInfo property = properties[i];
+                if (!property.PropertyType.IsValueType || property.GetCustomAttribute<DontSerializeAttribute>() != null)
                     continue;
-                object value = property.GetValue(obj);
+                object value = propertyValues[i];
                 int size = ByteUtils.GetBytes(value, array, index + 1);
                 if (size > byte.MaxValue)
                     throw new SerializedSizeTooLargeException(size);

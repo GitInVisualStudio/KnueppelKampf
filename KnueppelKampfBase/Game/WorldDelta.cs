@@ -83,7 +83,8 @@ namespace KnueppelKampfBase.Game
             while (index < bytes.Length)
             {
                 size = bytes[index++];
-                Changed.Add(new ObjectDelta(bytes, index, index + size));
+                Changed.Add(new ObjectDelta(bytes, index));
+                index += size;
             }
         }
 

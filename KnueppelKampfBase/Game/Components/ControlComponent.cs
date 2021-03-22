@@ -41,7 +41,6 @@ namespace KnueppelKampfBase.Game.Components
 
         public void HandleInpute(GameAction action)
         {
-            
             switch (action)
             {
                 //TODO: find a neat way to implement jumping => onGround problem

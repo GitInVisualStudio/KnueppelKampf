@@ -29,7 +29,7 @@ namespace KnueppelKampfBase.Networking
 
         private static int lastId = 1;
 
-        private const int UPDATE_SLEEP = 1000;
+        private const int UPDATE_SLEEP = 25;
 
         public int Id { get => id; set => id = value; }
         public Connection[] Connections { get => connections; }
@@ -142,6 +142,7 @@ namespace KnueppelKampfBase.Networking
             isHandling = true;
             Task.Run(() =>
             {
+                CancellationTokenSource updateCanceller = new CancellationTokenSource();
                 while (true)
                 {
                     idleSince = TimeUtils.GetTimestamp();
@@ -157,11 +158,20 @@ namespace KnueppelKampfBase.Networking
                     }
 
                     Setup();
+                    Task.Run(() =>
+                    {
+                        int tpt = 1000 / WorldManager.TPS;
+                        while (true)
+                        {
+                            manager.OnUpdate();
+                            Thread.Sleep(tpt);
+                        }   
+                    }, updateCanceller.Token);
                     while (true)
                     {
                         if (GetPlayersConnected() == 0)
                             break;
-
+                        
                         WorldState ws = manager.GetState();
                         states.Add(ws);
                         Dictionary<WorldState, WorldDelta> updates = new Dictionary<WorldState, WorldDelta>();
@@ -189,8 +199,20 @@ namespace KnueppelKampfBase.Networking
                                     UpdatePacket up = new UpdatePacket(wd);
                                     lock (players)
                                         up.YourEntityId = players[c].Id;
-                                    //byte[] debugBytes = up.ToBytes();
-                                    //UpdatePacket debugPacket = new UpdatePacket(debugBytes);
+                                    while (true)
+                                    {
+                                        try
+                                        {
+                                            byte[] debugBytes = up.ToBytes();
+                                            UpdatePacket debugPacket = new UpdatePacket(debugBytes);
+                                            break;
+                                        }
+                                        catch (Exception e)
+                                        {
+
+                                        }
+                                    }
+                                    
                                     sendPacket(up, c.Client);
                                     c.RefreshSentPacketTimestamp();
                                 }
@@ -198,6 +220,7 @@ namespace KnueppelKampfBase.Networking
                         }
                         Thread.Sleep(UPDATE_SLEEP);
                     }
+                    updateCanceller.Cancel();
                 }
             }, cts.Token).ContinueWith((Task t) =>
             {

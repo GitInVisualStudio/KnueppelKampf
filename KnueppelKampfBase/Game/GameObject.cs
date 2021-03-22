@@ -87,6 +87,11 @@ namespace KnueppelKampfBase.Game
             this.id = lastId++;
         }
 
+        public static int GetTypeIndex(Type t)
+        {
+            return Array.FindIndex(objectTypes, x => t.Equals(x));
+        }
+
         public T GetComponent<T>() where T : GameComponent
         {
             return (T)this.Components.Find(x => x is T);
@@ -138,7 +143,7 @@ namespace KnueppelKampfBase.Game
             lock (components)
                 foreach (ComponentDelta cs in od.ChangedComponents)
                 {
-                    // TODO
+                    
                 }
         }
     }
