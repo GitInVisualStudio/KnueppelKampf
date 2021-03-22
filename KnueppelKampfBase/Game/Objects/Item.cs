@@ -12,6 +12,13 @@ namespace KnueppelKampfBase.Game.Objects
         private Items type;
         private Bitmap image;
         private float damage;
+
+        public Item()
+        {
+            type = Items.TEST;
+            image = null;
+        }
+
         public Item(Items type)
         {
             this.Type = type;

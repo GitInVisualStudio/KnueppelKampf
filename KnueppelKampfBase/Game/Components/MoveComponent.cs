@@ -1,4 +1,6 @@
 ﻿using KnueppelKampfBase.Math;
+using KnueppelKampfBase.Utils;
+using KnueppelKampfBase.Utils.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,6 +20,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public float Length => velocity.Length;
 
+        [DontSerialize]
         public float X
         {
             get
@@ -30,6 +33,7 @@ namespace KnueppelKampfBase.Game.Components
             }
         }
 
+        [DontSerialize]
         public float Y
         {
             get
@@ -52,7 +56,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnRender()
         {
-            ;
+            
         }
 
         public override void OnUpdate()
@@ -88,5 +92,38 @@ namespace KnueppelKampfBase.Game.Components
         private float friction;
         public Vector Velocity { get => velocity; set => velocity = value; }
         public float Friction { get => friction; set => friction = value; }
+
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            int index = startIndex;
+            GetHeader(array, index);
+            index += HEADER_SIZE;
+            index += ByteUtils.GetBytesAddSize(velocity, array, index);
+            BitConverter.GetBytes(friction).CopyTo(array, index);
+            index += sizeof(float);
+            return index - startIndex;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new MoveComponent(friction)
+            {
+                Velocity = velocity
+            };
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out MoveState cs)
+        {
+            int index = startIndex;
+            cs = new MoveState();
+            int size = bytes[index++];
+            byte[] velocityBytes = new byte[size];
+            Array.Copy(bytes, index, velocityBytes, 0, size);
+            cs.Velocity = (Vector)ByteUtils.FromBytes(velocityBytes, typeof(Vector));
+            index += size;
+            cs.Friction = BitConverter.ToSingle(bytes, index);
+            index += sizeof(float);
+            return index - startIndex;
+        }
     }
 }

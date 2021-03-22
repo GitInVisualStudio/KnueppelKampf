@@ -1,7 +1,9 @@
 ﻿using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Render;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace KnueppelKampfBase.Game
@@ -20,6 +22,7 @@ namespace KnueppelKampfBase.Game
         public Vector Size { get => size; set => size = value; }
         public float Rotation { get => rotation; set => rotation = value; }
 
+        [DontSerialize]
         public float Width
         {
             get
@@ -32,6 +35,7 @@ namespace KnueppelKampfBase.Game
             }
         }
 
+        [DontSerialize]
         public float Height
         {
             get
@@ -44,6 +48,7 @@ namespace KnueppelKampfBase.Game
             }
         }
 
+        [DontSerialize]
         public float X
         {
             get
@@ -55,6 +60,8 @@ namespace KnueppelKampfBase.Game
                 position.X = value;
             }
         }
+
+        [DontSerialize]
         public float Y
         {
             get
@@ -70,6 +77,9 @@ namespace KnueppelKampfBase.Game
         public List<GameComponent> Components { get => components; set => components = value; }
         public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
         public int Id { get => id; set => id = value; }
+        
+        private static Type[] objectTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(GameObject))).ToArray();
+        public static Type[] ObjectTypes { get => objectTypes; }
 
         public GameObject()
         {
@@ -82,12 +92,13 @@ namespace KnueppelKampfBase.Game
             return (T)this.Components.Find(x => x is T);
         }
 
-        public bool AddComponent<T>(T c) where T : GameComponent
+        public bool AddComponent<T>(T c, bool initComponent = true) where T : GameComponent
         {
             if (this.Components.Find(x => x is T) != null)
                 return false;
             c.GameObject = this;
-            c.Init();
+            if (initComponent)
+                c.Init();
             this.Components.Add(c);
             return true;
         }
@@ -111,6 +122,24 @@ namespace KnueppelKampfBase.Game
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)
                 Components[i].OnUpdate();
+        }
+
+        public void Apply(ObjectDelta od)
+        {
+            Type t = GetType();
+            PropertyInfo[] properties = t.GetProperties();
+            lock (this)
+                foreach (byte key in od.ChangedProperties.Keys)
+                {
+                    object value = od.ChangedProperties[key];
+                    properties[key].SetValue(this, value);
+                }
+
+            lock (components)
+                foreach (ComponentDelta cs in od.ChangedComponents)
+                {
+                    // TODO
+                }
         }
     }
 }

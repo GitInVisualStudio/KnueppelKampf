@@ -12,6 +12,13 @@ namespace KnueppelKampfBase.Game.Objects
 {
     public class Floor : GameObject
     {
+        public Floor()
+        {
+            position = default(Vector);
+            size = default(Vector);
+            AddComponent(new BoxComponent(HandleCollision));
+        }
+
         public Floor(Vector position, Vector size)
         {
             this.position = position;

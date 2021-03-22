@@ -13,9 +13,9 @@ namespace KnueppelKampfBase.Game.Objects
         private Color color;
         public Color Color { get => color; set => color = value; }
 
-        public Player(Vector position = default)
+        public Player()
         {
-            this.position = position;
+            this.position = default(Vector);
             this.size = new Vector(50, 100);
             color = Color.Black;
             this.AddComponent(new HealthComponent(10.0f));
@@ -24,6 +24,11 @@ namespace KnueppelKampfBase.Game.Objects
             this.AddComponent(new PlayerAnimationComponent());
             this.AddComponent(new ControlComponent());
             this.AddComponent(new ItemComponent());
+        }
+
+        public Player(Vector position = default) : this()
+        {
+            this.position = position;
         }
 
         public override void OnRender()

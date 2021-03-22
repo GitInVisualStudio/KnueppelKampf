@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game\ComponentDelta.cs" />
     <Compile Include="Game\ComponentState.cs" />
     <Compile Include="Game\Components\AnimationComponent.cs" />
     <Compile Include="Game\Components\BoxComponent.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Game\GameAction.cs" />
     <Compile Include="Game\GameComponent.cs" />
     <Compile Include="Game\GameObject.cs" />
+    <Compile Include="Game\ObjectDelta.cs" />
     <Compile Include="Game\ObjectState.cs" />
     <Compile Include="Game\Objects\Floor.cs" />
     <Compile Include="Game\Objects\Item.cs" />
@@ -95,6 +97,9 @@
     <Compile Include="Render\RenderUtils.cs" />
     <Compile Include="Render\State.cs" />
     <Compile Include="Render\StateManager.cs" />
+    <Compile Include="Utils\ByteUtils.cs" />
+    <Compile Include="Utils\DontSerializeAttribute.cs" />
+    <Compile Include="Utils\Exceptions\SerializedSizeTooLargeException.cs" />
     <Compile Include="Utils\TimeUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

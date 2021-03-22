@@ -19,7 +19,6 @@ namespace KnueppelKampf
     public partial class GameWindow : Window
     {
         private Client client;
-        private WorldManager manager;
         private Player thePlayer;
         private ControlComponent control;
         private Label debugData;
@@ -28,10 +27,6 @@ namespace KnueppelKampf
         public GameWindow() : base(60, 30)
         {
             InitializeComponent();
-
-            manager = new WorldManager();
-            client = new Client("localhost", manager);
-            client.StartConnecting();
 
             debugData = new Label()
             {
@@ -52,7 +47,7 @@ namespace KnueppelKampf
         {
             base.OnMouseMove(e);
             Vector mouse = new Vector(e.X, e.Y);
-            mouse = mouse - thePlayer.Position;
+            //mouse = mouse - thePlayer.Position;
             //thePlayer.Rotation = mouse.Angle;
             //TODO: send rotation to the server
         }
@@ -60,30 +55,16 @@ namespace KnueppelKampf
         public override void Init()
         {
             base.Init();
-            this.worldManager.Entities.Add(thePlayer = new Player(new Vector(50.0f, 50.0f)));
-            this.worldManager.Entities.Add(new Player(new Vector(550.0f, 50.0f)));
-            int width = 1920;
-            //unten
-            this.worldManager.Entities.Add(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
-            this.worldManager.Entities.Add(new Floor(new Vector(500 - 75, 850 - 100), new Vector(76, 600)));
-            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 1, 850 - 100), new Vector(76, 600)));
-            
-            //pillar
-            this.worldManager.Entities.Add(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
-            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
 
-
-            //seiten
-            this.worldManager.Entities.Add(new Floor(new Vector(50, 650), new Vector(150, 600)));
-            this.worldManager.Entities.Add(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
-
-            //augen
-            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
-            this.worldManager.Entities.Add(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
-
-            this.worldManager.Camera = thePlayer;
-
-            control = thePlayer.GetComponent<ControlComponent>();
+            worldManager = new WorldManager();
+            client = new Client("localhost", worldManager);
+            client.StartConnecting();
+            client.GameInitialized += (object sender, GameObject player) =>
+            {
+                thePlayer = (Player)player;
+                control = thePlayer.GetComponent<ControlComponent>();
+                this.worldManager.Camera = thePlayer;
+            };
         }
 
         protected override void OnUpdate()
@@ -94,10 +75,10 @@ namespace KnueppelKampf
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
 
-            client.StartGettingGameInfo();
+            //client.StartGettingGameInfo();
             debugData.Invoke(new MethodInvoker(() =>
             {
-                debugData.Text = client.IngameStatus.ToString() + ". Game: " + client.GameInfo;
+                debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck;
             }));
         }
 
@@ -111,13 +92,12 @@ namespace KnueppelKampf
         {
             if (client.ConnectionStatus == ConnectionStatus.Connected)
             {
-                if (client.IngameStatus == IngameStatus.InGame)
+                if (client.IngameStatus == IngameStatus.InRunningGame)
                 {
-                    GameAction[] pressedActions = ActionManager.GetActions();
-
+                    GameAction[] pressedActions = ActiveForm == this ? ActionManager.GetActions() : new GameAction[0];
                     InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
                     client.SendPacket(p);
-                    control.HandleInputs(pressedActions);
+                    control?.HandleInputs(pressedActions);
                 }
                 else
                 {

@@ -1,5 +1,6 @@
 ﻿using KnueppelKampfBase.Game.Components;
 using KnueppelKampfBase.Render;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,6 +15,11 @@ namespace KnueppelKampfBase.Game.Objects
         private MoveComponent move;
         private float damage;
         private GameObject owner;
+
+        public Projectile()
+        {
+
+        }
 
         public Projectile(GameObject owner, float damage)
         {
