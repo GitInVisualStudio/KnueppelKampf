@@ -13,15 +13,17 @@ namespace KnueppelKampfBase.Game
     /// </summary>
     public abstract class ComponentState
     {
-        protected static Type[] componentTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(ComponentState))).ToArray();
+        private static Type[] componentTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(ComponentState))).ToArray();
 
         protected const int HEADER_SIZE = 1;
+
+        public static Type[] ComponentTypes { get => componentTypes; set => componentTypes = value; }
 
         public abstract GameComponent ToComponent();
 
         public abstract int ToBytes(byte[] array, int startIndex);
 
-        protected static int GetTypeIndex(Type t)
+        public static int GetTypeIndex(Type t)
         {
             return Array.FindIndex(componentTypes, x => x.Equals(t));
         }

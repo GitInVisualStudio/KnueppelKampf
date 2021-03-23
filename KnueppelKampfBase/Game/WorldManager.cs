@@ -22,7 +22,7 @@ namespace KnueppelKampfBase.Game
         public GameObject Camera { get => camera; set => camera = value; }
         public Vector Offset { get => offset; set => offset = value; }
 
-        public const int TPS = 40;
+        public const int TPS = 20;
 
         public WorldManager()
         { 

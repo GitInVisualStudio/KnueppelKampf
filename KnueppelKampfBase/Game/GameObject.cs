@@ -75,6 +75,8 @@ namespace KnueppelKampfBase.Game
         }
 
         public List<GameComponent> Components { get => components; set => components = value; }
+        
+        [DontSerialize]
         public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
         public int Id { get => id; set => id = value; }
         
@@ -137,7 +139,17 @@ namespace KnueppelKampfBase.Game
                 foreach (byte key in od.ChangedProperties.Keys)
                 {
                     object value = od.ChangedProperties[key];
-                    properties[key].SetValue(this, value);
+                    
+
+                    // remove this
+                    //if (properties[key].PropertyType == typeof(Vector))
+                    //{
+                    //    Vector newPosition = (Vector)value;
+                    //    if ((newPosition - position).Length > 20)
+                    //        properties[key].SetValue(this, value);
+                    //}
+                    //else
+                        properties[key].SetValue(this, value);
                 }
 
             lock (components)

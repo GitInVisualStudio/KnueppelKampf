@@ -131,7 +131,7 @@ namespace KnueppelKampfBase.Game
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo prop = properties[i];
-                if (!prop.GetType().IsValueType)
+                if (!prop.PropertyType.IsValueType)
                     continue;
                 object oldVal = prop.GetValue(oldObj);
                 object newVal = prop.GetValue(newObj);

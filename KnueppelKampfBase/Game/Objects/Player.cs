@@ -34,7 +34,7 @@ namespace KnueppelKampfBase.Game.Objects
         public override void OnRender()
         {
             StateManager.SetColor(Color.Red);
-            StateManager.DrawRect(this.position, this.size);
+            //StateManager.DrawRect(this.position, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);

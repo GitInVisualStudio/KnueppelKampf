@@ -12,6 +12,7 @@ namespace KnueppelKampfBase.Game
     {
         private int componentId;
         private Dictionary<byte, object> changedProperties;
+        private Type componentType;
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
         /// <summary>
@@ -22,14 +23,18 @@ namespace KnueppelKampfBase.Game
         public ComponentDelta(ComponentState oldState, ComponentState newState)
         {
             changedProperties = WorldDelta.GetChangedProperties(oldState, newState);
+            componentType = oldState.GetType();
         }
 
         public ComponentDelta(byte[] bytes, int startIndex)
         {
             int index = startIndex;
+            int typeIndex = bytes[index++];
+            componentType = ComponentState.ComponentTypes[typeIndex];
             int length = bytes[index++];
             changedProperties = new Dictionary<byte, object>(length);
-            PropertyInfo[] properties = typeof(ComponentState).GetProperties();
+            
+            PropertyInfo[] properties = componentType.GetProperties();
             for (int i = 0; i < length; i++)
             {
                 byte key = bytes[index++];
@@ -45,6 +50,7 @@ namespace KnueppelKampfBase.Game
         public int ToBytes(byte[] array, int startIndex)
         {
             int index = startIndex;
+            array[index++] = (byte)ComponentState.GetTypeIndex(componentType);
             array[index++] = (byte)changedProperties.Count;
             foreach (byte key in changedProperties.Keys)
             { 

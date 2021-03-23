@@ -29,7 +29,7 @@ namespace KnueppelKampfBase.Networking
 
         private static int lastId = 1;
 
-        private const int UPDATE_SLEEP = 25;
+        private const int UPDATE_SLEEP = 50;
 
         public int Id { get => id; set => id = value; }
         public Connection[] Connections { get => connections; }
