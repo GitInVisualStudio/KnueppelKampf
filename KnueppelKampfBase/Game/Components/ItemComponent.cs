@@ -23,7 +23,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return new ItemState() { Type = (int)item.Type };
+            return new ItemState() { Type = item == null ? -1 : (int)item.Type };
         }
 
         public override void OnRender()
@@ -41,7 +41,7 @@ namespace KnueppelKampfBase.Game.Components
             if(item == null)
             {
                 //TODO: nur mit der faust schlagen, so wie der herr
-                foreach(HealthComponent enemy in WorldManager.Instance.SelectComponents<HealthComponent>())
+                foreach(HealthComponent enemy in GameObject.Manager.SelectComponents<HealthComponent>())
                 {
                     if(enemy.GameObject != this.GameObject)
                     {
@@ -60,7 +60,7 @@ namespace KnueppelKampfBase.Game.Components
             }
 
             //TODO: add the projectile of the item
-            WorldManager.Instance.Entities.Add(new Projectile(GameObject, item.Damage));
+            GameObject.Manager.AddObject(new Projectile(GameObject, item.Damage));
         }
 
         public override void OnUpdate()
@@ -75,5 +75,24 @@ namespace KnueppelKampfBase.Game.Components
         private int type;
 
         public int Type { get => type; set => type = value; }
+
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            GetHeader(array, startIndex);
+            BitConverter.GetBytes(type).CopyTo(array, startIndex + HEADER_SIZE);
+            return sizeof(int) + HEADER_SIZE;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new ItemComponent(); // TODO @jamin
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out ItemState cs)
+        {
+            cs = new ItemState();
+            cs.Type = BitConverter.ToInt32(bytes, startIndex);
+            return sizeof(int);
+        }
     }
 }
