@@ -12,29 +12,30 @@ namespace KnueppelKampfBase.Game
     {
         private int componentId;
         private Dictionary<byte, object> changedProperties;
-        private Type componentType;
+        private Type componentStateType;
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
         /// <summary>
         /// Component ID relative to owning game object
         /// </summary>
         public int ComponentId { get => componentId; set => componentId = value; }
+        public Type ComponentStateType { get => componentStateType; set => componentStateType = value; }
 
         public ComponentDelta(ComponentState oldState, ComponentState newState)
         {
             changedProperties = WorldDelta.GetChangedProperties(oldState, newState);
-            componentType = oldState.GetType();
+            ComponentStateType = oldState.GetType();
         }
 
         public ComponentDelta(byte[] bytes, int startIndex)
         {
             int index = startIndex;
             int typeIndex = bytes[index++];
-            componentType = ComponentState.ComponentTypes[typeIndex];
+            ComponentStateType = ComponentState.ComponentTypes[typeIndex];
             int length = bytes[index++];
             changedProperties = new Dictionary<byte, object>(length);
             
-            PropertyInfo[] properties = componentType.GetProperties();
+            PropertyInfo[] properties = ComponentStateType.GetProperties();
             for (int i = 0; i < length; i++)
             {
                 byte key = bytes[index++];
@@ -51,17 +52,21 @@ namespace KnueppelKampfBase.Game
         public int ToBytes(byte[] array, int startIndex)
         {
             int index = startIndex;
-            array[index++] = (byte)ComponentState.GetTypeIndex(componentType);
-            array[index++] = (byte)changedProperties.Count;
+            array[index++] = (byte)ComponentState.GetTypeIndex(ComponentStateType);
+            int changedPropertyCountIndex = index++;
+            int changedPropertyCount = 0;
+            PropertyInfo[] properties = componentStateType.GetProperties();
             foreach (byte key in changedProperties.Keys)
             { 
                 object value = changedProperties[key];
                 Type t = value.GetType();
-                if (!t.IsValueType)
+                if (!t.IsValueType || properties[key].GetCustomAttribute<DontSerializeAttribute>() != null)
                     continue;
                 array[index++] = key;
                 index += ByteUtils.GetBytesAddSize(value, array, index);
+                changedPropertyCount++;
             }
+            array[changedPropertyCountIndex] = (byte)changedPropertyCount;
             return index - startIndex;
         }
     }

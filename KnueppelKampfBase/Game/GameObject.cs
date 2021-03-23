@@ -145,23 +145,29 @@ namespace KnueppelKampfBase.Game
                 foreach (byte key in od.ChangedProperties.Keys)
                 {
                     object value = od.ChangedProperties[key];
-                    
-
-                    // remove this
-                    //if (properties[key].PropertyType == typeof(Vector))
-                    //{
-                    //    Vector newPosition = (Vector)value;
-                    //    if ((newPosition - position).Length > 20)
-                    //        properties[key].SetValue(this, value);
-                    //}
-                    //else
-                        properties[key].SetValue(this, value);
+                    properties[key].SetValue(this, value);
                 }
 
             lock (components)
-                foreach (ComponentDelta cs in od.ChangedComponents)
+                foreach (ComponentDelta cd in od.ChangedComponents)
                 {
-                    
+                    Type componentStateType = cd.ComponentStateType;
+                    PropertyInfo componentStateInfo = componentStateType.GetProperty("ComponentType");
+                    if (componentStateInfo == null)
+                        continue;
+                    Type componentType = (Type)componentStateInfo.GetValue(cd);
+                    GameComponent gc = Components.Find(x => x.GetType() == componentType);
+                    if (gc == null)
+                        continue;
+
+                    ComponentState state = gc.GetState();
+                    properties = componentStateType.GetProperties();
+                    foreach (byte key in cd.ChangedProperties.Keys)
+                    {
+                        object value = cd.ChangedProperties[key];
+                        properties[key].SetValue(state, value);
+                    }
+                    gc.ApplyState(state);
                 }
         }
     }

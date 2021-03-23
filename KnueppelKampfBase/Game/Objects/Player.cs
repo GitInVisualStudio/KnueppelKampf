@@ -37,10 +37,12 @@ namespace KnueppelKampfBase.Game.Objects
         public override void OnRender()
         {
             StateManager.SetColor(Color.Red);
-            StateManager.DrawRect(this.position, this.size);
+            //StateManager.DrawRect(this.position, this.size);
+            HealthComponent hc = GetComponent<HealthComponent>();
+            StateManager.DrawString(hc.Health.ToString(), position - new Vector(0, -5));
             StateManager.Push();
             StateManager.SetColor(Color.Green);
-            StateManager.DrawRect(lastRecievedPosition, this.size);
+            //StateManager.DrawRect(lastRecievedPosition, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);

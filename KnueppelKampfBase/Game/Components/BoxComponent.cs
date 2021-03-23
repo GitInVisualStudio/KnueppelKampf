@@ -1,4 +1,5 @@
 ﻿using KnueppelKampfBase.Math;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -133,6 +134,11 @@ namespace KnueppelKampfBase.Game.Components
 
     public class BoxState : ComponentState
     {
+        private static Type componentType = typeof(BoxComponent);
+
+        [DontSerialize]
+        public static Type ComponentType { get => componentType; set => componentType = value; }
+
         public override int ToBytes(byte[] array, int startIndex)
         {
             GetHeader(array, startIndex);

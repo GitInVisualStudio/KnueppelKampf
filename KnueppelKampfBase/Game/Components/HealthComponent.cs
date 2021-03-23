@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnueppelKampfBase.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,6 +63,11 @@ namespace KnueppelKampfBase.Game.Components
 
     public class HealthState : ComponentState
     {
+        private static Type componentType = typeof(HealthComponent);
+
+        [DontSerialize]
+        public static Type ComponentType { get => componentType; set => componentType = value; }
+
         private float health;
         private int hurttime;
         public float Health { get => health; set => health = value; }

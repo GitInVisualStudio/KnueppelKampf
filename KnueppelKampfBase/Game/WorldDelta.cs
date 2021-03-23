@@ -1,4 +1,5 @@
-﻿using KnueppelKampfBase.Utils.Exceptions;
+﻿using KnueppelKampfBase.Utils;
+using KnueppelKampfBase.Utils.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,12 +47,17 @@ namespace KnueppelKampfBase.Game
                     Spawned.Add(objs.Obj);
 
             changed = new List<ObjectDelta>();
-            for (int i = 0; i < oldState.States.Count; i++)
+            for (int i = 0; i < newState.States.Count; i++)
             {
                 ObjectDelta d = new ObjectDelta(oldState.States[i], newState.States[i]);
                 if (d.ChangedProperties.Count > 0 || d.ChangedComponents.Count > 0)
                     changed.Add(d);
             }
+
+            deleted = new List<int>();
+            foreach (ObjectState os in oldState.States)
+                if (newState.States.Find(x => x.Obj.Id == os.Obj.Id) == null)
+                    deleted.Add(os.Obj.Id);
         }
 
         public WorldDelta(byte[] bytes, int startIndex)
@@ -131,7 +137,7 @@ namespace KnueppelKampfBase.Game
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo prop = properties[i];
-                if (!prop.PropertyType.IsValueType)
+                if (!prop.PropertyType.IsValueType || prop.GetCustomAttribute<DontSerializeAttribute>() != null)
                     continue;
                 object oldVal = prop.GetValue(oldObj);
                 object newVal = prop.GetValue(newObj);

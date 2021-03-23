@@ -98,7 +98,7 @@ namespace KnueppelKampf
             {
                 if (client.IngameStatus == IngameStatus.InRunningGame)
                 {
-                    GameAction[] pressedActions = ActiveForm == this ? ActionManager.GetActions() : new GameAction[0];
+                    GameAction[] pressedActions = ActiveForm == this ? ActionManager.GetActions() : new GameAction[] { GameAction.SecondaryUse };
                     InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
                     client.SendPacket(p);
                     control?.HandleInputs(pressedActions);

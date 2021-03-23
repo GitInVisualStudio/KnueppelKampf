@@ -90,6 +90,11 @@ namespace KnueppelKampfBase.Game.Components
 
     public class MoveState : ComponentState
     {
+        private static Type componentType = typeof(MoveComponent);
+
+        [DontSerialize]
+        public static Type ComponentType { get => componentType; set => componentType = value; }
+
         private Vector velocity;
         private float friction;
         //[DontSerialize]
@@ -122,7 +127,7 @@ namespace KnueppelKampfBase.Game.Components
             int size = bytes[index++];
             byte[] velocityBytes = new byte[size];
             Array.Copy(bytes, index, velocityBytes, 0, size);
-            //cs.Velocity = (Vector)ByteUtils.FromBytes(velocityBytes, typeof(Vector));
+            cs.Velocity = (Vector)ByteUtils.FromBytes(velocityBytes, typeof(Vector));
             index += size;
             cs.Friction = BitConverter.ToSingle(bytes, index);
             index += sizeof(float);

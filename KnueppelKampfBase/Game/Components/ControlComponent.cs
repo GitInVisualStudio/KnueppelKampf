@@ -1,4 +1,5 @@
 ﻿    using KnueppelKampfBase.Game.Objects;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,7 +31,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return new ControlState();
+            return new ControlState() { Blocking = blocking };
         }
 
         public override void OnRender()
@@ -83,10 +84,20 @@ namespace KnueppelKampfBase.Game.Components
 
     public class ControlState : ComponentState
     {
+        private static Type componentType = typeof(ControlComponent);
+
+        [DontSerialize]
+        public static Type ComponentType { get => componentType; set => componentType = value; }
+        
+        private bool blocking;
+
+        public bool Blocking { get => blocking; set => blocking = value; }
+
         public override int ToBytes(byte[] array, int startIndex)
         {
             GetHeader(array, startIndex);
-            return HEADER_SIZE;
+            array[startIndex + 1] = (byte)(blocking ? 0 : 1);
+            return HEADER_SIZE + 1;
         }
 
         public override GameComponent ToComponent()
@@ -97,7 +108,8 @@ namespace KnueppelKampfBase.Game.Components
         public static int FromBytes(byte[] bytes, int startIndex, out ControlState cs)
         {
             cs = new ControlState();
-            return 0;
+            cs.Blocking = bytes[startIndex] > 0;
+            return 1;
         }
     }
 }

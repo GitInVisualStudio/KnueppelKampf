@@ -1,6 +1,7 @@
 ﻿using KnueppelKampfBase.Game.Objects;
 using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Render;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -86,6 +87,10 @@ namespace KnueppelKampfBase.Game.Components
 
     public class PlayerAnimationState : ComponentState
     {
+        private static Type componentType = typeof(PlayerAnimationComponent);
+
+        [DontSerialize]
+        public static Type ComponentType { get => componentType; set => componentType = value; }
         public PlayerAnimationState()
         {
 
