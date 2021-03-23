@@ -122,12 +122,32 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return null;
+            return new BoxState();
         }
 
         public override void ApplyState(ComponentState state)
         {
 
+        }
+    }
+
+    public class BoxState : ComponentState
+    {
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            GetHeader(array, startIndex);
+            return HEADER_SIZE;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new BoxComponent();
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out BoxState bs)
+        {
+            bs = new BoxState();
+            return 0;
         }
     }
 }

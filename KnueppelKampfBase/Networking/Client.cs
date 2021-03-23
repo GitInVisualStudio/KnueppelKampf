@@ -37,6 +37,8 @@ namespace KnueppelKampfBase.Networking
         public WorldManager Manager { get => manager; set => manager = value; }
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
 
+        public event EventHandler<GameObject> GameInitialized;
+
         public Client(string host, WorldManager manager)
         {
             IPAddress serverIp = GetIpFromHostname(host);
@@ -45,6 +47,7 @@ namespace KnueppelKampfBase.Networking
             connectionStatus = ConnectionStatus.Disconnected;
             ingameStatus = IngameStatus.NotInGame;
             this.manager = manager;
+            worldStateAck = -1;
 
             packetCallbacks = new Dictionary<Type, Action<Packet>>()
             {
@@ -61,7 +64,6 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         connectionStatus = ConnectionStatus.Connected;
-                        Console.WriteLine("Connected!");
                     }
                 },
                 {
@@ -93,8 +95,14 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         UpdatePacket up = (UpdatePacket)p;
-                        manager.Apply(up.Delta);
-                        WorldStateAck = up.Delta.NewerId;
+                        if (up.Delta.NewerId > worldStateAck) 
+                        {
+                            manager.Apply(up.Delta);
+                            WorldStateAck = up.Delta.NewerId;
+                        }
+                        if (up.Delta.EarlierId == -1) 
+                            GameInitialized?.Invoke(this, manager.GetObject(up.YourEntityId));
+                        ingameStatus = IngameStatus.InRunningGame;
                     }
                 }
             };
@@ -249,6 +257,7 @@ namespace KnueppelKampfBase.Networking
     {
         NotInGame = 0,
         Queueing,
-        InGame
+        InGame,
+        InRunningGame
     }
 }

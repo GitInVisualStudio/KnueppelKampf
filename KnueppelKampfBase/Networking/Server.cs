@@ -189,7 +189,7 @@ namespace KnueppelKampfBase.Networking
 
                         Game g = games[gameIndex];
                         InputPacket inpt = (InputPacket)p;
-                        g.ClientAcknowledgesWorldState(c, inpt.WorldStateAck);
+                        g.HandleInputPacket(inpt, c);
                     }
                 }
             };

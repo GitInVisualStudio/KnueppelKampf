@@ -30,7 +30,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return null;
+            return new ControlState();
         }
 
         public override void OnRender()
@@ -78,6 +78,26 @@ namespace KnueppelKampfBase.Game.Components
 
             foreach (GameAction a in gameActions)
                 this.HandleInpute(a);
+        }
+    }
+
+    public class ControlState : ComponentState
+    {
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            GetHeader(array, startIndex);
+            return HEADER_SIZE;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new ControlComponent();
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out ControlState cs)
+        {
+            cs = new ControlState();
+            return 0;
         }
     }
 }

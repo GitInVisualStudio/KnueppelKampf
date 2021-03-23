@@ -1,6 +1,7 @@
 ﻿using KnueppelKampfBase.Game.Components;
 using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Render;
+using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,7 +19,12 @@ namespace KnueppelKampfBase.Game.Objects
         private GameObject owner;
         private Bitmap bitmap;
 
-        public Projectile(GameObject owner, float damage, Bitmap bitmap)
+        public Projectile()
+        {
+
+        }
+
+        public Projectile(GameObject owner, float damage)
         {
             this.owner = owner;
             this.damage = damage;

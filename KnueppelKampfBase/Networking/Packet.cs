@@ -20,7 +20,7 @@ namespace KnueppelKampfBase.Networking
         /// <summary>
         /// Max size in bytes a packet may have
         /// </summary>
-        protected const int MAX_SIZE = 512;
+        protected const int MAX_SIZE = 2048;
         /// <summary>
         /// Size in bytes reserved in every packet for the header
         /// </summary>

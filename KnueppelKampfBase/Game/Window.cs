@@ -41,6 +41,7 @@ namespace KnueppelKampfBase.Game
             this.tpsTimer.Start();
             this.fpsTimer.Start();
 
+
             this.worldManager = WorldManager.Instance;
         }
 

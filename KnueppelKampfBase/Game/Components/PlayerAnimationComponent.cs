@@ -82,4 +82,29 @@ namespace KnueppelKampfBase.Game.Components
             //return null;
         }
     }
+
+    public class PlayerAnimationState : ComponentState
+    {
+        public PlayerAnimationState()
+        {
+
+        }
+
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            GetHeader(array, startIndex);
+            return HEADER_SIZE;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new PlayerAnimationComponent();
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out ComponentState cs)
+        {
+            cs = new PlayerAnimationState();
+            return 0;
+        }
+    }
 }

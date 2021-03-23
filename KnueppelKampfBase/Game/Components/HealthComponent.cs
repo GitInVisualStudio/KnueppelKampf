@@ -66,5 +66,35 @@ namespace KnueppelKampfBase.Game.Components
         private int hurttime;
         public float Health { get => health; set => health = value; }
         public int Hurttime { get => hurttime; set => hurttime = value; }
+
+        public override int ToBytes(byte[] array, int startIndex)
+        {
+            int index = startIndex;
+            GetHeader(array, index);
+            index += HEADER_SIZE;
+            BitConverter.GetBytes(health).CopyTo(array, index);
+            index += sizeof(float);
+            BitConverter.GetBytes(hurttime).CopyTo(array, index);
+            index += sizeof(int);
+            return index - startIndex;
+        }
+
+        public override GameComponent ToComponent()
+        {
+            return new HealthComponent(health)
+            {
+                Hurttime = hurttime
+            };
+        }
+
+        public static int FromBytes(byte[] bytes, int startIndex, out HealthState result)
+        {
+            result = new HealthState();
+            result.Health = BitConverter.ToSingle(bytes, startIndex);
+            startIndex += sizeof(float);
+            result.Hurttime = BitConverter.ToInt32(bytes, startIndex);
+            startIndex += sizeof(int);
+            return sizeof(float) + sizeof(int);
+        }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Game.Components;
 using KnueppelKampfBase.Game.Objects;
+using KnueppelKampfBase.Math;
+using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
 using KnueppelKampfBase.Utils;
 using System;
@@ -26,7 +29,7 @@ namespace KnueppelKampfBase.Networking
 
         private static int lastId = 1;
 
-        private const int UPDATE_SLEEP = 5;
+        private const int UPDATE_SLEEP = 50;
 
         public int Id { get => id; set => id = value; }
         public Connection[] Connections { get => connections; }
@@ -53,11 +56,31 @@ namespace KnueppelKampfBase.Networking
             players = new Dictionary<Connection, Player>();
             states = new List<WorldState>();
             inGame = true;
+
+            int width = 1920;
+            //unten
+            manager.AddObject(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
+            manager.AddObject(new Floor(new Vector(500 - 75, 850 - 100), new Vector(76, 600)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.5f - 1, 850 - 100), new Vector(76, 600)));
+
+            //pillar
+            manager.AddObject(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+
+
+            //seiten
+            manager.AddObject(new Floor(new Vector(50, 650), new Vector(150, 600)));
+            manager.AddObject(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
+
+            //augen
+            manager.AddObject(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
+
             foreach (Connection c in Connections)
             {
                 Player p = new Player();
                 players[c] = p;
-                manager.Entities.Add(p);
+                manager.AddObject(p);
             }
         }
 
@@ -101,6 +124,8 @@ namespace KnueppelKampfBase.Networking
                     players.Remove(c);
                 }
             }
+            if (GetPlayersConnected() == 0)
+                cts.Cancel();
         }
 
         private int GetFirstFreeIndex()
@@ -119,6 +144,7 @@ namespace KnueppelKampfBase.Networking
             isHandling = true;
             Task.Run(() =>
             {
+                CancellationTokenSource updateCanceller = new CancellationTokenSource();
                 while (true)
                 {
                     idleSince = TimeUtils.GetTimestamp();
@@ -134,39 +160,66 @@ namespace KnueppelKampfBase.Networking
                     }
 
                     Setup();
+                    Task.Run(() =>
+                    {
+                        int tpt = 1000 / WorldManager.TPS;
+                        while (true)
+                        {
+                            manager.OnUpdate();
+                            Thread.Sleep(tpt);
+                        }   
+                    }, updateCanceller.Token);
                     while (true)
                     {
-                        if (GetPlayersConnected() == 0)
-                            break;
-
                         WorldState ws = manager.GetState();
+                        states.Add(ws);
                         Dictionary<WorldState, WorldDelta> updates = new Dictionary<WorldState, WorldDelta>();
                         lock (connections)
                         {
                             foreach (Connection c in connections)
                             {
-                                if (c == null)
-                                    continue;
-
-                                WorldDelta wd;
-                                if (c.LastAck != null)
+                                lock (c)
                                 {
-                                    if (!updates.ContainsKey(c.LastAck)) // gotta make sure we havent calculated this update before 
-                                    {
-                                        updates[c.LastAck] = new WorldDelta(c.LastAck, ws);
-                                    }
-                                    wd = updates[c.LastAck];
-                                }
-                                else
-                                    wd = new WorldDelta(null, ws);
+                                    if (c == null)
+                                        continue;
 
-                                UpdatePacket up = new UpdatePacket(wd);
-                                sendPacket(up, c.Client);
-                                c.RefreshSentPacketTimestamp();
+                                    WorldDelta wd;
+                                    if (c.LastAck != null)
+                                    {
+                                        if (!updates.ContainsKey(c.LastAck)) // gotta make sure we havent calculated this update before 
+                                        {
+                                            updates[c.LastAck] = new WorldDelta(c.LastAck, ws);
+                                        }
+                                        wd = updates[c.LastAck];
+                                    }
+                                    else
+                                        wd = new WorldDelta(null, ws);
+
+                                    UpdatePacket up = new UpdatePacket(wd);
+                                    lock (players)
+                                        up.YourEntityId = players[c].Id;
+                                    while (true)
+                                    {
+                                        try
+                                        {
+                                            byte[] debugBytes = up.ToBytes();
+                                            UpdatePacket debugPacket = new UpdatePacket(debugBytes);
+                                            break;
+                                        }
+                                        catch (Exception e)
+                                        {
+
+                                        }
+                                    }
+                                    
+                                    sendPacket(up, c.Client);
+                                    c.RefreshSentPacketTimestamp();
+                                }
                             }
                         }
                         Thread.Sleep(UPDATE_SLEEP);
                     }
+                    updateCanceller.Cancel();
                 }
             }, cts.Token).ContinueWith((Task t) =>
             {
@@ -175,15 +228,25 @@ namespace KnueppelKampfBase.Networking
             });
         }
 
+        public void HandleInputPacket(InputPacket input, Connection c)
+        {
+            ClientAcknowledgesWorldState(c, input.WorldStateAck);
+            if (players != null && players.ContainsKey(c))
+                players[c].GetComponent<ControlComponent>().HandleInputs(input.Actions);
+        }
+
         public void ClientAcknowledgesWorldState(Connection c, int stateId)
         {
             if (!inGame)
                 return;
-            WorldState ws = states.Find(x => x.Id == stateId);
+            WorldState ws;
+            lock (states)
+                ws = states.Find(x => x.Id == stateId);
             if (ws == null)
                 return;
 
-            c.LastAck = ws;
+            lock (c)
+                c.LastAck = ws;
             ws.AcknowledgedBy.Add(c);
         }
     }
