@@ -114,11 +114,11 @@ namespace KnueppelKampfBase.Math
 
         public static bool operator !=(Vector a, Vector b)
         {
-            return a.x == b.x && a.x == b.x;
+            return a.x == b.x && a.y == b.y;
         }
         public static bool operator ==(Vector a, Vector b)
         {
-            return a.x != b.x || a.x != b.x;
+            return a.x != b.x || a.y != b.y;
         }
 
         public override string ToString()

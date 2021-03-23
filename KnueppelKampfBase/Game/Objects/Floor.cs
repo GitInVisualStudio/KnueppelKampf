@@ -2,6 +2,7 @@
 using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Render;
 using System;
+using static System.Math;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -29,38 +30,44 @@ namespace KnueppelKampfBase.Game.Objects
             if (move == null)
                 return;
 
-
             if (move.Y > 0)
                 move.OnGround = true;
 
-            if (obj.Y < Y + Height && obj.Y + obj.Height > Y + Height)
+            Vector delta = default;
+
+            if (obj.Y + obj.Height > Y && obj.Y + obj.Height < Y + Height)
             {
-                obj.Y = Y + Height;
-                move.Y = 0;
-                return;
+                delta.Y = Y - obj.Height - 1;
             }
 
-            if (obj.Y + obj.Height > Y && obj.Y + obj.Height < Y + Height && obj.Y <= Y)
+            if (obj.Y <= Y + Height && obj.Y + obj.Height > Y + Height)
             {
-                obj.Y = Y - obj.Height;
-                move.Y = 0;
-                return;
+                delta.Y = Y + Height + 1;
             }
 
             if (obj.X + obj.Width > X && obj.X + obj.Width < X + Width)
             {
-                obj.X = X - obj.Width;
-                move.Velocity *= 0.6f;
+                delta.X = X - obj.Width - 1;
             }
-                
 
             if (obj.X < X + Width && obj.X + obj.Width > X + Width)
             {
-                obj.X = X + Width;
-                move.Velocity *= 0.6f;
+                delta.X = X + Width + 1;
             }
 
 
+            if (Abs(obj.X - delta.X) > Abs(obj.Y - delta.Y))
+            {
+                delta.X = obj.X;
+                move.Y = 0;
+            }
+            else if(Abs(obj.X - delta.X) < Abs(obj.Y - delta.Y))
+            {
+                delta.Y = obj.Y;
+                move.X = 0;
+            }
+
+            obj.Position = delta;
             //obj.Position -= move.Velocity * 10f;
             //move.Velocity = default;
         }

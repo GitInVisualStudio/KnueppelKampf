@@ -64,7 +64,7 @@ namespace KnueppelKampf
             this.worldManager.Entities.Add(new Player(new Vector(550.0f, 50.0f)));
             this.worldManager.Entities.Add(new Item(0)
             {
-                Position = new Vector(550, 50)
+                Position = new Vector(700, 50)
             }) ;
             int width = 1920;
             //unten
