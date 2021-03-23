@@ -12,6 +12,7 @@ namespace KnueppelKampfBase.Game.Components
     {
         private MoveComponent move;
         private HealthComponent health;
+        private ControlComponent control;
         private Player player;
         private float state;
         private float leftLeg, rightLeg;
@@ -26,10 +27,13 @@ namespace KnueppelKampfBase.Game.Components
 
             this.move = GameObject.GetComponent<MoveComponent>();
             this.health = GameObject.GetComponent<HealthComponent>();
+            this.control = GameObject.GetComponent<ControlComponent>();
             if (move == null)
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
             if (health == null)
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(HealthComponent)}");
+            if (control == null)
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(ControlComponent)}");
 
         }
 
@@ -47,6 +51,8 @@ namespace KnueppelKampfBase.Game.Components
         {
             //StateManager.Translate(player.Size.X / 2, 0);
             state += move.Length * StateManager.delta * 10;
+            if (control.Blocking)
+                StateManager.DrawString("Bro ich bin gerade am blocken", default);
             StateManager.SetColor(player.Color);
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
             float r = player.Color.R * delta + (1 - delta) * 255;

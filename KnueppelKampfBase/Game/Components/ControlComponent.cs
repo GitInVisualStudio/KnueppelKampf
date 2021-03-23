@@ -8,6 +8,9 @@ namespace KnueppelKampfBase.Game.Components
     public class ControlComponent : GameComponent
     {
         private MoveComponent move;
+        private bool blocking;
+        public bool Blocking { get => blocking; set => blocking = value; }
+
         public ControlComponent()
         {
         }
@@ -48,7 +51,7 @@ namespace KnueppelKampfBase.Game.Components
                     break;
                 case GameAction.Jump:
                     if(move.OnGround)
-                        move.Y = -12;
+                        move.Y = -5f;
                     break;
                 case GameAction.MoveLeft:
                     move.X = -2f;
@@ -64,12 +67,15 @@ namespace KnueppelKampfBase.Game.Components
                     break;
                 case GameAction.SecondaryUse:
                     //weiß nicht ob wir das überhaupt mal brauchen werden
+                    blocking = true;
                     break;
             }
         }
 
         public void HandleInputs(GameAction[] gameActions)
         {
+            blocking = false;
+
             foreach (GameAction a in gameActions)
                 this.HandleInpute(a);
         }

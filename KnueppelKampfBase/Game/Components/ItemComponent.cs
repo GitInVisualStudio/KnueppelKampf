@@ -30,7 +30,7 @@ namespace KnueppelKampfBase.Game.Components
         {
             if (item == null)
                 return;
-            StateManager.DrawImage(item.Image, default);
+            //StateManager.DrawImage(item.Image, default);
         }
 
         public void Attack()
@@ -38,6 +38,7 @@ namespace KnueppelKampfBase.Game.Components
             if (Cooldown != 0)
                 return;
             Cooldown = 10;
+            const float reduce = 5f;
             if(item == null)
             {
                 //TODO: nur mit der faust schlagen, so wie der herr
@@ -48,17 +49,17 @@ namespace KnueppelKampfBase.Game.Components
                         Vector dir = enemy.GameObject.Position - GameObject.Position;
                         if (dir > 100)
                             return;
-                        enemy.Health -= 2.0f;
+                        ControlComponent control = enemy.GameObject.GetComponent<ControlComponent>();
+                        enemy.Health -= control.Blocking ? 2 / reduce : 2.0f;
                         MoveComponent move = enemy.GameObject.GetComponent<MoveComponent>();
                         if (move == null)
                             return;
-                        dir.Length = 5;
+                        dir.Length = control.Blocking ? 5 / reduce : 5;
                         move.Velocity += dir;
                     }
                 }
                 return;
             }
-
             //TODO: add the projectile of the item
             GameObject.Manager.AddObject(new Projectile(GameObject, item.Damage));
         }
