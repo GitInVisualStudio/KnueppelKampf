@@ -37,7 +37,7 @@ namespace KnueppelKampfBase.Game
         public void Apply()
         {
             manager.Entities.Clear();
-            manager.Entities.AddRange(states.Select(x => x.Obj));
+            manager.AddObjects(states.Select(x => x.Obj));
             foreach (ObjectState s in states)
                 s.Apply();
         }

@@ -41,7 +41,7 @@ namespace KnueppelKampfBase.Game.Components
             if(item == null)
             {
                 //TODO: nur mit der faust schlagen, so wie der herr
-                foreach(HealthComponent enemy in WorldManager.Instance.SelectComponents<HealthComponent>())
+                foreach(HealthComponent enemy in GameObject.Manager.SelectComponents<HealthComponent>())
                 {
                     if(enemy.GameObject != this.GameObject)
                     {
@@ -60,7 +60,7 @@ namespace KnueppelKampfBase.Game.Components
             }
 
             //TODO: add the projectile of the item
-            WorldManager.Instance.Entities.Add(new Projectile(GameObject, item.Damage));
+            GameObject.Manager.AddObject(new Projectile(GameObject, item.Damage));
         }
 
         public override void OnUpdate()

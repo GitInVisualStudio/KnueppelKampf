@@ -31,7 +31,7 @@ namespace KnueppelKampfBase.Networking
         /// <summary>
         /// Time in seconds where no packets are recieved until connection times out
         /// </summary>
-        public const int TIME_OUT = 500;
+        public const int TIME_OUT = 10;
         public const int BYTE_LENGTH = sizeof(long) + sizeof(int);
 
         public Connection(IPEndPoint client, byte clientSalt, byte serverSalt)

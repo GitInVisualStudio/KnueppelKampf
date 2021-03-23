@@ -44,6 +44,7 @@ namespace KnueppelKampfBase.Game
                 Array.Copy(bytes, index, objBytes, 0, size);
                 object value = ByteUtils.FromBytes(objBytes, t);
                 changedProperties[key] = value;
+                index += size;
             }
         }
 

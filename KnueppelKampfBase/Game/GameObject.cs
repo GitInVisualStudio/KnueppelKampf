@@ -17,6 +17,7 @@ namespace KnueppelKampfBase.Game
         protected Vector size;
         protected float rotation;
         private List<GameComponent> components;
+        private WorldManager manager;
 
         public Vector Position { get => position; set => position = value; }
         public Vector Size { get => size; set => size = value; }
@@ -82,6 +83,8 @@ namespace KnueppelKampfBase.Game
         
         private static Type[] objectTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(GameObject))).ToArray();
         public static Type[] ObjectTypes { get => objectTypes; }
+        [DontSerialize]
+        public WorldManager Manager { get => manager; set => manager = value; }
 
         public GameObject()
         {

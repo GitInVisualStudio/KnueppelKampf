@@ -59,28 +59,28 @@ namespace KnueppelKampfBase.Networking
 
             int width = 1920;
             //unten
-            manager.Entities.Add(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
-            manager.Entities.Add(new Floor(new Vector(500 - 75, 850 - 100), new Vector(76, 600)));
-            manager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 1, 850 - 100), new Vector(76, 600)));
+            manager.AddObject(new Floor(new Vector(500, 850), new Vector(width * 0.5f, 500)));
+            manager.AddObject(new Floor(new Vector(500 - 75, 850 - 100), new Vector(76, 600)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.5f - 1, 850 - 100), new Vector(76, 600)));
 
             //pillar
-            manager.Entities.Add(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
-            manager.Entities.Add(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+            manager.AddObject(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
 
 
             //seiten
-            manager.Entities.Add(new Floor(new Vector(50, 650), new Vector(150, 600)));
-            manager.Entities.Add(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
+            manager.AddObject(new Floor(new Vector(50, 650), new Vector(150, 600)));
+            manager.AddObject(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
 
             //augen
-            manager.Entities.Add(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
-            manager.Entities.Add(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
+            manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
 
             foreach (Connection c in Connections)
             {
                 Player p = new Player();
                 players[c] = p;
-                manager.Entities.Add(p);
+                manager.AddObject(p);
             }
         }
 
@@ -124,6 +124,8 @@ namespace KnueppelKampfBase.Networking
                     players.Remove(c);
                 }
             }
+            if (GetPlayersConnected() == 0)
+                cts.Cancel();
         }
 
         private int GetFirstFreeIndex()
@@ -169,9 +171,6 @@ namespace KnueppelKampfBase.Networking
                     }, updateCanceller.Token);
                     while (true)
                     {
-                        if (GetPlayersConnected() == 0)
-                            break;
-                        
                         WorldState ws = manager.GetState();
                         states.Add(ws);
                         Dictionary<WorldState, WorldDelta> updates = new Dictionary<WorldState, WorldDelta>();

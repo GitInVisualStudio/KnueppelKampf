@@ -29,6 +29,18 @@ namespace KnueppelKampfBase.Game
             this.Entities = new List<GameObject>();
         }
 
+        public void AddObjects(IEnumerable<GameObject> objs)
+        {
+            foreach (GameObject obj in objs)
+                AddObject(obj);
+        }
+
+        public void AddObject(GameObject obj)
+        {
+            entities.Add(obj);
+            obj.Manager = this;
+        }
+
         public void OnRender()
         {
             StateManager.SetColor(37, 57, 68);
@@ -73,7 +85,7 @@ namespace KnueppelKampfBase.Game
         {
             lock (entities)
             {
-                entities.AddRange(delta.Spawned);
+                AddObjects(delta.Spawned);
                 foreach (ObjectDelta od in delta.Changed)
                 {
                     GameObject go = entities.Find(x => x.Id == od.EntityId);
