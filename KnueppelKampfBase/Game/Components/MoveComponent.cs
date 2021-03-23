@@ -92,7 +92,7 @@ namespace KnueppelKampfBase.Game.Components
     {
         private Vector velocity;
         private float friction;
-        [DontSerialize]
+        //[DontSerialize]
         public Vector Velocity { get => velocity; set => velocity = value; }
         public float Friction { get => friction; set => friction = value; }
 

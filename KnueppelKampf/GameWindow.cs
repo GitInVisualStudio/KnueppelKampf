@@ -28,10 +28,6 @@ namespace KnueppelKampf
         {
             InitializeComponent();
 
-            manager = new WorldManager();
-            client = new Client("localhost", manager);
-            client.StartConnecting();
-
             debugData = new Label()
             {
                 AutoSize = true
@@ -44,7 +40,7 @@ namespace KnueppelKampf
                 Location = new Point(100, 0)
             };
             Controls.Add(connectBtn);
-            //connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
+            connectBtn.Click += (object sender, EventArgs e) => client.StartQueueing();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -52,7 +48,8 @@ namespace KnueppelKampf
             base.OnMouseMove(e);
             Vector mouse = new Vector(e.X, e.Y);
             mouse = mouse - new Vector(Width / 2, Height / 2);
-            thePlayer.Rotation = mouse.Angle;
+            if(thePlayer != null)
+                thePlayer.Rotation = mouse.Angle;
             //TODO: send rotation to the server
         }
 
@@ -74,13 +71,13 @@ namespace KnueppelKampf
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            GameAction[] pressedActions = ActionManager.GetActions();
+            //GameAction[] pressedActions = ActionManager.GetActions();
 
-            control.HandleInputs(pressedActions);
+            //control.HandleInputs(pressedActions);
 
-            //SendInputOrKeepAlive();
-            //if (client.IsTimedOut())
-            //    MessageBox.Show("Connection to server timed out.");
+            SendInputOrKeepAlive();
+            if (client.IsTimedOut())
+                MessageBox.Show("Connection to server timed out.");
 
             //client.StartGettingGameInfo();
             debugData.Invoke(new MethodInvoker(() =>
