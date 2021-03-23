@@ -45,6 +45,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnRender()
         {
+            //return;
             //StateManager.Translate(player.Size.X / 2, 0);
             state += move.Length * StateManager.delta * 10;
             StateManager.SetColor(player.Color);

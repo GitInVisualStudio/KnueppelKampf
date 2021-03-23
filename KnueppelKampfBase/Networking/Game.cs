@@ -7,6 +7,7 @@ using KnueppelKampfBase.Networking.Packets.ServerPackets;
 using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -75,6 +76,9 @@ namespace KnueppelKampfBase.Networking
             //augen
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
+
+            //item
+            manager.AddObject(new Item() { Position = new Vector(600, 0) });
 
             foreach (Connection c in Connections)
             {
@@ -162,13 +166,27 @@ namespace KnueppelKampfBase.Networking
                     Setup();
                     Task.Run(() =>
                     {
-                        int tpt = 1000 / WorldManager.TPS;
+                        Stopwatch watch = new Stopwatch(), w = new Stopwatch();
+                        w.Start();
+                        watch.Start();
+                        int count = 0;
+                        int tpt = (int)(1000f / WorldManager.TPS);
                         while (true)
                         {
+                            if (w.Elapsed.TotalSeconds >= 1)
+                            {
+                                Console.WriteLine("Current ticks: " + count);
+                                count = 0;
+                                w.Restart();
+                            }
                             manager.OnUpdate();
-                            Thread.Sleep(tpt);
-                        }   
+                            while (watch.Elapsed.TotalMilliseconds < tpt)
+                                Thread.Sleep(0);
+                            count++;
+                            watch.Restart();
+                        }
                     }, updateCanceller.Token);
+
                     while (true)
                     {
                         WorldState ws = manager.GetState();
@@ -178,11 +196,10 @@ namespace KnueppelKampfBase.Networking
                         {
                             foreach (Connection c in connections)
                             {
+                                if (c == null)
+                                    continue;
                                 lock (c)
                                 {
-                                    if (c == null)
-                                        continue;
-
                                     WorldDelta wd;
                                     if (c.LastAck != null)
                                     {
@@ -226,6 +243,11 @@ namespace KnueppelKampfBase.Networking
                 isHandling = false;
                 inGame = false;
             });
+        }
+
+        private void T_Tick(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public void HandleInputPacket(InputPacket input, Connection c)

@@ -47,11 +47,11 @@ namespace KnueppelKampfBase.Game.Components
                     {
                         Vector dir = enemy.GameObject.Position - GameObject.Position;
                         if (dir > 100)
-                            return;
+                            continue;
                         enemy.Health -= 2.0f;
                         MoveComponent move = enemy.GameObject.GetComponent<MoveComponent>();
                         if (move == null)
-                            return;
+                            continue;
                         dir.Length = 5;
                         move.Velocity += dir;
                     }

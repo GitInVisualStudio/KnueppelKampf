@@ -1,4 +1,5 @@
 ﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Game.Objects;
 using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
@@ -95,13 +96,15 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         UpdatePacket up = (UpdatePacket)p;
-                        if (up.Delta.NewerId > worldStateAck) 
+                        if (up.Delta.EarlierId == worldStateAck) 
                         {
                             manager.Apply(up.Delta);
                             WorldStateAck = up.Delta.NewerId;
                         }
+                        GameObject playerObject = manager.GetObject(up.YourEntityId);
                         if (up.Delta.EarlierId == -1) 
-                            GameInitialized?.Invoke(this, manager.GetObject(up.YourEntityId));
+                            GameInitialized?.Invoke(this, playerObject);
+                        Player.LastRecievedPosition = playerObject.Position;
                         ingameStatus = IngameStatus.InRunningGame;
                     }
                 }

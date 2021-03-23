@@ -12,6 +12,9 @@ namespace KnueppelKampfBase.Game.Objects
     {
         private Color color;
         public Color Color { get => color; set => color = value; }
+        
+        private static Vector lastRecievedPosition;
+        public static Vector LastRecievedPosition { get => lastRecievedPosition; set => lastRecievedPosition = value; }
 
         public Player()
         {
@@ -34,17 +37,20 @@ namespace KnueppelKampfBase.Game.Objects
         public override void OnRender()
         {
             StateManager.SetColor(Color.Red);
-            //StateManager.DrawRect(this.position, this.size);
+            StateManager.DrawRect(this.position, this.size);
+            StateManager.Push();
+            StateManager.SetColor(Color.Green);
+            StateManager.DrawRect(lastRecievedPosition, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);
             StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)
-                Components[i].OnRender();
+                Components[i].OnRender(); 
 
             StateManager.Pop();
-
+            StateManager.Pop();
         }
 
         public override void OnUpdate()
