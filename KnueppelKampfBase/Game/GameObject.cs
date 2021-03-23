@@ -18,6 +18,7 @@ namespace KnueppelKampfBase.Game
         protected float rotation;
         private List<GameComponent> components;
         private WorldManager manager;
+        private bool despawn = false;
 
         public Vector Position { get => position; set => position = value; }
         public Vector Size { get => size; set => size = value; }
@@ -85,6 +86,8 @@ namespace KnueppelKampfBase.Game
         public static Type[] ObjectTypes { get => objectTypes; }
         [DontSerialize]
         public WorldManager Manager { get => manager; set => manager = value; }
+
+        public bool Despawn { get => despawn; set => despawn = value; }
 
         public GameObject()
         {

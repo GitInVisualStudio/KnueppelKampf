@@ -82,7 +82,7 @@ namespace KnueppelKampfBase.Networking
 
             foreach (Connection c in Connections)
             {
-                Player p = new Player();
+                Player p = new Player(new Vector(600, 0));
                 players[c] = p;
                 manager.AddObject(p);
             }

@@ -47,8 +47,9 @@ namespace KnueppelKampf
         {
             base.OnMouseMove(e);
             Vector mouse = new Vector(e.X, e.Y);
-            //mouse = mouse - thePlayer.Position;
-            //thePlayer.Rotation = mouse.Angle;
+            mouse = mouse - new Vector(Width / 2, Height / 2);
+            if(thePlayer != null)
+                thePlayer.Rotation = mouse.Angle;
             //TODO: send rotation to the server
         }
 
@@ -70,6 +71,9 @@ namespace KnueppelKampf
         protected override void OnUpdate()
         {
             base.OnUpdate();
+            //GameAction[] pressedActions = ActionManager.GetActions();
+
+            //control.HandleInputs(pressedActions);
 
             SendInputOrKeepAlive();
             if (client.IsTimedOut())

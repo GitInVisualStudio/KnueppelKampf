@@ -16,7 +16,8 @@ namespace KnueppelKampf
             { Key.A, GameAction.MoveLeft },
             { Key.D, GameAction.MoveRight},
             { Key.LeftCtrl, GameAction.Duck},
-            { Key.T, GameAction.PrimaryUse}
+            { Key.T, GameAction.PrimaryUse},
+            { Key.H, GameAction.SecondaryUse}
         };
 
         public static void Bind(Key key, GameAction action)

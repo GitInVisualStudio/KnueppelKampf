@@ -55,8 +55,8 @@ namespace KnueppelKampfBase.Game.Components
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector current = original[i];
-                double x = GameObject.X + GameObject.Size.X / 2 + current.X * Cos(angle) - current.Y * Sin(angle);
-                double y = GameObject.Y + GameObject.Size.Y / 2 + current.X * Sin(angle) + current.Y * Cos(angle);
+                double x = GameObject.X + GameObject.Size.X / 2 + current.X;
+                double y = GameObject.Y + GameObject.Size.Y / 2 + current.Y;
                 corners[i] = new Vector((float)x, (float)y);
             }
         }
@@ -71,10 +71,8 @@ namespace KnueppelKampfBase.Game.Components
             double[] angles; // Array der Winkel der Achsen, die überprüft werden müssen
             UpdateCorners();
             box.UpdateCorners();
-            if (GameObject.Rotation == box.GameObject.Rotation)
-                angles = new double[] { GameObject.Rotation, GameObject.Rotation + (double)PI / 2.0f };
-            else
-                angles = new double[] { GameObject.Rotation, GameObject.Rotation + (double)PI / 2.0f, box.GameObject.Rotation, box.GameObject.Rotation + (double)PI / 2.0f };
+
+            angles = new double[] { 0, PI / 2.0f };
 
             foreach (double angle in angles)
                 if (!ProjectionOverlaps(ProjectOnto(angle), box.ProjectOnto(angle)))
