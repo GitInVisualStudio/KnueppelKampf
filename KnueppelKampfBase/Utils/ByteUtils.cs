@@ -15,12 +15,20 @@ namespace KnueppelKampfBase.Utils
             Type t = obj.GetType();
             if (!t.IsValueType)
                 throw new Exception("Non-struct given");
-            int size = Marshal.SizeOf(obj);
+            Type outputType;
+            if (t.IsEnum)
+            {
+                outputType = typeof(int);
+                obj = (int)obj;
+            }
+            else
+                outputType = obj.GetType();
+            int size = Marshal.SizeOf(outputType);
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(obj, ptr, false);
             Marshal.Copy(ptr, array, index, size);
-            Marshal.DestroyStructure(ptr, t);
+            Marshal.DestroyStructure(ptr, outputType);
             Marshal.FreeHGlobal(ptr);
             return size;
         }
@@ -39,7 +47,15 @@ namespace KnueppelKampfBase.Utils
             if (!t.IsValueType)
                 throw new Exception("Non-struct type given");
 
-            object obj = Activator.CreateInstance(t);
+            object obj;
+
+            if (t.IsEnum)
+            {
+                obj = 0;
+                t = typeof(int);
+            }
+            else
+                obj = Activator.CreateInstance(t);
 
             int size = Marshal.SizeOf(obj);
             IntPtr ptr = Marshal.AllocHGlobal(size);

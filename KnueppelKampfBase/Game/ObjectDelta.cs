@@ -31,7 +31,12 @@ namespace KnueppelKampfBase.Game
             {
                 object oldValue = oldProperties[i];
                 object newValue = newProperties[i];
-                if (newValue.GetType().IsValueType && ((newValue == null && oldValue != null) || !newValue.Equals(oldValue)))
+                if (newValue == null)
+                {
+                    if (oldValue != null && oldValue.GetType().IsValueType)
+                        changedProperties[(byte)i] = newValue;
+                }
+                else if (newValue.GetType().IsValueType && !newValue.Equals(oldValue))
                     changedProperties[(byte)i] = newValue;
             }
             changedComponents = new List<ComponentDelta>();

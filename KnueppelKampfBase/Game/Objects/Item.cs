@@ -46,15 +46,15 @@ namespace KnueppelKampfBase.Game.Objects
             this.Despawn = true;
         }
 
-        public enum Items : int
-        {
-            TEST = 0,
-        }
-
         public override void OnRender()
         {
             //base.OnRender();
             StateManager.DrawString("Ich bin ein item", position);
         }
+    }
+
+    public enum Items : int
+    {
+        TEST = 0,
     }
 }

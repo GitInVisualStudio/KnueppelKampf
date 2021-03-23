@@ -78,7 +78,7 @@ namespace KnueppelKampfBase.Networking
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
 
             //item
-            manager.AddObject(new Item() { Position = new Vector(600, 0) });
+            manager.AddObject(new Item() { Position = new Vector(600, 700) });
 
             foreach (Connection c in Connections)
             {

@@ -114,11 +114,19 @@ namespace KnueppelKampfBase.Math
 
         public static bool operator !=(Vector a, Vector b)
         {
-            return a.x == b.x && a.y == b.y;
+            return !a.Equals(b);
         }
         public static bool operator ==(Vector a, Vector b)
         {
-            return a.x != b.x || a.y != b.y;
+            return a.Equals(b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector))
+                return false;
+            Vector vect = (Vector)obj;
+            return vect.X == x && vect.Y == y;
         }
 
         public override string ToString()
