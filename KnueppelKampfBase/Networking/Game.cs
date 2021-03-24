@@ -71,7 +71,6 @@ namespace KnueppelKampfBase.Networking
             manager.AddObject(new Floor(new Vector(500 - 75 - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
             manager.AddObject(new Floor(new Vector(500 + width * 0.5f - 50, 850 - 100 - 300), new Vector(75 + 100, 75)));
 
-
             //seiten
             manager.AddObject(new Floor(new Vector(50, 650), new Vector(150, 600)));
             manager.AddObject(new Floor(new Vector(width * 0.5f + 800, 650), new Vector(150, 600)));
@@ -80,14 +79,17 @@ namespace KnueppelKampfBase.Networking
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f - 300, 250), new Vector(150, 450)));
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
 
-            //item
-            manager.AddObject(new Item() { Position = new Vector(950, 700) });
+            //items
+            manager.AddObject(new Item() { Position = new Vector(500 + width * 0.25f - 25, 350) });
+            manager.AddObject(new Item() { Position = new Vector(500 + width * 0.25f - 25, 700) });
 
+            Vector[] playerPositions = new Vector[] { new Vector(50 + 150 / 2f, 300), new Vector(width * 0.5f + 800 + 150 / 2f, 300), new Vector(500 - 75 - 50 + 175 / 2f, 100), new Vector(500 + width * 0.5f - 50 + 175 / 2f, 100) };
             lock (connections)
-                foreach (Connection c in Connections)
+                for (int i = 0; i < Connections.Length; i++)
                 {
+                    Connection c = Connections[i];
                     c.LastAck = null;
-                    Player p = new Player(new Vector(600, 0));
+                    Player p = new Player(playerPositions[i % playerPositions.Length]);
                     players[c] = p;
                     manager.AddObject(p);
                 }

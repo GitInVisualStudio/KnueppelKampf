@@ -23,7 +23,7 @@ namespace KnueppelKampfBase.Game.Objects
             image = Resources.pistol;
             damage = 2;
             size = new Vector(50, 50);
-            AddComponent(new MoveComponent());
+            //AddComponent(new MoveComponent());
             AddComponent(new BoxComponent(OnPickup));
         }
 
@@ -34,7 +34,7 @@ namespace KnueppelKampfBase.Game.Objects
             this.image = null;
             this.damage = 2;
             this.size = new Vector(50, 50);
-            this.AddComponent(new MoveComponent());
+            //this.AddComponent(new MoveComponent());
             this.AddComponent(new BoxComponent(OnPickup));
         }
 
@@ -47,6 +47,8 @@ namespace KnueppelKampfBase.Game.Objects
             if (!(b.GameObject is Player))
                 return;
             ItemComponent item = b.GameObject.GetComponent<ItemComponent>();
+            if (item.Item == type)
+                return;
             item.Item = type;
             this.Despawn = true;
         }
