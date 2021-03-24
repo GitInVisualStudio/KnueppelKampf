@@ -50,7 +50,6 @@ namespace KnueppelKampf
             mouse = mouse - new Vector(Width / 2, Height / 2);
             if(thePlayer != null)
                 thePlayer.Rotation = mouse.Angle;
-            //TODO: send rotation to the server
         }
 
         public override void Init()
@@ -83,7 +82,7 @@ namespace KnueppelKampf
             //client.StartGettingGameInfo();
             debugData.Invoke(new MethodInvoker(() =>
             {
-                debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck;
+                debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck + "\nPlayer rotation: " + thePlayer?.Rotation;
             }));
         }
 
@@ -100,7 +99,7 @@ namespace KnueppelKampf
                 if (client.IngameStatus == IngameStatus.InRunningGame)
                 {
                     GameAction[] pressedActions = ActiveForm == this ? ActionManager.GetActions() : new GameAction[] { };
-                    InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
+                    InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck, thePlayer.Rotation);
                     client.SendPacket(p);
                     //control?.HandleInputs(pressedActions);
                 }

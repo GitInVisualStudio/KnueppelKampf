@@ -48,10 +48,8 @@ namespace KnueppelKampfBase.Game.Objects
                 move.Velocity += this.move.Velocity;
             }));
 
-            float x = (float)Cos(owner.Rotation * PI / 180.0f + PI/2);
-            float y = (float)Sin(owner.Rotation * PI / 180.0f + PI/2);
-            this.move.Velocity = new Vector(x, y) * 10f;
-
+            Vector velocity = new Vector(owner.Rotation);
+            move.Velocity = velocity * 10f;
         }
 
         public override void OnRender()
@@ -60,7 +58,7 @@ namespace KnueppelKampfBase.Game.Objects
             StateManager.Push();
             StateManager.Translate(position + size / 2);
             StateManager.SetColor(Color.Black);
-            StateManager.Rotate(move.Velocity.Angle);
+            StateManager.Rotate(GetComponent<MoveComponent>().Velocity.Angle);
             StateManager.FillRect(size / -2, size);
             StateManager.Pop();
         }

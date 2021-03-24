@@ -14,6 +14,19 @@ namespace KnueppelKampfBase.Math
             this.x = x;
             this.y = y;
         }
+
+        /// <summary>
+        /// Returns a normalized vector based on an angle
+        /// </summary>
+        /// <param name="angle">Angle in degrees</param>
+        public Vector(float angle)
+        {
+            angle = (float)(angle * m.PI / 180f);
+            float tan = (float)m.Tan(angle);
+            x = (float)(1f / (m.Sqrt(1 + m.Pow(tan, 2))));
+            y = x * tan;
+        }
+
         public float X { get => x; set => x = value; }
         public float Y { get => y; set => y = value; }
         

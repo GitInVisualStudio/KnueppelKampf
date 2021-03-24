@@ -118,7 +118,7 @@ namespace KnueppelKampfBase.Networking
             connections[index] = null;
             if (players.ContainsKey(c))
             {
-                lock (manager)
+                lock (manager.Entities)
                 {
                     manager.Entities.Remove(players[c]);
                 }
@@ -245,16 +245,18 @@ namespace KnueppelKampfBase.Networking
             });
         }
 
-        private void T_Tick(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         public void HandleInputPacket(InputPacket input, Connection c)
         {
             ClientAcknowledgesWorldState(c, input.WorldStateAck);
-            if (players != null && players.ContainsKey(c))
-                players[c].GetComponent<ControlComponent>().HandleInputs(input.Actions);
+            lock (players)
+            {
+                if (players != null && players.ContainsKey(c))
+                {
+                    Player p = players[c];
+                    p.GetComponent<ControlComponent>().HandleInputs(input.Actions);
+                    p.Rotation = input.Rotation;
+                }
+            }
         }
 
         public void ClientAcknowledgesWorldState(Connection c, int stateId)

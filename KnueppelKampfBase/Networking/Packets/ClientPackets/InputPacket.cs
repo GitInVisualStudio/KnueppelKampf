@@ -11,24 +11,27 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
     {
         private int worldStateAck;
         private GameAction[] actions;
+        private float rotation;
 
         /// <summary>
         /// The id of the last WorldState the client recieved
         /// </summary>
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
         public GameAction[] Actions { get => actions; set => actions = value; }
+        public float Rotation { get => rotation; set => rotation = value; }
 
-        public InputPacket(byte salt, GameAction[] actions, int worldStateAck) : base(salt)
+        public InputPacket(byte salt, GameAction[] actions, int worldStateAck, float rotation) : base(salt)
         {
             this.actions = actions;
-
             this.worldStateAck = worldStateAck;
+            this.rotation = rotation;
         }
 
         public InputPacket(byte[] bytes) : base(bytes)
         {
             worldStateAck = BitConverter.ToInt32(bytes, HEADER_SIZE);
-            byte actionByte = bytes[HEADER_SIZE + sizeof(int)];
+            rotation = BitConverter.ToSingle(bytes, HEADER_SIZE + sizeof(int));
+            byte actionByte = bytes[HEADER_SIZE + sizeof(int) + sizeof(float)];
             actions = new GameAction[GetSetBits(actionByte)];
             GameAction[] values = (GameAction[])Enum.GetValues(typeof(GameAction));
             int lastSet = 0;
@@ -50,10 +53,11 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 
         public override byte[] ToBytes()
         {
-            byte[] result = GetHeader(HEADER_SIZE + sizeof(int) + 1);
+            byte[] result = GetHeader(HEADER_SIZE + sizeof(int) + sizeof(float) + 1);
             BitConverter.GetBytes(worldStateAck).CopyTo(result, HEADER_SIZE);
+            BitConverter.GetBytes(rotation).CopyTo(result, HEADER_SIZE + sizeof(float));
             for (int i = 0; i < actions.Length; i++)
-                result[HEADER_SIZE + sizeof(int)] += (byte)actions[i];
+                result[HEADER_SIZE + sizeof(int) + sizeof(float)] += (byte)actions[i];
             return result;
         }
     }

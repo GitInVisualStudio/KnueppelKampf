@@ -37,7 +37,8 @@ namespace KnueppelKampfBase.Game
 
         public void AddObject(GameObject obj)
         {
-            entities.Add(obj);
+            lock (entities)
+                entities.Add(obj);
             obj.Manager = this;
         }
 
