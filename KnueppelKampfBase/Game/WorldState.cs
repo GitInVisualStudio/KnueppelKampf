@@ -20,7 +20,7 @@ namespace KnueppelKampfBase.Game
         {
             this.manager = manager;
             this.states = new List<ObjectState>();
-            lock (manager)
+            lock (manager.Entities)
             {
                 foreach (GameObject o in manager.Entities)
                     states.Add(new ObjectState(o));

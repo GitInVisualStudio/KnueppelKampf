@@ -40,7 +40,8 @@ namespace KnueppelKampfBase.Game.Objects
                 HealthComponent health = b.GameObject.GetComponent<HealthComponent>();
                 if (health == null)
                     return;
-                health.Health -= damage;
+                if (WorldManager.OnServer)
+                    health.Health -= damage;
                 MoveComponent move = b.GameObject.GetComponent<MoveComponent>();
                 if (move == null)
                     return;

@@ -68,6 +68,7 @@ namespace KnueppelKampfBase.Game
         {
             spawned = new List<GameObject>();
             Changed = new List<ObjectDelta>();
+            deleted = new List<int>();
             int index = startIndex;
             oldId = BitConverter.ToInt32(bytes, index);
             index += sizeof(int);
@@ -89,12 +90,24 @@ namespace KnueppelKampfBase.Game
             }
             spawned = newSpawned.ToList();
 
+            if (index == bytes.Length)
+                return;
             // deserialize changed objects
-            while (index < bytes.Length)
+            int changedCount = bytes[index++];
+            for (int i = 0; i < changedCount; i++)
             {
                 size = bytes[index++];
                 Changed.Add(new ObjectDelta(bytes, index));
                 index += size;
+            }
+
+            if (index == bytes.Length)
+                return;
+            // deserialize deleted objects
+            while (index < bytes.Length)
+            {
+                deleted.Add(BitConverter.ToInt32(bytes, index));
+                index += sizeof(int);
             }
         }
 
@@ -122,12 +135,21 @@ namespace KnueppelKampfBase.Game
             // serialize changed objects
             if (Changed == null) 
                 return index - startIndex;
+            array[index++] = (byte)changed.Count;
             foreach (ObjectDelta od in Changed)
             {
                 int size = od.ToBytes(array, index + 1);
                 array[index++] = (byte)size;
                 index += size;
             }
+
+            //serialize deleted objects
+            foreach (int x in deleted)
+            {
+                BitConverter.GetBytes(x).CopyTo(array, index);
+                index += sizeof(int);
+            }
+
             return index - startIndex;
         }
 
