@@ -65,6 +65,13 @@ namespace KnueppelKampf
                 control = thePlayer.GetComponent<ControlComponent>();
                 this.worldManager.Camera = thePlayer;
             };
+            client.GameEnded += (object sender, EventArgs e) =>
+            {
+                worldManager = new WorldManager();
+                client.Manager = worldManager;
+                thePlayer = null;
+                control = null;
+            };
         }
 
         protected override void OnUpdate()

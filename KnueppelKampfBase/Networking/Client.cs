@@ -39,6 +39,7 @@ namespace KnueppelKampfBase.Networking
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
 
         public event EventHandler<GameObject> GameInitialized;
+        public event EventHandler GameEnded;
 
         public Client(string host, WorldManager manager)
         {
@@ -78,10 +79,18 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         QueueResponsePacket qrp = (QueueResponsePacket)p;
-                        if (qrp.GameId == -1)
-                            IngameStatus = IngameStatus.NotInGame;
-
-                        IngameStatus = IngameStatus.InGame;
+                        if (qrp.GameId == -1) 
+                        {
+                            if (ingameStatus == IngameStatus.InGame || ingameStatus == IngameStatus.InRunningGame)
+                            {
+                                GameEnded?.Invoke(this, new EventArgs());
+                                worldStateAck = -1;
+                            }
+                                
+                            IngameStatus = IngameStatus.NotInGame; 
+                        } 
+                        else
+                            IngameStatus = IngameStatus.InGame;
                     }
                 },
                 {
@@ -102,7 +111,7 @@ namespace KnueppelKampfBase.Networking
                             WorldStateAck = up.Delta.NewerId;
                         }
                         GameObject playerObject = manager.GetObject(up.YourEntityId);
-                        if (up.Delta.EarlierId == -1) 
+                        if (ingameStatus != IngameStatus.InRunningGame) 
                             GameInitialized?.Invoke(this, playerObject);
                         ingameStatus = IngameStatus.InRunningGame;
                     }

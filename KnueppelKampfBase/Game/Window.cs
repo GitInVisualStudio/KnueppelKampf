@@ -56,7 +56,7 @@ namespace KnueppelKampfBase.Game
             this.Refresh();
         }
 
-        protected  override void OnPaint(PaintEventArgs e)
+        protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = null;
             base.OnPaint(e);

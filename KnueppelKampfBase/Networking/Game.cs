@@ -40,6 +40,8 @@ namespace KnueppelKampfBase.Networking
         public const int MAX_IDLE_TIME = 60;
         public const int MAX_PLAYERS = 4;
 
+        public event EventHandler GameEnded;
+
         public Game()
         {
             id = lastId++;
@@ -54,7 +56,7 @@ namespace KnueppelKampfBase.Networking
         public void Setup()
         {
             manager = new WorldManager();
-            WorldManager.OnServer = true;
+            
             players = new Dictionary<Connection, Player>();
             states = new List<WorldState>();
             inGame = true;
@@ -81,12 +83,14 @@ namespace KnueppelKampfBase.Networking
             //item
             manager.AddObject(new Item() { Position = new Vector(950, 700) });
 
-            foreach (Connection c in Connections)
-            {
-                Player p = new Player(new Vector(600, 0));
-                players[c] = p;
-                manager.AddObject(p);
-            }
+            lock (connections)
+                foreach (Connection c in Connections)
+                {
+                    c.LastAck = null;
+                    Player p = new Player(new Vector(600, 0));
+                    players[c] = p;
+                    manager.AddObject(p);
+                }
         }
 
         public int GetPlayersConnected()
@@ -109,7 +113,6 @@ namespace KnueppelKampfBase.Networking
             if (index == -1)
                 return false;
             connections[index] = c;
-            c.InGame = true;
             return true;
         }
 
@@ -150,102 +153,99 @@ namespace KnueppelKampfBase.Networking
             Task.Run(() =>
             {
                 CancellationTokenSource updateCanceller = new CancellationTokenSource();
-                while (true)
+                states = new List<WorldState>();
+                idleSince = TimeUtils.GetTimestamp();
+                while (true) // waits until enough players in game, game idle for long enough with 2 players
                 {
-                    idleSince = TimeUtils.GetTimestamp();
-                    while (true) // waits until enough players in game, game idle for long enough with 2 players
-                    {
-                        int playersInGame = GetPlayersConnected();
-                        if (playersInGame == 0)
-                            return;
-                        long timestamp = TimeUtils.GetTimestamp();
-                        if (playersInGame == MAX_PLAYERS || (timestamp - IdleSince > MAX_IDLE_TIME && playersInGame > 1))
-                            break;
-                        Thread.Sleep(100);
-                    }
+                    int playersInGame = GetPlayersConnected();
+                    if (playersInGame == 0)
+                        return;
+                    long timestamp = TimeUtils.GetTimestamp();
+                    if (playersInGame == MAX_PLAYERS || (timestamp - IdleSince > MAX_IDLE_TIME && playersInGame > 1))
+                        break;
+                    Thread.Sleep(100);
+                }
 
-                    Setup();
-                    Task.Run(() =>
-                    {
-                        Stopwatch watch = new Stopwatch(), w = new Stopwatch();
-                        w.Start();
-                        watch.Start();
-                        int count = 0;
-                        int tpt = (int)(1000f / WorldManager.TPS);
-                        while (true)
-                        {
-                            try
-                            {
-                                if (w.Elapsed.TotalSeconds >= 1)
-                                {
-                                    Console.WriteLine("Current ticks: " + count);
-                                    count = 0;
-                                    w.Restart();
-                                }
-                                manager.OnUpdate();
-                                while (watch.Elapsed.TotalMilliseconds < tpt)
-                                    Thread.Sleep(0);
-                                count++;
-                                watch.Restart();
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e.Message);
-                            }
-                        }
-                    }, updateCanceller.Token);
-
+                Setup();
+                Task.Run(() =>
+                {
+                    Stopwatch watch = new Stopwatch(), w = new Stopwatch();
+                    w.Start();
+                    watch.Start();
+                    int count = 0;
+                    int tpt = (int)(1000f / WorldManager.TPS);
                     while (true)
                     {
-                        WorldState ws = manager.GetState();
-                        states.Add(ws);
-                        Dictionary<WorldState, WorldDelta> updates = new Dictionary<WorldState, WorldDelta>();
-                        lock (connections)
+                        try
                         {
-                            foreach (Connection c in connections)
+                            if (w.Elapsed.TotalSeconds >= 1)
                             {
-                                if (c == null)
-                                    continue;
-                                lock (c)
+                                Console.WriteLine("Current ticks: " + count);
+                                count = 0;
+                                w.Restart();
+                            }
+                            manager.OnUpdate();
+                            while (watch.Elapsed.TotalMilliseconds < tpt)
+                                Thread.Sleep(0);
+                            count++;
+                            watch.Restart();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                }, updateCanceller.Token);
+
+                while (true)
+                {
+                    lock (manager.Entities)
+                    {
+                        if (manager.Entities.Where(x => x.GetType() == typeof(Player)).Count() == 1) // win condition
+                        {
+                            GameEnded?.Invoke(this, new EventArgs());
+                            break;
+                        }
+                    }
+
+                    WorldState ws = manager.GetState();
+                    states.Add(ws);
+                    Dictionary<WorldState, WorldDelta> updates = new Dictionary<WorldState, WorldDelta>();
+                    lock (connections)
+                    {
+                        foreach (Connection c in connections)
+                        {
+                            if (c == null)
+                                continue;
+                            lock (c)
+                            {
+                                WorldDelta wd;
+                                if (c.LastAck != null)
                                 {
-                                    WorldDelta wd;
-                                    if (c.LastAck != null)
+                                    if (!updates.ContainsKey(c.LastAck)) // gotta make sure we havent calculated this update before 
                                     {
-                                        if (!updates.ContainsKey(c.LastAck)) // gotta make sure we havent calculated this update before 
-                                        {
-                                            updates[c.LastAck] = new WorldDelta(c.LastAck, ws);
-                                        }
-                                        wd = updates[c.LastAck];
+                                        updates[c.LastAck] = new WorldDelta(c.LastAck, ws);
                                     }
-                                    else
-                                        wd = new WorldDelta(null, ws);
-
-                                    UpdatePacket up = new UpdatePacket(wd);
-                                    lock (players)
-                                        up.YourEntityId = players[c].Id;
-                                    while (true)
-                                    {
-                                        try
-                                        {
-                                            byte[] debugBytes = up.ToBytes();
-                                            UpdatePacket debugPacket = new UpdatePacket(debugBytes);
-                                            break;
-                                        }
-                                        catch (Exception e)
-                                        {
-
-                                        }
-                                    }
-                                    
-                                    sendPacket(up, c.Client);
-                                    c.RefreshSentPacketTimestamp();
+                                    wd = updates[c.LastAck];
                                 }
+                                else
+                                    wd = new WorldDelta(null, ws);
+
+                                UpdatePacket up = new UpdatePacket(wd);
+                                lock (players)
+                                    up.YourEntityId = players[c].Id;
+
+                                //byte[] debugBytes = up.ToBytes();
+                                //UpdatePacket debugPacket = new UpdatePacket(debugBytes);
+                                    
+                                sendPacket(up, c.Client);
+                                c.RefreshSentPacketTimestamp();
                             }
                         }
-                        Thread.Sleep(UPDATE_SLEEP);
                     }
-                    updateCanceller.Cancel();
+                    Thread.Sleep(UPDATE_SLEEP);
                 }
+                updateCanceller.Cancel();
             }, cts.Token).ContinueWith((Task t) =>
             {
                 isHandling = false;
@@ -255,6 +255,8 @@ namespace KnueppelKampfBase.Networking
 
         public void HandleInputPacket(InputPacket input, Connection c)
         {
+            if (!isHandling || !inGame)
+                return;
             ClientAcknowledgesWorldState(c, input.WorldStateAck);
             lock (players)
             {

@@ -1,4 +1,5 @@
-﻿using KnueppelKampfBase.Networking.Packets;
+﻿using KnueppelKampfBase.Game;
+using KnueppelKampfBase.Networking.Packets;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
 using KnueppelKampfBase.Networking.Packets.ServerPackets;
 using KnueppelKampfBase.Utils;
@@ -39,6 +40,8 @@ namespace KnueppelKampfBase.Networking
         /// <param name="useLocalhost">Whether the server should use 127.0.0.1 ip or use its actual outgoing one</param>
         public Server(bool useLocalhost = false)
         {
+            WorldManager.OnServer = true;
+
             isDisposed = false;
             isDoingCleanup = false;
 
@@ -157,6 +160,11 @@ namespace KnueppelKampfBase.Networking
                                         g.AddConnection(c);
                                         gameId = g.Id;
                                         g.StartHandle(SendPacket);
+                                        g.GameEnded += (object sender, EventArgs e) =>
+                                        {
+                                            lock (games)
+                                                games[newGameIndex] = null;
+                                        };
                                     }
                                 }
                             }
@@ -185,7 +193,10 @@ namespace KnueppelKampfBase.Networking
                     {
                         int gameIndex = GetGameIndexFromIep(c.Client);
                         if (gameIndex == -1)
+                        {
+                            SendPacket(new QueueResponsePacket(-1), c.Client);
                             return;
+                        }
 
                         Game g = games[gameIndex];
                         InputPacket inpt = (InputPacket)p;

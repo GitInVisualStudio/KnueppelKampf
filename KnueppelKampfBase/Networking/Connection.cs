@@ -16,7 +16,6 @@ namespace KnueppelKampfBase.Networking
         private byte xored;
         private long lastRecievedPacketTimestamp;
         private long lastSentPacketTimestamp;
-        private bool inGame;
         private WorldState lastAck;
 
         public IPEndPoint Client { get => client; set => client = value; }
@@ -25,7 +24,6 @@ namespace KnueppelKampfBase.Networking
         public long LastRecievedPacketTimestamp { get => lastRecievedPacketTimestamp; }
         public long LastSentPacketTimestamp { get => lastSentPacketTimestamp; }
         public byte Xored { get => xored; set => xored = value; }
-        public bool InGame { get => inGame; set => inGame = value; }
         public WorldState LastAck { get => lastAck; set => lastAck = value; }
 
         /// <summary>
@@ -40,7 +38,6 @@ namespace KnueppelKampfBase.Networking
             this.clientSalt = clientSalt;
             this.serverSalt = serverSalt;
             xored = (byte)(clientSalt ^ serverSalt);
-            inGame = false;
         }
 
         public void RefreshRecievedPacketTimestamp()
