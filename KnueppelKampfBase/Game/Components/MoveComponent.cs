@@ -7,6 +7,9 @@ using System.Text;
 
 namespace KnueppelKampfBase.Game.Components
 {
+    /// <summary>
+    /// ermöglicht bewegung
+    /// </summary>
     public class MoveComponent : GameComponent
     {
         const float MIN_VALUE = 0.001f;
@@ -62,6 +65,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnUpdate()
         {
+            //wenn man auf dem Boden ist, dann soll man nicht unendlich sich bewegen können
             if(OnGround)
                 Velocity *= friction;
             OnGround = false;

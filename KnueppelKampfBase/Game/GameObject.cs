@@ -8,6 +8,10 @@ using System.Text;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// oberklasse aller objekte im spiel
+    /// bestitz komponenten um sich selbst zu erweitern
+    /// </summary>
     public class GameObject
     {
         private static int lastId;
@@ -105,6 +109,13 @@ namespace KnueppelKampfBase.Game
             return (T)this.Components.Find(x => x is T);
         }
 
+        /// <summary>
+        /// fügt ein component zum objekt hinzu und initialisiert diesen
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="c"></param>
+        /// <param name="initComponent"></param>
+        /// <returns></returns>
         public bool AddComponent<T>(T c, bool initComponent = true) where T : GameComponent
         {
             if (this.Components.Find(x => x is T) != null)

@@ -4,6 +4,10 @@ using System.Text;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// oberklasse für alle komponenten eines objektes
+    /// verleiht dieses eigenschaften
+    /// </summary>
     public abstract class GameComponent
     {
         private GameObject gameObject;

@@ -15,8 +15,8 @@ namespace KnueppelKampfBase.Game.Objects
     {
         public Floor()
         {
-            position = default(Vector);
-            size = default(Vector);
+            position = default;
+            size = default;
             AddComponent(new BoxComponent(HandleCollision));
         }
 
@@ -27,6 +27,10 @@ namespace KnueppelKampfBase.Game.Objects
             AddComponent(new BoxComponent(HandleCollision));
         }
 
+        /// <summary>
+        /// push alle entities aus dem boden hinaus
+        /// </summary>
+        /// <param name="b"></param>
         private void HandleCollision(BoxComponent b)
         {
             if (b.GameObject is Floor)
@@ -64,7 +68,7 @@ namespace KnueppelKampfBase.Game.Objects
                 delta.X = X + Width + 1;
             }
 
-
+            //zur nächsten seite hinaus pushen
             if (Abs(obj.X - delta.X) > Abs(obj.Y - delta.Y))
             {
                 delta.X = obj.X;

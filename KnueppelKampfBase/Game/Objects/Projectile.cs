@@ -12,6 +12,9 @@ using static System.Math;
 
 namespace KnueppelKampfBase.Game.Objects
 {
+    /// <summary>
+    /// ist ein projektiel der waffe
+    /// </summary>
     public class Projectile : GameObject
     {
         private MoveComponent move;
@@ -32,6 +35,7 @@ namespace KnueppelKampfBase.Game.Objects
             AddComponent(move = new MoveComponent());
             AddComponent(new BoxComponent((BoxComponent b) =>
             {
+                //wenn das projektil einen spieler trifft, soll dieser schaden erhalten
                 if (b.GameObject == owner)
                     return;
                 this.Despawn = true;
@@ -47,6 +51,7 @@ namespace KnueppelKampfBase.Game.Objects
                 move.Velocity += this.move.Velocity;
             }));
 
+            //zur blickrichtung bewegen
             float x = (float)Cos(owner.Rotation * PI / 180.0f + PI/2);
             float y = (float)Sin(owner.Rotation * PI / 180.0f + PI/2);
             this.move.Velocity = new Vector(x, y) * 10f;

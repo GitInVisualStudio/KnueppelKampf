@@ -9,6 +9,9 @@ using KnueppelKampfBase.Render;
 
 namespace KnueppelKampfBase.Game.Components
 {
+    /// <summary>
+    /// speichert das gehaltene item des spielers, auch wenn dieser keines in der hand hat
+    /// </summary>
     public class ItemComponent : GameComponent
     {
         private Items item;
@@ -46,6 +49,7 @@ namespace KnueppelKampfBase.Game.Components
                 //TODO: nur mit der faust schlagen, so wie der herr
                 foreach(HealthComponent enemy in GameObject.Manager.SelectComponents<HealthComponent>())
                 {
+                    //alle spieler schlagen die in der näche sind und leben
                     if(enemy.GameObject != this.GameObject)
                     {
                         Vector dir = enemy.GameObject.Position - GameObject.Position;

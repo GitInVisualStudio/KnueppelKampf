@@ -1,5 +1,6 @@
 ﻿using KnueppelKampfBase.Game.Objects;
 using KnueppelKampfBase.Math;
+using KnueppelKampfBase.Properties;
 using KnueppelKampfBase.Render;
 using KnueppelKampfBase.Utils;
 using System;
@@ -10,6 +11,9 @@ using static System.Math;
 
 namespace KnueppelKampfBase.Game.Components
 {
+    /// <summary>
+    /// animiert eine spieler 
+    /// </summary>
     public class PlayerAnimationComponent : GameComponent
     {
         private MoveComponent move;
@@ -20,6 +24,7 @@ namespace KnueppelKampfBase.Game.Components
         private float state;
         private float right, left;
         private float alpha;
+        private float prev;
         public PlayerAnimationComponent()
         {
         }
@@ -55,67 +60,77 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnRender()
         {
-            //RenderArm(default, b, -b);
-            //StateManager.Push();
+            //blocking
             alpha += ((control.Blocking ? 140 : 0) - alpha) * StateManager.delta * 5;
             StateManager.SetColor(100, 0, 0, (int)alpha);
             StateManager.FillRoundRect(-player.Size / 2, player.Size);
+
+            //hurttime
             StateManager.SetColor(player.Color);
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
             float r = player.Color.R * delta + (1 - delta) * 255;
             float g = player.Color.G * delta;
             float b = player.Color.B * delta;
             StateManager.SetColor((int)r, (int)g, (int)b);
-            StateManager.Translate(0, 20);
-            state += move.Length * StateManager.delta * 5;
 
+            //spieler an sich
+            StateManager.Translate(0, 5);
+            state += move.Length * StateManager.delta * 5;
             int headSize = 25;
             StateManager.FillCircle(0, -player.Size.Y / 2, headSize);
             float width = player.Size.X / 5;
             float height = player.Size.Y;
-            StateManager.FillRoundRect(-width / 2, -height / 2, width, height / 2, 5, 10);
+            StateManager.FillRoundRect(-width / 2, -height / 2, width, height / 2 + 3, 5, 10);
 
-            //wenn das hier jemand sieht der sollte sich auf jeden fall keine gedanken machen wieso das so ist wie es ist
+            //arme entsprchend der richtung animieren
             right += (-move.Velocity.Angle - right - 15 + (move.X < 0 ? -1 : 1) * item.Cooldown * -30) * StateManager.delta * 10;
             left += (-move.Velocity.Angle - left + 15 + (move.X < 0 ? -1 : 1) * item.Cooldown * -30) * StateManager.delta * 10;
-
-            StateManager.Translate(0, -player.Size.Y / 2 + headSize - 10);
-            StateManager.Rotate(right / 2);
-            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
-            StateManager.Rotate(-right / 2);
-            StateManager.Rotate(left / 2);
-            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
-            StateManager.Rotate(-left / 2);
-            StateManager.Translate(0, - (-player.Size.Y / 2 + headSize + 5));
 
             WalkingAnimation((float)Sin(state));
             WalkingAnimation((float)-Sin(state));
 
-
-            //float rot = (float)Sin(state) * 30;
-            //rightLeg += (rot - rightLeg) / 4 * StateManager.delta * 30;
-            //StateManager.Rotate(rightLeg);
-            //StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
-            //StateManager.Rotate(-rightLeg);
-            //rot = (float)Sin(-state) * 30; //new value of leg rotation
-            //leftLeg += (rot - leftLeg) / 4 * StateManager.delta * 30;
-            //StateManager.Rotate(leftLeg);
-            //StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
-            //StateManager.Rotate(-leftLeg);
+            //zeichnen der arme
+            StateManager.Translate(0, -player.Size.Y / 2 + headSize - 10);
+            StateManager.Rotate(right / 2);
+            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
+            if (item.Item == Items.GUN)
+                StateManager.DrawImage(Resources.pistol, -width, -5);
+            StateManager.Rotate(-right / 2);
+            StateManager.Rotate(left / 2);
+            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
+            StateManager.Rotate(-left / 2);
         }
 
+        /// <summary>
+        /// zeichnet die beinbewegung
+        /// </summary>
+        /// <param name="d"></param>
         private void WalkingAnimation(float d)
         {
-            float h = (float)Sqrt(d * d + 3);
+            //berechnet eine position auf dem boden wo der fuß stehen soll und bewegen diesen dann entsprechend
+            float h = (float)Sqrt(d * d + 3); //+3 weil die höhe sqrt(3) ist
             float alpha = (float)(Asin(d / h) * 180.0f / PI);
             float beta = (float)(Acos(h / 2) * 180.0f / PI);
             float gamma = (float)(Acos((2 - h * h) / 2) * 180.0f / PI);
-            if(move.X < 0)
+            float value = move.X;
+            if (value == 0)
+                value = prev;
+            else 
+                prev = value;
+
+            if (value < 0)
                 RenderArm(default, (alpha + beta), 180 + gamma);
             else
                 RenderArm(default, -(alpha + beta), 180 - gamma);
+
         }
 
+        /// <summary>
+        /// zeichnet einen arm mit gelenken
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         private void RenderArm(Vector position, float a, float b)
         {
             Vector size = new Vector(player.Size.X / 5, player.Size.Y / 4);
