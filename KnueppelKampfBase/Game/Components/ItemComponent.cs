@@ -11,24 +11,25 @@ namespace KnueppelKampfBase.Game.Components
 {
     public class ItemComponent : GameComponent
     {
-        private Item item;
+        private Items item;
         private float cooldown;
-        public Item Item { get => item; set => item = value; }
         public float Cooldown { get => cooldown; set => cooldown = value; }
+        public Items Item { get => item; set => item = value; }
 
         public override void ApplyState(ComponentState state)
         {
-            
+            ItemState var1 = (ItemState)state;
+            this.Item = (Items)var1.Type;
         }
 
         public override ComponentState GetState()
         {
-            return new ItemState() { Type = item == null ? -1 : (int)item.Type };
+            return new ItemState() { Type = (int)Item };
         }
 
         public override void OnRender()
         {
-            if (item == null)
+            if (Item == Items.HAND)
                 return;
             //StateManager.DrawImage(item.Image, default);
         }
@@ -39,7 +40,7 @@ namespace KnueppelKampfBase.Game.Components
                 return;
             Cooldown = 10;
             const float reduce = 5f;
-            if(item == null)
+            if(Item == Items.HAND)
             {
                 //TODO: nur mit der faust schlagen, so wie der herr
                 foreach(HealthComponent enemy in GameObject.Manager.SelectComponents<HealthComponent>())
@@ -61,7 +62,7 @@ namespace KnueppelKampfBase.Game.Components
                 return;
             }
             //TODO: add the projectile of the item
-            GameObject.Manager.AddObject(new Projectile(GameObject, item.Damage));
+            GameObject.Manager.AddObject(new Projectile(GameObject, 2));
         }
 
         public override void OnUpdate()
@@ -86,7 +87,10 @@ namespace KnueppelKampfBase.Game.Components
 
         public override GameComponent ToComponent()
         {
-            return new ItemComponent(); // TODO @jamin
+            return new ItemComponent()
+            {
+                Item = (Items)Type
+            }; // TODO @jamin
         }
 
         public static int FromBytes(byte[] bytes, int startIndex, out ItemState cs)

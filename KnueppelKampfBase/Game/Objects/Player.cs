@@ -13,9 +13,6 @@ namespace KnueppelKampfBase.Game.Objects
         private Color color;
         public Color Color { get => color; set => color = value; }
         
-        private static Vector lastRecievedPosition;
-        public static Vector LastRecievedPosition { get => lastRecievedPosition; set => lastRecievedPosition = value; }
-
         public Player()
         {
             this.position = default(Vector);
@@ -37,12 +34,11 @@ namespace KnueppelKampfBase.Game.Objects
         public override void OnRender()
         {
             StateManager.SetColor(Color.Red);
-            //StateManager.DrawRect(this.position, this.size);
+            StateManager.DrawRect(this.position, this.size);
             HealthComponent hc = GetComponent<HealthComponent>();
             StateManager.DrawString(hc.Health.ToString(), position - new Vector(0, -5));
             StateManager.Push();
             StateManager.SetColor(Color.Green);
-            //StateManager.DrawRect(lastRecievedPosition, this.size);
             StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);

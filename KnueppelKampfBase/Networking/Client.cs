@@ -104,7 +104,6 @@ namespace KnueppelKampfBase.Networking
                         GameObject playerObject = manager.GetObject(up.YourEntityId);
                         if (up.Delta.EarlierId == -1) 
                             GameInitialized?.Invoke(this, playerObject);
-                        Player.LastRecievedPosition = playerObject.Position;
                         ingameStatus = IngameStatus.InRunningGame;
                     }
                 }

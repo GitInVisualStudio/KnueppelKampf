@@ -4,6 +4,7 @@ using KnueppelKampfBase.Render;
 using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using static System.Math;
 
@@ -50,11 +51,8 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void OnRender()
         {
-            //return;
-            //StateManager.Translate(player.Size.X / 2, 0);
-            state += move.Length * StateManager.delta * 10;
-            if (control.Blocking)
-                StateManager.DrawString("Bro ich bin gerade am blocken", default);
+            //RenderArm(default, b, -b);
+            StateManager.Push();
             StateManager.SetColor(player.Color);
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
             float r = player.Color.R * delta + (1 - delta) * 255;
@@ -62,21 +60,52 @@ namespace KnueppelKampfBase.Game.Components
             float b = player.Color.B * delta;
             StateManager.SetColor((int)r, (int)g, (int)b);
 
+            state += move.Length * StateManager.delta * 5;
+            //WalkingAnimation((float)Sin(state));
+            //WalkingAnimation((float)-Sin(state));
+
             int headSize = 25;
             StateManager.FillCircle(0, -player.Size.Y / 2 - (float)(-Sin(state) * 2), headSize);
             float width = player.Size.X / 5;
             float height = player.Size.Y;
-            StateManager.FillRoundRect(-width / 2, -height/ 2, width, height / 2, 5, 10);
-            float rot = (float)Sin(state) * 30;
-            rightLeg += (rot - rightLeg) / 4 * StateManager.delta * 30;
-            StateManager.Rotate(rightLeg);
-            StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
-            StateManager.Rotate(-rightLeg);
-            rot = (float)Sin(-state) * 30; //new value of leg rotation
-            leftLeg += (rot - leftLeg) / 4 * StateManager.delta * 30;
-            StateManager.Rotate(leftLeg);
-            StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
-            StateManager.Rotate(-leftLeg);
+            StateManager.FillRoundRect(-width / 2, -height / 2, width, height / 2, 5, 10);
+            StateManager.Pop();
+            //float rot = (float)Sin(state) * 30;
+            //rightLeg += (rot - rightLeg) / 4 * StateManager.delta * 30;
+            //StateManager.Rotate(rightLeg);
+            //StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
+            //StateManager.Rotate(-rightLeg);
+            //rot = (float)Sin(-state) * 30; //new value of leg rotation
+            //leftLeg += (rot - leftLeg) / 4 * StateManager.delta * 30;
+            //StateManager.Rotate(leftLeg);
+            //StateManager.FillRoundRect(-width / 2, -6, width, height / 2, 5, 10);
+            //StateManager.Rotate(-leftLeg);
+        }
+
+        private void WalkingAnimation(float d)
+        {
+            //StateManager.DrawRect(d * player.Size.X / 2, player.Size.Y / 2, 5, 5);
+            float h = (float)Sqrt(d * d + 3);
+            float alpha = (float)(Asin(d / h) * 180.0f / PI);
+            float beta = (float)(Acos((h * h) / (2 * h)) * 180.0f / PI);
+            float gamma = (float)(Acos((2 - h * h) / 2) * 180.0f / PI);
+            if(move.X > 0)
+                RenderArm(default, (alpha + beta), 180 + gamma);
+            else
+                RenderArm(default, -(alpha + beta), 180 - gamma);
+        }
+
+        private void RenderArm(Vector position, float a, float b)
+        {
+            Vector size = new Vector(player.Size.X / 5, player.Size.Y / 4);
+            StateManager.Push();
+            StateManager.Translate(position.X, position.Y);
+            StateManager.Rotate(a);
+            StateManager.FillRoundRect(-size.X / 2, 0, size.X, size.Y + 5, 5, 10);
+            StateManager.Translate(0, size.Y);
+            StateManager.Rotate(b);
+            StateManager.FillRoundRect(-size.X / 2, 0, size.X, size.Y, 5, 10);
+            StateManager.Pop();
         }
 
         public override void OnUpdate()

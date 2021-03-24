@@ -18,8 +18,12 @@ namespace KnueppelKampfBase.Game.Objects
 
         public Item()
         {
-            type = Items.TEST;
+            type = Items.GUN;
             image = null;
+            damage = 2;
+            size = new Vector(50, 50);
+            AddComponent(new MoveComponent());
+            AddComponent(new BoxComponent(OnPickup));
         }
 
         public Item(Items type)
@@ -42,7 +46,7 @@ namespace KnueppelKampfBase.Game.Objects
             if (!(b.GameObject is Player))
                 return;
             ItemComponent item = b.GameObject.GetComponent<ItemComponent>();
-            item.Item = this;
+            item.Item = type;
             this.Despawn = true;
         }
 
@@ -55,6 +59,7 @@ namespace KnueppelKampfBase.Game.Objects
 
     public enum Items : int
     {
-        TEST = 0,
+        HAND = 0,
+        GUN = 1
     }
 }

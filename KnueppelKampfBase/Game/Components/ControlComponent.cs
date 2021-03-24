@@ -26,6 +26,8 @@ namespace KnueppelKampfBase.Game.Components
 
         public override void ApplyState(ComponentState state)
         {
+            ControlState bs = (ControlState)state;
+            this.blocking = bs.Blocking;
             return;
         }
 
