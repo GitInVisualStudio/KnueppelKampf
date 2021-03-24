@@ -17,7 +17,6 @@ namespace KnueppelKampfBase.Game.Objects
         private MoveComponent move;
         private float damage;
         private GameObject owner;
-        private Bitmap bitmap;
 
         public Projectile()
         {
@@ -29,7 +28,7 @@ namespace KnueppelKampfBase.Game.Objects
             this.owner = owner;
             this.damage = damage;
             this.position = owner.Position;
-            this.size = new Vector(10, 10);
+            this.size = new Vector(10, 5);
             AddComponent(move = new MoveComponent());
             AddComponent(new BoxComponent((BoxComponent b) =>
             {
@@ -57,10 +56,10 @@ namespace KnueppelKampfBase.Game.Objects
         {
             base.OnRender();
             StateManager.Push();
-            StateManager.Translate(position + size / 2);
-            StateManager.SetColor(Color.Black);
-            StateManager.Rotate(GetComponent<MoveComponent>().Velocity.Angle);
-            StateManager.FillRect(size / -2, size);
+            StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);
+            StateManager.Rotate(GetComponent<MoveComponent>().Velocity.Angle + 90.0f);
+            StateManager.SetColor(Color.Red);
+            StateManager.FillRoundRect(size / -2, size, 5, 10);
             StateManager.Pop();
         }
     }

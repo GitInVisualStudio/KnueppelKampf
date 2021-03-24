@@ -37,6 +37,8 @@ namespace KnueppelKampfBase.Game.Objects
             if (move == null)
                 return;
 
+            b.OnCollision?.Invoke(this.GetComponent<BoxComponent>());
+
             if (move.Y > 0)
                 move.OnGround = true;
 
@@ -71,12 +73,9 @@ namespace KnueppelKampfBase.Game.Objects
             else if(Abs(obj.X - delta.X) < Abs(obj.Y - delta.Y))
             {
                 delta.Y = obj.Y;
-                //move.X = 0;
             }
 
             obj.Position = delta;
-            //obj.Position -= move.Velocity * 10f;
-            //move.Velocity = default;
         }
 
         public override void OnRender()
