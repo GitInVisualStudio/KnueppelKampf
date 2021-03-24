@@ -53,8 +53,6 @@ namespace KnueppelKampfBase.Game.Objects
 
         public override void OnRender()
         {
-            //base.OnRender();
-            //StateManager.DrawString("Ich bin ein item", position);
             StateManager.DrawImage(image, position);
         }
     }

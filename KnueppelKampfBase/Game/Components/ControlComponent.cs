@@ -6,6 +6,9 @@ using System.Text;
 
 namespace KnueppelKampfBase.Game.Components
 {
+    /// <summary>
+    /// dient zur verarbeitung der eingaben um den spieler zu steuern
+    /// </summary>
     public class ControlComponent : GameComponent
     {
         private MoveComponent move;
@@ -78,7 +81,7 @@ namespace KnueppelKampfBase.Game.Components
         public void HandleInputs(GameAction[] gameActions)
         {
             blocking = false;
-
+            //alle aktionen des spielers verarbeiten
             foreach (GameAction a in gameActions)
                 this.HandleInpute(a);
         }
