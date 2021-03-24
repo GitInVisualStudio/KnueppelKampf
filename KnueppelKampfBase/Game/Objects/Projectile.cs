@@ -58,7 +58,7 @@ namespace KnueppelKampfBase.Game.Objects
             StateManager.Push();
             StateManager.Translate(position + size / 2);
             StateManager.SetColor(Color.Black);
-            StateManager.Rotate(move.Velocity.Angle);
+            StateManager.Rotate(GetComponent<MoveComponent>().Velocity.Angle);
             StateManager.FillRect(size / -2, size);
             StateManager.Pop();
         }

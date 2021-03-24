@@ -49,7 +49,11 @@ namespace KnueppelKampfBase.Game
             changed = new List<ObjectDelta>();
             for (int i = 0; i < newState.States.Count; i++)
             {
-                ObjectDelta d = new ObjectDelta(oldState.States[i], newState.States[i]);
+                ObjectState newOS = newState.States[i];
+                ObjectState oldOS = oldState.States.Find(x => x.Id == newOS.Id);
+                if (oldOS == null)
+                    continue;
+                ObjectDelta d = new ObjectDelta(oldOS, newOS);
                 if (d.ChangedProperties.Count > 0 || d.ChangedComponents.Count > 0)
                     changed.Add(d);
             }
