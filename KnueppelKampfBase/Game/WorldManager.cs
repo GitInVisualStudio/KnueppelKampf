@@ -16,13 +16,15 @@ namespace KnueppelKampfBase.Game
         private List<GameObject> entities;
         private GameObject camera;
         private Vector current;
-        public static WorldManager Instance = new WorldManager();
         private Vector offset;
         public List<GameObject> Entities { get => entities; set => entities = value; }
         public GameObject Camera { get => camera; set => camera = value; }
         public Vector Offset { get => offset; set => offset = value; }
+        public static bool OnServer { get => onServer; set => onServer = value; }
 
         public const int TPS = 20;
+
+        private static bool onServer = false;
 
         public WorldManager()
         { 
@@ -101,6 +103,13 @@ namespace KnueppelKampfBase.Game
                     GameObject go = entities.Find(x => x.Id == od.EntityId);
                     if (go != null)
                         go.Apply(od);
+                }
+
+                foreach (int deletedId in delta.Deleted)
+                {
+                    GameObject go = entities.Find(x => x.Id == deletedId);
+                    if (go != null)
+                        go.Despawn = true;
                 }
             }
         }

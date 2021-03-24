@@ -52,7 +52,9 @@ namespace KnueppelKampfBase.Game.Components
                         if (dir > 100)
                             continue;
                         ControlComponent control = enemy.GameObject.GetComponent<ControlComponent>();
-                        enemy.Health -= control.Blocking ? 2 / reduce : 2.0f;
+
+                        if (WorldManager.OnServer)
+                            enemy.Health -= control.Blocking ? 2 / reduce : 2.0f;
                         MoveComponent move = enemy.GameObject.GetComponent<MoveComponent>();
                         if (move == null)
                             continue;

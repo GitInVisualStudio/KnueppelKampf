@@ -42,7 +42,7 @@ namespace KnueppelKampfBase.Game
             this.fpsTimer.Start();
 
 
-            this.worldManager = WorldManager.Instance;
+            this.worldManager = new WorldManager();
         }
 
         private void TpsTimer_Tick(object sender, EventArgs e)

@@ -54,6 +54,7 @@ namespace KnueppelKampfBase.Networking
         public void Setup()
         {
             manager = new WorldManager();
+            WorldManager.OnServer = true;
             players = new Dictionary<Connection, Player>();
             states = new List<WorldState>();
             inGame = true;
@@ -260,8 +261,8 @@ namespace KnueppelKampfBase.Networking
                 if (players != null && players.ContainsKey(c))
                 {
                     Player p = players[c];
-                    p.GetComponent<ControlComponent>().HandleInputs(input.Actions);
                     p.Rotation = input.Rotation;
+                    p.GetComponent<ControlComponent>().HandleInputs(input.Actions);
                 }
             }
         }
