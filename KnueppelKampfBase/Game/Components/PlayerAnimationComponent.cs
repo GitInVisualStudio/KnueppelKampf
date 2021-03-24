@@ -15,9 +15,10 @@ namespace KnueppelKampfBase.Game.Components
         private MoveComponent move;
         private HealthComponent health;
         private ControlComponent control;
+        private ItemComponent item;
         private Player player;
         private float state;
-        private float leftLeg, rightLeg;
+        private float right, left;
         public PlayerAnimationComponent()
         {
         }
@@ -30,13 +31,15 @@ namespace KnueppelKampfBase.Game.Components
             this.move = GameObject.GetComponent<MoveComponent>();
             this.health = GameObject.GetComponent<HealthComponent>();
             this.control = GameObject.GetComponent<ControlComponent>();
+            this.item = GameObject.GetComponent<ItemComponent>();
             if (move == null)
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(MoveComponent)}");
             if (health == null)
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(HealthComponent)}");
             if (control == null)
                 throw new Exception($"GameObject: {GameObject} hat kein component {typeof(ControlComponent)}");
-
+            if(item == null)
+                throw new Exception($"GameObject: {GameObject} hat kein component {typeof(ItemComponent)}");
         }
 
         public override void ApplyState(ComponentState state)
@@ -52,24 +55,39 @@ namespace KnueppelKampfBase.Game.Components
         public override void OnRender()
         {
             //RenderArm(default, b, -b);
-            StateManager.Push();
+            //StateManager.Push();
             StateManager.SetColor(player.Color);
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
             float r = player.Color.R * delta + (1 - delta) * 255;
             float g = player.Color.G * delta;
             float b = player.Color.B * delta;
             StateManager.SetColor((int)r, (int)g, (int)b);
-
+            StateManager.Translate(0, 20);
             state += move.Length * StateManager.delta * 5;
-            //WalkingAnimation((float)Sin(state));
-            //WalkingAnimation((float)-Sin(state));
 
             int headSize = 25;
-            StateManager.FillCircle(0, -player.Size.Y / 2 - (float)(-Sin(state) * 2), headSize);
+            StateManager.FillCircle(0, -player.Size.Y / 2, headSize);
             float width = player.Size.X / 5;
             float height = player.Size.Y;
             StateManager.FillRoundRect(-width / 2, -height / 2, width, height / 2, 5, 10);
-            StateManager.Pop();
+
+            //wenn das hier jemand sieht der sollte sich auf jeden fall keine gedanken machen wieso das so ist wie es ist
+            right += (-move.Velocity.Angle - right - 15 + (move.X < 0 ? -1 : 1) * item.Cooldown * -30) * StateManager.delta * 10;
+            left += (-move.Velocity.Angle - left + 15 + (move.X < 0 ? -1 : 1) * item.Cooldown * -30) * StateManager.delta * 10;
+
+            StateManager.Translate(0, -player.Size.Y / 2 + headSize - 10);
+            StateManager.Rotate(right / 2);
+            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
+            StateManager.Rotate(-right / 2);
+            StateManager.Rotate(left / 2);
+            StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
+            StateManager.Rotate(-left / 2);
+            StateManager.Translate(0, - (-player.Size.Y / 2 + headSize + 5));
+
+            WalkingAnimation((float)Sin(state));
+            WalkingAnimation((float)-Sin(state));
+
+
             //float rot = (float)Sin(state) * 30;
             //rightLeg += (rot - rightLeg) / 4 * StateManager.delta * 30;
             //StateManager.Rotate(rightLeg);
@@ -84,12 +102,11 @@ namespace KnueppelKampfBase.Game.Components
 
         private void WalkingAnimation(float d)
         {
-            //StateManager.DrawRect(d * player.Size.X / 2, player.Size.Y / 2, 5, 5);
             float h = (float)Sqrt(d * d + 3);
             float alpha = (float)(Asin(d / h) * 180.0f / PI);
-            float beta = (float)(Acos((h * h) / (2 * h)) * 180.0f / PI);
+            float beta = (float)(Acos(h / 2) * 180.0f / PI);
             float gamma = (float)(Acos((2 - h * h) / 2) * 180.0f / PI);
-            if(move.X > 0)
+            if(move.X < 0)
                 RenderArm(default, (alpha + beta), 180 + gamma);
             else
                 RenderArm(default, -(alpha + beta), 180 - gamma);
@@ -98,14 +115,16 @@ namespace KnueppelKampfBase.Game.Components
         private void RenderArm(Vector position, float a, float b)
         {
             Vector size = new Vector(player.Size.X / 5, player.Size.Y / 4);
-            StateManager.Push();
             StateManager.Translate(position.X, position.Y);
             StateManager.Rotate(a);
             StateManager.FillRoundRect(-size.X / 2, 0, size.X, size.Y + 5, 5, 10);
             StateManager.Translate(0, size.Y);
             StateManager.Rotate(b);
             StateManager.FillRoundRect(-size.X / 2, 0, size.X, size.Y, 5, 10);
-            StateManager.Pop();
+            StateManager.Rotate(-b);
+            StateManager.Translate(0, -size.Y);
+            StateManager.Rotate(-a);
+            StateManager.Translate(-position.X, -position.Y);
         }
 
         public override void OnUpdate()

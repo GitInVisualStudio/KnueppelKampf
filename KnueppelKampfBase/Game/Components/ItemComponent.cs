@@ -20,6 +20,7 @@ namespace KnueppelKampfBase.Game.Components
         {
             ItemState var1 = (ItemState)state;
             this.Item = (Items)var1.Type;
+            this.cooldown = var1.Cooldown;
         }
 
         public override ComponentState GetState()
@@ -75,21 +76,24 @@ namespace KnueppelKampfBase.Game.Components
     public class ItemState : ComponentState
     {
         private int type;
-
+        private int cooldown;
         public int Type { get => type; set => type = value; }
+        public int Cooldown { get => cooldown; set => cooldown = value; }
 
         public override int ToBytes(byte[] array, int startIndex)
         {
             GetHeader(array, startIndex);
             BitConverter.GetBytes(type).CopyTo(array, startIndex + HEADER_SIZE);
-            return sizeof(int) + HEADER_SIZE;
+            BitConverter.GetBytes(cooldown).CopyTo(array, startIndex + HEADER_SIZE + sizeof(int));
+            return sizeof(int) * 2 + HEADER_SIZE;
         }
 
         public override GameComponent ToComponent()
         {
             return new ItemComponent()
             {
-                Item = (Items)Type
+                Item = (Items)Type,
+                Cooldown = cooldown
             }; // TODO @jamin
         }
 
@@ -97,7 +101,8 @@ namespace KnueppelKampfBase.Game.Components
         {
             cs = new ItemState();
             cs.Type = BitConverter.ToInt32(bytes, startIndex);
-            return sizeof(int);
+            cs.cooldown = BitConverter.ToInt32(bytes, startIndex + sizeof(int));
+            return sizeof(int) * 2;
         }
     }
 }

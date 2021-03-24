@@ -58,7 +58,6 @@ namespace KnueppelKampf
             base.Init();
 
             worldManager = new WorldManager();
-            //worldManager.Entities.Add(thePlayer = new Player(new Vector(300, 300)));
             client = new Client("localhost", worldManager);
             client.StartConnecting();
             client.GameInitialized += (object sender, GameObject player) =>
@@ -102,7 +101,7 @@ namespace KnueppelKampf
                     GameAction[] pressedActions = ActiveForm == this ? ActionManager.GetActions() : new GameAction[] { };
                     InputPacket p = new InputPacket(client.XorSalt, pressedActions, client.WorldStateAck);
                     client.SendPacket(p);
-                    //control?.HandleInputs(pressedActions);
+                    control?.HandleInputs(pressedActions);
                 }
                 else
                 {

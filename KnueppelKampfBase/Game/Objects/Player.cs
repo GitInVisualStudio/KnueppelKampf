@@ -16,8 +16,9 @@ namespace KnueppelKampfBase.Game.Objects
         public Player()
         {
             this.position = default(Vector);
+            Color[] colors = new Color[] { Color.White, Color.Red, Color.Green, Color.Azure, Color.Orange };
             this.size = new Vector(50, 100);
-            color = Color.Black;
+            color = colors[this.Id % colors.Length];
             this.AddComponent(new HealthComponent(10.0f));
             this.AddComponent(new MoveComponent());
             this.AddComponent(new BoxComponent());
@@ -39,15 +40,17 @@ namespace KnueppelKampfBase.Game.Objects
             StateManager.DrawString(hc.Health.ToString(), position - new Vector(0, -5));
             StateManager.Push();
             StateManager.SetColor(Color.Green);
-            StateManager.Push();
             //von der mitte des objektes wird rotiert
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);
             //StateManager.Rotate(Rotation);
             //NOTE: in umgekehrte richtung, damit es keine probleme gibt, falls während des durchgangs ein element entfernt wird
             for (int i = Components.Count - 1; i >= 0; i--)
-                Components[i].OnRender(); 
+            {
+                StateManager.Push();
+                Components[i].OnRender();
+                StateManager.Pop();
+            }
 
-            StateManager.Pop();
             StateManager.Pop();
         }
 

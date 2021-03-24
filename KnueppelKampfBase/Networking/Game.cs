@@ -78,7 +78,7 @@ namespace KnueppelKampfBase.Networking
             manager.AddObject(new Floor(new Vector(500 + width * 0.25f + 150, 250), new Vector(150, 450)));
 
             //item
-            manager.AddObject(new Item() { Position = new Vector(950, 700) });
+            //manager.AddObject(new Item() { Position = new Vector(950, 700) });
 
             foreach (Connection c in Connections)
             {
@@ -173,17 +173,24 @@ namespace KnueppelKampfBase.Networking
                         int tpt = (int)(1000f / WorldManager.TPS);
                         while (true)
                         {
-                            if (w.Elapsed.TotalSeconds >= 1)
+                            try
                             {
-                                Console.WriteLine("Current ticks: " + count);
-                                count = 0;
-                                w.Restart();
+                                if (w.Elapsed.TotalSeconds >= 1)
+                                {
+                                    Console.WriteLine("Current ticks: " + count);
+                                    count = 0;
+                                    w.Restart();
+                                }
+                                manager.OnUpdate();
+                                while (watch.Elapsed.TotalMilliseconds < tpt)
+                                    Thread.Sleep(0);
+                                count++;
+                                watch.Restart();
                             }
-                            manager.OnUpdate();
-                            while (watch.Elapsed.TotalMilliseconds < tpt)
-                                Thread.Sleep(0);
-                            count++;
-                            watch.Restart();
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                            }
                         }
                     }, updateCanceller.Token);
 

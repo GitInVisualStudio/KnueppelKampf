@@ -71,7 +71,7 @@ namespace KnueppelKampfBase.Game.Objects
             else if(Abs(obj.X - delta.X) < Abs(obj.Y - delta.Y))
             {
                 delta.Y = obj.Y;
-                move.X = 0;
+                //move.X = 0;
             }
 
             obj.Position = delta;

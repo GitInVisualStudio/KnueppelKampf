@@ -28,7 +28,6 @@ namespace KnueppelKampfBase.Game.Objects
         {
             this.owner = owner;
             this.damage = damage;
-            this.bitmap = bitmap;
             this.position = owner.Position;
             this.size = new Vector(10, 10);
             AddComponent(move = new MoveComponent());
@@ -51,7 +50,6 @@ namespace KnueppelKampfBase.Game.Objects
             float x = (float)Cos(owner.Rotation * PI / 180.0f + PI/2);
             float y = (float)Sin(owner.Rotation * PI / 180.0f + PI/2);
             this.move.Velocity = new Vector(x, y) * 10f;
-
         }
 
         public override void OnRender()
