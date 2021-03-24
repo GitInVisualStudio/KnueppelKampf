@@ -107,10 +107,10 @@ namespace KnueppelKampfBase.Networking
                         UpdatePacket up = (UpdatePacket)p;
                         if (up.Delta.EarlierId == worldStateAck) 
                         {
-                            manager.Apply(up.Delta);
+                            this.manager.Apply(up.Delta);
                             WorldStateAck = up.Delta.NewerId;
                         }
-                        GameObject playerObject = manager.GetObject(up.YourEntityId);
+                        GameObject playerObject = this.manager.GetObject(up.YourEntityId);
                         if (ingameStatus != IngameStatus.InRunningGame) 
                             GameInitialized?.Invoke(this, playerObject);
                         ingameStatus = IngameStatus.InRunningGame;

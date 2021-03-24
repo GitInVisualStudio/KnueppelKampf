@@ -4,6 +4,7 @@ using KnueppelKampfBase.Game.Objects;
 using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Networking;
 using KnueppelKampfBase.Networking.Packets.ClientPackets;
+using KnueppelKampfBase.Render;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -67,11 +68,18 @@ namespace KnueppelKampf
             };
             client.GameEnded += (object sender, EventArgs e) =>
             {
-                worldManager = new WorldManager();
+                Vector offset = this.worldManager.Offset;
+                this.worldManager = new WorldManager();
+                this.worldManager.Offset = offset;
                 client.Manager = worldManager;
                 thePlayer = null;
                 control = null;
             };
+        }
+
+        protected override void OnRender()
+        {
+            base.OnRender();
         }
 
         protected override void OnUpdate()
