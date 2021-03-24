@@ -58,6 +58,8 @@ namespace KnueppelKampfBase.Game.Components
         {
             if (Hurttime > 0)
                 Hurttime--;
+            if (health <= 0 || GameObject.Position.Y > 2000)
+                GameObject.Despawn = true;
         }
     }
 

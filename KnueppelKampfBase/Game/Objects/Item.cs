@@ -1,5 +1,6 @@
 ﻿using KnueppelKampfBase.Game.Components;
 using KnueppelKampfBase.Math;
+using KnueppelKampfBase.Properties;
 using KnueppelKampfBase.Render;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace KnueppelKampfBase.Game.Objects
         public Item()
         {
             type = Items.GUN;
-            image = null;
+            image = Resources.pistol;
             damage = 2;
             size = new Vector(50, 50);
             AddComponent(new MoveComponent());
@@ -53,7 +54,8 @@ namespace KnueppelKampfBase.Game.Objects
         public override void OnRender()
         {
             //base.OnRender();
-            StateManager.DrawString("Ich bin ein item", position);
+            //StateManager.DrawString("Ich bin ein item", position);
+            StateManager.DrawImage(image, position);
         }
     }
 

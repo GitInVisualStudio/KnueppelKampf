@@ -12,8 +12,8 @@ namespace KnueppelKampfBase.Game.Components
     public class ItemComponent : GameComponent
     {
         private Items item;
-        private float cooldown;
-        public float Cooldown { get => cooldown; set => cooldown = value; }
+        private int cooldown;
+        public int Cooldown { get => cooldown; set => cooldown = value; }
         public Items Item { get => item; set => item = value; }
 
         public override void ApplyState(ComponentState state)
@@ -25,7 +25,7 @@ namespace KnueppelKampfBase.Game.Components
 
         public override ComponentState GetState()
         {
-            return new ItemState() { Type = (int)Item };
+            return new ItemState() { Type = (int)Item, Cooldown = cooldown };
         }
 
         public override void OnRender()

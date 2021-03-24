@@ -19,6 +19,7 @@ namespace KnueppelKampfBase.Game.Components
         private Player player;
         private float state;
         private float right, left;
+        private float alpha;
         public PlayerAnimationComponent()
         {
         }
@@ -56,6 +57,9 @@ namespace KnueppelKampfBase.Game.Components
         {
             //RenderArm(default, b, -b);
             //StateManager.Push();
+            alpha += ((control.Blocking ? 140 : 0) - alpha) * StateManager.delta * 5;
+            StateManager.SetColor(100, 0, 0, (int)alpha);
+            StateManager.FillRoundRect(-player.Size / 2, player.Size);
             StateManager.SetColor(player.Color);
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
             float r = player.Color.R * delta + (1 - delta) * 255;
