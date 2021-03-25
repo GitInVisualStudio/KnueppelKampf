@@ -6,6 +6,7 @@ using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Text;
 using static System.Math;
 
@@ -25,6 +26,8 @@ namespace KnueppelKampfBase.Game.Components
         private float right, left;
         private float alpha;
         private float prev;
+        private float currentHealth;
+        private float time;
         public PlayerAnimationComponent()
         {
         }
@@ -65,13 +68,34 @@ namespace KnueppelKampfBase.Game.Components
             StateManager.SetColor(100, 0, 0, (int)alpha);
             StateManager.FillRoundRect(-player.Size / 2, player.Size);
 
+            GraphicsPath path = new GraphicsPath();
+            path.AddEllipse(-25, -50, 50, 100);
+
+            PathGradientBrush pthGrBrush = new PathGradientBrush(path);
+
+            pthGrBrush.CenterColor = Color.FromArgb(100, player.Color);
+
+            Color[] colors = { Color.FromArgb(0, player.Color) };
+            pthGrBrush.SurroundColors = colors;
+
+            StateManager.Graphics.FillEllipse(pthGrBrush, -25, -50, 50, 100);
+
             //hurttime
             StateManager.SetColor(player.Color);
+            //float wie weit die hurttime ist 0-1
+            //dementsprechend die spieler rot malen
             float delta = (HealthComponent.MAX_HURTTIME - health.Hurttime) / (float)HealthComponent.MAX_HURTTIME;
+
+            StateManager.SetColor(200, 0, 0, (int)(255 - delta * 255));
+            currentHealth += (health.Health / 10 - currentHealth) * StateManager.delta * 5;
+            StateManager.FillRoundRect(-player.Width / 2, -player.Height / 2 - 20, player.Width * currentHealth, 15, 5, 15);
+
+
             float r = player.Color.R * delta + (1 - delta) * 255;
             float g = player.Color.G * delta;
             float b = player.Color.B * delta;
             StateManager.SetColor((int)r, (int)g, (int)b);
+
 
             //spieler an sich
             StateManager.Translate(0, 5);
@@ -99,6 +123,17 @@ namespace KnueppelKampfBase.Game.Components
             StateManager.Rotate(left / 2);
             StateManager.FillRoundRect(-width / 2, 0, width, height / 2.5f, 5, 10);
             StateManager.Rotate(-left / 2);
+
+            if (move.Velocity.Length > 1)
+            {
+                time += StateManager.delta;
+                if(time > 0.25f / move.Velocity.Length)
+                {
+                    time = 0;
+                    this.GameObject.Manager.AddObject(new Particle(this.GameObject));
+                }
+            }
+                
         }
 
         /// <summary>
@@ -113,6 +148,7 @@ namespace KnueppelKampfBase.Game.Components
             float beta = (float)(Acos(h / 2) * 180.0f / PI);
             float gamma = (float)(Acos((2 - h * h) / 2) * 180.0f / PI);
             float value = move.X;
+            //wenn der spieler sich nicht beweget, soll die letzte richtung genommen werden
             if (value == 0)
                 value = prev;
             else 
@@ -122,7 +158,6 @@ namespace KnueppelKampfBase.Game.Components
                 RenderArm(default, (alpha + beta), 180 + gamma);
             else
                 RenderArm(default, -(alpha + beta), 180 - gamma);
-
         }
 
         /// <summary>

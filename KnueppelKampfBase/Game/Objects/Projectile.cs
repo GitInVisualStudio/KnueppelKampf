@@ -5,6 +5,7 @@ using KnueppelKampfBase.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,19 @@ namespace KnueppelKampfBase.Game.Objects
             StateManager.Push();
             StateManager.Translate(Position + (PrevPosition - position) * StateManager.partialTicks + Size / 2);
             StateManager.Rotate(GetComponent<MoveComponent>().Velocity.Angle + 90.0f);
+
+            GraphicsPath path = new GraphicsPath();
+            path.AddEllipse(-size.X / 2 * 2, -size.Y / 2 * 2, size.X * 2, size.Y * 2);
+
+            PathGradientBrush pthGrBrush = new PathGradientBrush(path);
+
+            pthGrBrush.CenterColor = Color.FromArgb(150, Color.Red);
+
+            Color[] colors = { Color.FromArgb(0, Color.Red) };
+            pthGrBrush.SurroundColors = colors;
+
+            StateManager.Graphics.FillEllipse(pthGrBrush, -size.X / 2 * 2, -size.Y / 2 * 2, size.X * 2, size.Y * 2);
+
             StateManager.SetColor(Color.Red);
             StateManager.FillRoundRect(size / -2, size, 5, 10);
             StateManager.Pop();

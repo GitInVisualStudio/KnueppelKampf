@@ -59,6 +59,7 @@
     <Compile Include="Game\ObjectState.cs" />
     <Compile Include="Game\Objects\Floor.cs" />
     <Compile Include="Game\Objects\Item.cs" />
+    <Compile Include="Game\Objects\Particle.cs" />
     <Compile Include="Game\Objects\Player.cs" />
     <Compile Include="Game\Objects\Projectile.cs" />
     <Compile Include="Game\Window.cs">

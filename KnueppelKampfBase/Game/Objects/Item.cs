@@ -20,10 +20,10 @@ namespace KnueppelKampfBase.Game.Objects
         public Item()
         {
             type = Items.GUN;
+            //für jetzt gibt es einfach nur ein item, und zwar die pistole
             image = Resources.pistol;
             damage = 2;
             size = new Vector(50, 50);
-            //AddComponent(new MoveComponent());
             AddComponent(new BoxComponent(OnPickup));
         }
 
@@ -34,7 +34,6 @@ namespace KnueppelKampfBase.Game.Objects
             this.image = null;
             this.damage = 2;
             this.size = new Vector(50, 50);
-            //this.AddComponent(new MoveComponent());
             this.AddComponent(new BoxComponent(OnPickup));
         }
 
@@ -42,6 +41,11 @@ namespace KnueppelKampfBase.Game.Objects
         public Items Type { get => type; set => type = value; }
         public float Damage { get => damage; set => damage = value; }
 
+
+        /// <summary>
+        /// setzt das item zu dem spieler in die Hand und lässt das objekt verschwinden
+        /// </summary>
+        /// <param name="b"></param>
         private void OnPickup(BoxComponent b)
         {
             if (!(b.GameObject is Player))
@@ -55,10 +59,14 @@ namespace KnueppelKampfBase.Game.Objects
 
         public override void OnRender()
         {
+            //zeichnet einfach nur das bild
             StateManager.DrawImage(image, position);
         }
     }
 
+    /// <summary>
+    /// hilfe um zu erkennen welche items es gibt und welches item der spieler hat
+    /// </summary>
     public enum Items : int
     {
         HAND = 0,

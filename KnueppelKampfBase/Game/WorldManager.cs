@@ -14,6 +14,7 @@ namespace KnueppelKampfBase.Game
     public class WorldManager
     {
         private List<GameObject> entities;
+        private HealthComponent health;
         private GameObject camera;
         private Vector current;
         private Vector offset;
@@ -21,7 +22,15 @@ namespace KnueppelKampfBase.Game
         private static bool onServer = false;
 
         public List<GameObject> Entities { get => entities; set => entities = value; }
-        public GameObject Camera { get => camera; set => camera = value; }
+        public GameObject Camera
+        { 
+            get => camera;
+            set
+            {
+                health = value.GetComponent<HealthComponent>();
+                this.camera = value;
+            }
+        }
         public Vector Offset { get => offset; set => offset = value; }
 
         /// <summary>
@@ -59,18 +68,54 @@ namespace KnueppelKampfBase.Game
         {
             StateManager.SetColor(37, 57, 68);
             StateManager.FillRect(new Vector(-5, -5), offset * 2.1f);
-
             StateManager.Push();
             if (camera != null)
             {
-                current += (-camera.Position - camera.Size / 2 + offset - current) * StateManager.delta * 3;
+                //wenn der spieler geschlagen wird, dann wackelt die camera
+                int hurttime = health.Hurttime;
+                Vector target = -camera.Position - camera.Size / 2 + offset;
+                target.X -= (float)System.Math.Sin(hurttime / (float)10 * System.Math.PI * 4) * 25;
+                target.Y += (float)System.Math.Cos(hurttime / (float)10* System.Math.PI * 4) * 25;
+                current += (target - current) * StateManager.delta * 5;
             }
-                
             StateManager.Translate(current);
+
+
+            RenderLamp(new Vector(980 - 25, 200));
+
+            RenderLamp(new Vector(980 - 25, 500));
+
+            RenderLamp(new Vector(960 + 800 + 25, 500));
+
+            RenderLamp(new Vector(50 + 25, 500));
+
             lock (entities)
                 for (int i = Entities.Count - 1; i >= 0; i--)
                     Entities[i].OnRender();
             StateManager.Pop();
+        }
+
+        private void RenderLamp(Vector position)
+        {
+
+            StateManager.SetColor(Color.FromArgb(0, 20, 40));
+            StateManager.FillRect(position, 50, 10);
+            StateManager.FillRect(position.X, position.Y + 50, 50, 10);
+            StateManager.SetColor(Color.Cyan);
+            StateManager.FillRect(position.X + 10, position.Y + 10, 30, 40);
+
+            GraphicsPath path = new GraphicsPath();
+            float size = 30;
+            path.AddEllipse(position.X - size, position.Y - size, 50 + size * 2, 50 + size * 2);
+
+            PathGradientBrush pthGrBrush = new PathGradientBrush(path);
+
+            pthGrBrush.CenterColor = Color.FromArgb(100, Color.Cyan);
+
+            Color[] colors = { Color.FromArgb(0, Color.Cyan) };
+            pthGrBrush.SurroundColors = colors;
+
+            StateManager.Graphics.FillEllipse(pthGrBrush, position.X - size, position.Y - size, 50 + size * 2, 50 + size * 2);
         }
 
         public IEnumerable<T> SelectComponents<T>() where T : GameComponent
