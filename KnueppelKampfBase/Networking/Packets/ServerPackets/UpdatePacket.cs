@@ -7,12 +7,18 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 {
-    public class UpdatePacket : Packet // TODO
+    /// <summary>
+    /// Packet sent by server to update a client's world manager
+    /// </summary>
+    public class UpdatePacket : Packet
     {
         private WorldDelta delta;
         private int yourEntityId;
 
         public WorldDelta Delta { get => delta; set => delta = value; }
+        /// <summary>
+        /// ID of the entity controlled by client
+        /// </summary>
         public int YourEntityId { get => yourEntityId; set => yourEntityId = value; }
 
         public UpdatePacket(WorldDelta wd)

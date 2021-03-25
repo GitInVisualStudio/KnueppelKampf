@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// Object representing changed properties and components of an object
+    /// </summary>
     public class ObjectDelta
     {
         private int entityId;
@@ -18,6 +21,9 @@ namespace KnueppelKampfBase.Game
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
         public List<ComponentDelta> ChangedComponents { get => changedComponents; set => changedComponents = value; }
+        /// <summary>
+        /// Entity ID this delta corresponds to
+        /// </summary>
         public int EntityId { get => entityId; }
 
         public ObjectDelta(ObjectState oldState, ObjectState newState)

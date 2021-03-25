@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking
 {
+    /// <summary>
+    /// Object handling communication with server
+    /// </summary>
     public class Client : IDisposable
     {
         private bool isDisposed;
@@ -31,14 +34,26 @@ namespace KnueppelKampfBase.Networking
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Random rnd = new Random(1312);
 
+        /// <summary>
+        /// Connection salt
+        /// </summary>
         public byte XorSalt { get => (byte)(clientSalt ^ serverSalt); }
         public ConnectionStatus ConnectionStatus { get => connectionStatus; set => connectionStatus = value; }
         public IngameStatus IngameStatus { get => ingameStatus; set => ingameStatus = value; }
         public GameInfoPacket GameInfo { get => gameInfo; set => gameInfo = value; }
         public WorldManager Manager { get => manager; set => manager = value; }
+        /// <summary>
+        /// The last recieved and applied world state's ID
+        /// </summary>
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
 
+        /// <summary>
+        /// Called when a new game is initialized
+        /// </summary>
         public event EventHandler<GameObject> GameInitialized;
+        /// <summary>
+        /// Called when running game ends
+        /// </summary>
         public event EventHandler GameEnded;
 
         public Client(string host, WorldManager manager)
@@ -105,10 +120,10 @@ namespace KnueppelKampfBase.Networking
                     {
                         lastPacketTimestamp = TimeUtils.GetTimestamp();
                         UpdatePacket up = (UpdatePacket)p;
-                        if (up.Delta.EarlierId == worldStateAck) 
+                        if (up.Delta.OldId == worldStateAck) 
                         {
                             this.manager.Apply(up.Delta);
-                            WorldStateAck = up.Delta.NewerId;
+                            WorldStateAck = up.Delta.NewId;
                         }
                         GameObject playerObject = this.manager.GetObject(up.YourEntityId);
                         if (ingameStatus != IngameStatus.InRunningGame) 
@@ -149,6 +164,9 @@ namespace KnueppelKampfBase.Networking
             throw new Exception("No IP found");
         }
 
+        /// <summary>
+        /// Attemtps to connect to server
+        /// </summary>
         public void StartConnecting()
         {
             if (connectionStatus != ConnectionStatus.Disconnected)
@@ -177,6 +195,9 @@ namespace KnueppelKampfBase.Networking
             }, cts.Token);
         }
 
+        /// <summary>
+        /// Queues for a game
+        /// </summary>
         public void StartQueueing()
         {
             if (IngameStatus != IngameStatus.NotInGame)
@@ -196,6 +217,9 @@ namespace KnueppelKampfBase.Networking
             }, cts.Token);
         }
 
+        /// <summary>
+        /// Requests game information from server and sets gameInfo property on success
+        /// </summary>
         public void StartGettingGameInfo()
         {
             if (connectionStatus != ConnectionStatus.Connected || ingameStatus != IngameStatus.InGame)
@@ -212,6 +236,9 @@ namespace KnueppelKampfBase.Networking
             }, cts.Token);
         }
 
+        /// <summary>
+        /// Checks whether no packets have been recieved for too long of a time
+        /// </summary>
         public bool IsTimedOut()
         {
             if (connectionStatus != ConnectionStatus.Connected)
@@ -256,6 +283,9 @@ namespace KnueppelKampfBase.Networking
         #endregion
     }
 
+    /// <summary>
+    /// Enum detailing on what stage of connecting a client is
+    /// </summary>
     public enum ConnectionStatus
     {
         Disconnected = 0,
@@ -264,6 +294,9 @@ namespace KnueppelKampfBase.Networking
         Connected = 3
     }
 
+    /// <summary>
+    /// Enum detailing whether a client is in a game, and whether that game is running
+    /// </summary>
     public enum IngameStatus
     {
         NotInGame = 0,

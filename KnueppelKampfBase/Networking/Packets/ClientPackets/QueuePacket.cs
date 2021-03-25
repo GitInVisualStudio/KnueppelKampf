@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
+    /// <summary>
+    /// Packet sent by client to queue for a game
+    /// </summary>
     public class QueuePacket : SaltedPacket
     {
         public QueuePacket(byte salt) : base(salt)

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// Enum representing a GameAction. Numbers are chosen for easy serialization
+    /// </summary>
     public enum GameAction
     {
         None = 0,

@@ -10,15 +10,10 @@ namespace KnueppelKampfBase.Game
 {
     public class ComponentDelta
     {
-        private int componentId;
         private Dictionary<byte, object> changedProperties;
         private Type componentStateType;
 
         public Dictionary<byte, object> ChangedProperties { get => changedProperties; set => changedProperties = value; }
-        /// <summary>
-        /// Component ID relative to owning game object
-        /// </summary>
-        public int ComponentId { get => componentId; set => componentId = value; }
         public Type ComponentStateType { get => componentStateType; set => componentStateType = value; }
 
         public ComponentDelta(ComponentState oldState, ComponentState newState)
@@ -27,6 +22,10 @@ namespace KnueppelKampfBase.Game
             ComponentStateType = oldState.GetType();
         }
 
+        /// <summary>
+        /// Generates a new ComponentDelta object from a byte array
+        /// </summary>
+        /// <param name="startIndex">The first index belonging to this object</param>
         public ComponentDelta(byte[] bytes, int startIndex)
         {
             int index = startIndex;
@@ -60,7 +59,7 @@ namespace KnueppelKampfBase.Game
             { 
                 object value = changedProperties[key];
                 Type t = value.GetType();
-                if (!t.IsValueType || properties[key].GetCustomAttribute<DontSerializeAttribute>() != null)
+                if (!t.IsValueType || properties[key].GetCustomAttribute<DontSerializeAttribute>() != null) // make sure only structs are serialized
                     continue;
                 array[index++] = key;
                 index += ByteUtils.GetBytesAddSize(value, array, index);

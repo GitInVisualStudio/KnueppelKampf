@@ -21,15 +21,30 @@ namespace KnueppelKampfBase.Networking
         public IPEndPoint Client { get => client; set => client = value; }
         public byte ClientSalt { get => clientSalt; set => clientSalt = value; }
         public byte ServerSalt { get => serverSalt; set => serverSalt = value; }
+        /// <summary>
+        /// Timestamp at which the last packet was recieved
+        /// </summary>
         public long LastRecievedPacketTimestamp { get => lastRecievedPacketTimestamp; }
+        /// <summary>
+        /// Timestamp at which the last packet was sent
+        /// </summary>
         public long LastSentPacketTimestamp { get => lastSentPacketTimestamp; }
+        /// <summary>
+        /// This connection's salt
+        /// </summary>
         public byte Xored { get => xored; set => xored = value; }
+        /// <summary>
+        /// The last world state this client acknowledged
+        /// </summary>
         public WorldState LastAck { get => lastAck; set => lastAck = value; }
 
         /// <summary>
         /// Time in seconds where no packets are recieved until connection times out
         /// </summary>
-        public const int TIME_OUT = 500;
+        public const int TIME_OUT = 10;
+        /// <summary>
+        /// Length of this object's byte array after serialization
+        /// </summary>
         public const int BYTE_LENGTH = sizeof(long) + sizeof(int);
 
         public Connection(IPEndPoint client, byte clientSalt, byte serverSalt)

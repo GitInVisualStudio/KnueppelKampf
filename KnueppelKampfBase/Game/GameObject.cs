@@ -81,17 +81,20 @@ namespace KnueppelKampfBase.Game
         }
 
         public List<GameComponent> Components { get => components; set => components = value; }
-        
         [DontSerialize]
         public Vector PrevPosition { get => prevPosition; set => prevPosition = value; }
         public int Id { get => id; set => id = value; }
-        
-        private static Type[] objectTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(GameObject))).ToArray();
-        public static Type[] ObjectTypes { get => objectTypes; }
         [DontSerialize]
         public WorldManager Manager { get => manager; set => manager = value; }
-
         public bool Despawn { get => despawn; set => despawn = value; }
+
+        private static Type[] objectTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes()).FindAll(x => x.IsSubclassOf(typeof(GameObject))).ToArray();
+
+        /// <summary>
+        /// An array of all types derived from GameObject
+        /// </summary>
+        public static Type[] ObjectTypes { get => objectTypes; }
+        
 
         public GameObject()
         {
@@ -110,7 +113,7 @@ namespace KnueppelKampfBase.Game
         }
 
         /// <summary>
-        /// fügt ein component zum objekt hinzu und initialisiert diesen
+        /// Fügt ein component zum objekt hinzu und initialisiert diesen
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="c"></param>
@@ -151,14 +154,17 @@ namespace KnueppelKampfBase.Game
         public void Apply(ObjectDelta od)
         {
             Type t = GetType();
+
+            // change properties
             PropertyInfo[] properties = t.GetProperties();
-            lock (this)
+            lock (this) 
                 foreach (byte key in od.ChangedProperties.Keys)
                 {
                     object value = od.ChangedProperties[key];
                     properties[key].SetValue(this, value);
                 }
 
+            // change components
             lock (components)
                 foreach (ComponentDelta cd in od.ChangedComponents)
                 {
@@ -167,7 +173,7 @@ namespace KnueppelKampfBase.Game
                     if (componentStateInfo == null)
                         continue;
                     Type componentType = (Type)componentStateInfo.GetValue(cd);
-                    GameComponent gc = Components.Find(x => x.GetType() == componentType);
+                    GameComponent gc = Components.Find(x => x.GetType() == componentType); // get this objects component corresponding to the given state
                     if (gc == null)
                         continue;
 

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Utils
 {
+    /// <summary>
+    /// Utils for converting structures to bytes and vice versa
+    /// </summary>
     public class ByteUtils
     {
         public static int GetBytes(object obj, byte[] array, int index)
@@ -16,7 +19,7 @@ namespace KnueppelKampfBase.Utils
             if (!t.IsValueType)
                 throw new Exception("Non-struct given");
             Type outputType;
-            if (t.IsEnum)
+            if (t.IsEnum) // enums need to be handled differently bc c# is not fun
             {
                 outputType = typeof(int);
                 obj = (int)obj;
@@ -33,6 +36,9 @@ namespace KnueppelKampfBase.Utils
             return size;
         }
 
+        /// <summary>
+        /// Writes given structure to array and prepends its size in bytes
+        /// </summary>
         public static int GetBytesAddSize(object obj, byte[] array, int index)
         {
             int size = GetBytes(obj, array, index + 1);

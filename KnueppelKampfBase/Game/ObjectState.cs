@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// Object representing a snapshot of an object's properties and components
+    /// </summary>
     public class ObjectState
     {
         private GameObject obj;
@@ -39,6 +42,10 @@ namespace KnueppelKampfBase.Game
         public int Id => obj.Id;
         public List<ComponentState> ComponentStates { get => componentStates; set => componentStates = value; }
         public GameObject Obj { get => obj; set => obj = value; }
+
+        /// <summary>
+        /// Values of this object's properties at construction time
+        /// </summary>
         public object[] PropertyValues { get => propertyValues; set => propertyValues = value; }
 
         public void Apply()

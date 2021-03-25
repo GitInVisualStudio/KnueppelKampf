@@ -17,14 +17,22 @@ namespace KnueppelKampfBase.Game
         private GameObject camera;
         private Vector current;
         private Vector offset;
+
+        private static bool onServer = false;
+
         public List<GameObject> Entities { get => entities; set => entities = value; }
         public GameObject Camera { get => camera; set => camera = value; }
         public Vector Offset { get => offset; set => offset = value; }
+
+        /// <summary>
+        /// Whether this manager is running on a server or a client
+        /// </summary>
         public static bool OnServer { get => onServer; set => onServer = value; }
 
+        /// <summary>
+        /// Number of ticks that should be simulated per second
+        /// </summary>
         public const int TPS = 20;
-
-        private static bool onServer = false;
 
         public WorldManager()
         { 
@@ -37,6 +45,9 @@ namespace KnueppelKampfBase.Game
                 AddObject(obj);
         }
 
+        /// <summary>
+        /// Adds an object to this manager's entity list and sets its manager property
+        /// </summary>
         public void AddObject(GameObject obj)
         {
             lock (entities)

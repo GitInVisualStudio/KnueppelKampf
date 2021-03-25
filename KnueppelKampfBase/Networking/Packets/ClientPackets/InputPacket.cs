@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking.Packets.ClientPackets
 {
+    /// <summary>
+    /// Packet sent by client for server to handle inputs & rotation. Also contains the last recieved world state ID
+    /// </summary>
     public class InputPacket : SaltedPacket
     {
         private int worldStateAck;
@@ -14,7 +17,7 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
         private float rotation;
 
         /// <summary>
-        /// The id of the last WorldState the client recieved
+        /// The ID of the last WorldState the client recieved
         /// </summary>
         public int WorldStateAck { get => worldStateAck; set => worldStateAck = value; }
         public GameAction[] Actions { get => actions; set => actions = value; }
@@ -40,6 +43,9 @@ namespace KnueppelKampfBase.Networking.Packets.ClientPackets
                     actions[lastSet++] = action;
         }
 
+        /// <summary>
+        /// Returns the number of bits in a byte that equal 1
+        /// </summary>
         private int GetSetBits(byte b)
         {
             int count = 0;

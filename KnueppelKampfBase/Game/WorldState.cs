@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// Object representing the entire game world's state at construction time
+    /// </summary>
     public class WorldState
     {
         private List<ObjectState> states;
-        private WorldManager manager;
         private List<Connection> acknowledgedBy;
         private int id;
 
@@ -18,7 +20,6 @@ namespace KnueppelKampfBase.Game
 
         public WorldState(WorldManager manager)
         {
-            this.manager = manager;
             this.states = new List<ObjectState>();
             lock (manager.Entities)
             {
@@ -33,13 +34,5 @@ namespace KnueppelKampfBase.Game
         public List<ObjectState> States { get => states; set => states = value; }
         public List<Connection> AcknowledgedBy { get => acknowledgedBy; set => acknowledgedBy = value; }
         public int Id { get => id; set => id = value; }
-
-        public void Apply()
-        {
-            manager.Entities.Clear();
-            manager.AddObjects(states.Select(x => x.Obj));
-            foreach (ObjectState s in states)
-                s.Apply();
-        }
     }
 }

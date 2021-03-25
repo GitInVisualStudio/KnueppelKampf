@@ -30,16 +30,33 @@ namespace KnueppelKampfBase.Networking
 
         private static int lastId = 1;
 
+        /// <summary>
+        /// Time in ms that passes between sent update packets
+        /// </summary>
         private const int UPDATE_SLEEP = 50;
-
+        /// <summary>
+        /// This game's ID, not to confuse with its index in the server's game array
+        /// </summary>
         public int Id { get => id; set => id = value; }
         public Connection[] Connections { get => connections; }
+        /// <summary>
+        /// Time since this game has been waiting for enough players
+        /// </summary>
         public long IdleSince { get => idleSince; set => idleSince = value; }
         public WorldManager Manager { get => manager; }
 
+        /// <summary>
+        /// Maximum time in seconds this game should be idle if there are more than 1 connected players
+        /// </summary>
         public const int MAX_IDLE_TIME = 60;
+        /// <summary>
+        /// Maximum amount of Players allowed per game
+        /// </summary>
         public const int MAX_PLAYERS = 4;
 
+        /// <summary>
+        /// Called when there is only one player left alive and this game ends
+        /// </summary>
         public event EventHandler GameEnded;
 
         public Game()
@@ -95,6 +112,9 @@ namespace KnueppelKampfBase.Networking
                 }
         }
 
+        /// <summary>
+        /// Returns count of connected players
+        /// </summary>
         public int GetPlayersConnected()
         {
             int count = 0;
@@ -107,6 +127,10 @@ namespace KnueppelKampfBase.Networking
             }
         }
 
+        /// <summary>
+        /// Tries to add connection to this game
+        /// </summary>
+        /// <returns>True if succeeded, false if failed</returns>
         public bool AddConnection(Connection c)
         {
             if (inGame)
@@ -118,6 +142,9 @@ namespace KnueppelKampfBase.Networking
             return true;
         }
 
+        /// <summary>
+        /// Unsets a connection and removes its entity
+        /// </summary>
         public void TimeoutConnection(Connection c)
         {
             int index = Array.FindIndex(connections, x => x != null && x == c);
@@ -154,7 +181,7 @@ namespace KnueppelKampfBase.Networking
             isHandling = true;
             Task.Run(() =>
             {
-                CancellationTokenSource updateCanceller = new CancellationTokenSource();
+                CancellationTokenSource updateCanceller = new CancellationTokenSource(); // used to exit the manager update thread
                 states = new List<WorldState>();
                 idleSince = TimeUtils.GetTimestamp();
                 while (true) // waits until enough players in game, game idle for long enough with 2 players
@@ -255,6 +282,9 @@ namespace KnueppelKampfBase.Networking
             });
         }
 
+        /// <summary>
+        /// Applies given input actions and sets acknowledge
+        /// </summary>
         public void HandleInputPacket(InputPacket input, Connection c)
         {
             if (!isHandling || !inGame)
@@ -271,6 +301,9 @@ namespace KnueppelKampfBase.Networking
             }
         }
 
+        /// <summary>
+        /// Sets a client's last acknowleded state
+        /// </summary>
         public void ClientAcknowledgesWorldState(Connection c, int stateId)
         {
             if (!inGame)

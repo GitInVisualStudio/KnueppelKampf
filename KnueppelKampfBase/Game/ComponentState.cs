@@ -17,10 +17,21 @@ namespace KnueppelKampfBase.Game
 
         protected const int HEADER_SIZE = 1;
 
-        public static Type[] ComponentTypes { get => componentTypes; set => componentTypes = value; }
+        /// <summary>
+        /// An array of all types derived from ComponentState
+        /// </summary>
+        public static Type[] ComponentTypes { get => componentTypes;  }
 
+        /// <summary>
+        /// Returns a component corresponding to this State
+        /// </summary>
         public abstract GameComponent ToComponent();
 
+        /// <summary>
+        /// Serializes this component into the given array
+        /// </summary>
+        /// <param name="startIndex">The first free index</param>
+        /// <returns></returns>
         public abstract int ToBytes(byte[] array, int startIndex);
 
         public static int GetTypeIndex(Type t)
@@ -51,7 +62,7 @@ namespace KnueppelKampfBase.Game
             object[] parameters = new object[] { array, index, null };
             index += (int)fromBytesMethod.Invoke(null, parameters);
             result = (ComponentState)parameters[2];
-            //result = (ComponentState)t.GetConstructor(new Type[] { typeof(byte[]), typeof(int) })?.Invoke(new object[] { array, index });
+
             return index - startIndex;
         }
     }

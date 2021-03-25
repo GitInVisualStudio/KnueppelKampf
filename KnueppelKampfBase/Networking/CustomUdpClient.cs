@@ -14,7 +14,7 @@ namespace KnueppelKampfBase.Networking
     public class CustomUdpClient : UdpClient
     {
         /// <summary>
-        /// Used to gracefully abort listening thread, has to be initialized!
+        /// Used to gracefully abort listening thread
         /// </summary>
         private CancellationTokenSource cts = new CancellationTokenSource();
         private bool isDisposed;
@@ -24,7 +24,7 @@ namespace KnueppelKampfBase.Networking
 
         public CustomUdpClient() : base()
         {
-            DontFragment = true;
+            DontFragment = true; // prevents packets from being fragmented into multiples
         }
 
         public CustomUdpClient(int port) : base(port)

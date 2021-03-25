@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Game
 {
+    /// <summary>
+    /// Object representing differences in object states between two WorldStates
+    /// </summary>
     public class WorldDelta
     {
         private int oldId;
@@ -16,10 +19,26 @@ namespace KnueppelKampfBase.Game
         private List<int> deleted;
         private List<GameObject> spawned;
         private List<ObjectDelta> changed;
-        public int EarlierId { get => oldId; set => oldId = value; }
-        public int NewerId { get => newId; set => newId = value; }
+
+        /// <summary>
+        /// ID of the older WorldState
+        /// </summary>
+        public int OldId { get => oldId; set => oldId = value; }
+        /// <summary>
+        /// ID of the newer WorldState
+        /// </summary>
+        public int NewId { get => newId; set => newId = value; }
+        /// <summary>
+        /// List of deleted object IDs
+        /// </summary>
         public List<int> Deleted { get => deleted; set => deleted = value; }
+        /// <summary>
+        /// List of spawned objects
+        /// </summary>
         public List<GameObject> Spawned { get => spawned; set => spawned = value; }
+        /// <summary>
+        /// List of changed objects
+        /// </summary>
         public List<ObjectDelta> Changed { get => changed; set => changed = value; }
 
         public WorldDelta(WorldState oldState, WorldState newState)
@@ -32,20 +51,24 @@ namespace KnueppelKampfBase.Game
 
             deleted = new List<int>();
             spawned = new List<GameObject>();
-            if (oldState == null)
+
+            // initialize spawned objects
+            if (oldState == null) // if this is a full-world update
             {
                 foreach (ObjectState os in newState.States)
                     spawned.Add(os.Obj);
                 return;
             }
-            foreach(ObjectState objs in oldState.States)
-                if(newState.States.Find(x => objs.Id == x.Id) == null)
-                    Deleted.Add(objs.Id);
-
             foreach (ObjectState objs in newState.States)
                 if (oldState.States.Find(x => objs.Id == x.Id) == null)
                     Spawned.Add(objs.Obj);
 
+            // initialize deleted objects
+            foreach (ObjectState objs in oldState.States)
+                if(newState.States.Find(x => objs.Id == x.Id) == null)
+                    Deleted.Add(objs.Id);
+
+            // initialize changed objects
             changed = new List<ObjectDelta>();
             for (int i = 0; i < newState.States.Count; i++)
             {
@@ -57,11 +80,6 @@ namespace KnueppelKampfBase.Game
                 if (d.ChangedProperties.Count > 0 || d.ChangedComponents.Count > 0)
                     changed.Add(d);
             }
-
-            deleted = new List<int>();
-            foreach (ObjectState os in oldState.States)
-                if (newState.States.Find(x => x.Obj.Id == os.Obj.Id) == null)
-                    deleted.Add(os.Obj.Id);
         }
 
         public WorldDelta(byte[] bytes, int startIndex)
@@ -90,7 +108,7 @@ namespace KnueppelKampfBase.Game
             }
             spawned = newSpawned.ToList();
 
-            if (index == bytes.Length)
+            if (index == bytes.Length) // if this is a full world update
                 return;
             // deserialize changed objects
             int changedCount = bytes[index++];
@@ -153,6 +171,10 @@ namespace KnueppelKampfBase.Game
             return index - startIndex;
         }
 
+        /// <summary>
+        /// Loops through both object's properties and adds the newer value to a dictionary if they are different
+        /// </summary>
+        /// <returns>A dictionary. Keys: Property indexes. Values: property values</returns>
         public static Dictionary<byte, object> GetChangedProperties(object oldObj, object newObj)
         {
             Type t = oldObj.GetType();
@@ -163,7 +185,7 @@ namespace KnueppelKampfBase.Game
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo prop = properties[i];
-                if (!prop.PropertyType.IsValueType || prop.GetCustomAttribute<DontSerializeAttribute>() != null)
+                if (!prop.PropertyType.IsValueType || prop.GetCustomAttribute<DontSerializeAttribute>() != null) // only get structs that should be serialized
                     continue;
                 object oldVal = prop.GetValue(oldObj);
                 object newVal = prop.GetValue(newObj);

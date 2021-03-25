@@ -33,7 +33,7 @@ namespace KnueppelKampf
             {
                 AutoSize = true
             };
-            Controls.Add(debugData);
+            //Controls.Add(debugData);
 
             connectBtn = new Button()
             {
@@ -65,6 +65,7 @@ namespace KnueppelKampf
                 thePlayer = (Player)player;
                 control = thePlayer.GetComponent<ControlComponent>();
                 this.worldManager.Camera = thePlayer;
+                connectBtn.Hide();
             };
             client.GameEnded += (object sender, EventArgs e) =>
             {
@@ -74,30 +75,21 @@ namespace KnueppelKampf
                 client.Manager = worldManager;
                 thePlayer = null;
                 control = null;
+                connectBtn.Show();
             };
-        }
-
-        protected override void OnRender()
-        {
-            base.OnRender();
         }
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
-            //GameAction[] pressedActions = ActionManager.GetActions();
-
-            //control.HandleInputs(pressedActions);
-
             SendInputOrKeepAlive();
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
 
-            //client.StartGettingGameInfo();
-            debugData.Invoke(new MethodInvoker(() =>
-            {
-                debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck + "\nPlayer rotation: " + thePlayer?.Rotation;
-            }));
+            //debugData.Invoke(new MethodInvoker(() =>
+            //{
+            //    debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck + "\nPlayer rotation: " + thePlayer?.Rotation;
+            //}));
         }
 
         protected override void OnResize(EventArgs e)
@@ -106,6 +98,9 @@ namespace KnueppelKampf
             this.worldManager.Offset = new Vector(this.Width, this.Height) / 2;
         }
 
+        /// <summary>
+        /// Sends an input packet and handles inputs if game is active, sends keep alive packet if inactive
+        /// </summary>
         private void SendInputOrKeepAlive()
         {
             if (client.ConnectionStatus == ConnectionStatus.Connected)

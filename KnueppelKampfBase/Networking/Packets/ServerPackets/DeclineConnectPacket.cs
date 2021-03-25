@@ -4,6 +4,9 @@ using System.Text;
 
 namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 {
+    /// <summary>
+    /// Packet sent by server if its pending or connected array is full
+    /// </summary>
     class DeclineConnectPacket : Packet
     {
         public DeclineConnectPacket()

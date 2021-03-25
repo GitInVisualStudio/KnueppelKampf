@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace KnueppelKampfBase.Networking.Packets.ServerPackets
 {
+    /// <summary>
+    /// Packet sent by server containing information on a client's current game
+    /// </summary>
     public class GameInfoPacket : Packet
     {
+        /// <summary>
+        /// The ID of the client's current game. -1 if not in game
+        /// </summary>
         private int gameId;
         private Connection[] players;
 

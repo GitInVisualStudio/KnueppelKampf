@@ -297,6 +297,9 @@ namespace KnueppelKampfBase.Networking
         }
         #endregion
 
+        /// <summary>
+        /// Starts a thread that times out connections or sends keep alive packets
+        /// </summary>
         public void StartCleanupThread()
         {
             if (isDoingCleanup)
