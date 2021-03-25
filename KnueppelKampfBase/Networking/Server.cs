@@ -34,6 +34,8 @@ namespace KnueppelKampfBase.Networking
 
         public const int PORT = 1337;
 
+        public EndPoint ListeningOn { get { return listener.Client.LocalEndPoint; } }
+
         /// <summary>
         /// Initializes serverobject with IP
         /// </summary>
@@ -50,7 +52,7 @@ namespace KnueppelKampfBase.Networking
                 ip = IPAddress.Parse("127.0.0.1");
             else
                 ip = GetIP();
-            //IPEndPoint iep = new IPEndPoint(ip, PORT);
+            IPEndPoint iep = new IPEndPoint(ip, PORT);
             listener = new CustomUdpClient(PORT);
             listener.PacketRecieved += PacketReceived;
 
