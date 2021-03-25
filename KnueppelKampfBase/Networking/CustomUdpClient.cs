@@ -32,6 +32,11 @@ namespace KnueppelKampfBase.Networking
             DontFragment = true;
         }
 
+        public CustomUdpClient(IPEndPoint iep) : base(iep)
+        {
+            DontFragment = true;
+        }
+
         /// <summary>
         /// Starts listening thread, raising PacketRecieved events whenever a new valid Packet comes in
         /// </summary>
@@ -45,11 +50,12 @@ namespace KnueppelKampfBase.Networking
             {
                 while (true)
                 {
-                    IPEndPoint sender = new IPEndPoint(IPAddress.Any, Server.PORT);
+                    IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
                     byte[] recieved;
                     try
                     {
                         recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
+                        Console.WriteLine("Recieved data!");
                     }
                     catch (SocketException e)
                     {
@@ -66,7 +72,7 @@ namespace KnueppelKampfBase.Networking
                         continue;
                     }
                     p.Sender = sender;
-                    //Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
+                    Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
                     //Console.WriteLine("Data: " + PrintBytes(recieved));
                     PacketRecieved?.Invoke(this, p);
                 }
