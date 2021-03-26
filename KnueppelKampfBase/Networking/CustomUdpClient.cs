@@ -55,7 +55,6 @@ namespace KnueppelKampfBase.Networking
                     try
                     {
                         recieved = Receive(ref sender); // blocks, recieves bytes and fills sender object with sender of packet
-                        Console.WriteLine("Recieved data!");
                     }
                     catch (SocketException e)
                     {
@@ -72,8 +71,6 @@ namespace KnueppelKampfBase.Networking
                         continue;
                     }
                     p.Sender = sender;
-                    Console.WriteLine("Recieved " + p.GetType().Name +  " from " + sender.ToString());
-                    //Console.WriteLine("Data: " + PrintBytes(recieved));
                     PacketRecieved?.Invoke(this, p);
                 }
             }, cts.Token);

@@ -1,4 +1,5 @@
-﻿using KnueppelKampfBase.Math;
+﻿using KnueppelKampfBase.Game.Objects;
+using KnueppelKampfBase.Math;
 using KnueppelKampfBase.Utils;
 using KnueppelKampfBase.Utils.Exceptions;
 using System;
@@ -66,8 +67,11 @@ namespace KnueppelKampfBase.Game.Components
         public override void OnUpdate()
         {
             //wenn man auf dem Boden ist, dann soll man nicht unendlich sich bewegen können
-            if(OnGround)
+            if (OnGround)
                 Velocity *= friction;
+            else if(this.GameObject is Player)
+                X *= friction;
+                
             OnGround = false;
             if (Velocity > limit)
                 velocity.Length = limit;

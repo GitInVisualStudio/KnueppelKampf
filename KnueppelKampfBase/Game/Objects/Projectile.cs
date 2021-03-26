@@ -49,7 +49,7 @@ namespace KnueppelKampfBase.Game.Objects
                 MoveComponent move = b.GameObject.GetComponent<MoveComponent>();
                 if (move == null)
                     return;
-                move.Velocity += this.move.Velocity;
+                move.Velocity += this.move.Velocity * 3;
             }));
 
             //zur blickrichtung bewegen

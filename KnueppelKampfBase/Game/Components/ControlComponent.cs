@@ -60,10 +60,10 @@ namespace KnueppelKampfBase.Game.Components
                         move.Y = -5f;
                     break;
                 case GameAction.MoveLeft:
-                    move.X = -2f;
+                    move.X += -1f;
                     break;
                 case GameAction.MoveRight:
-                    move.X = 2f;
+                    move.X += 1f;
                     break;
                 case GameAction.PrimaryUse:
                     ItemComponent item = GameObject.GetComponent<ItemComponent>();

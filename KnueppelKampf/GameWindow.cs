@@ -33,7 +33,7 @@ namespace KnueppelKampf
             {
                 AutoSize = true
             };
-            //Controls.Add(debugData);
+            Controls.Add(debugData);
 
             connectBtn = new Button()
             {
@@ -58,7 +58,7 @@ namespace KnueppelKampf
             base.Init();
 
             worldManager = new WorldManager();
-            client = new Client("localhost", worldManager);
+            client = new Client("10.0.3.85", worldManager);
             client.StartConnecting();
             client.GameInitialized += (object sender, GameObject player) =>
             {
@@ -86,10 +86,10 @@ namespace KnueppelKampf
             if (client.IsTimedOut())
                 MessageBox.Show("Connection to server timed out.");
 
-            //debugData.Invoke(new MethodInvoker(() =>
-            //{
-            //    debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck + "\nPlayer rotation: " + thePlayer?.Rotation;
-            //}));
+            debugData.Invoke(new MethodInvoker(() =>
+            {
+                debugData.Text = client.IngameStatus.ToString() + "\nYourEntityId: " + thePlayer?.Id + "\nStateId: " + client.WorldStateAck + "\nPlayer rotation: " + thePlayer?.Rotation;
+            }));
         }
 
         protected override void OnResize(EventArgs e)
